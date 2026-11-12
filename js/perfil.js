@@ -13,7 +13,9 @@ import {
   escaparHTML,
   pedirRegistro,
   estadoInsignia,
-  descuentoDisponible,
+  cuponesDisponibles,
+  estadoCupon,
+  formatoFecha,
   totalPrendasCompradas,
   htmlTarjetaEstilo,
   htmlIconoInsignia,
@@ -22,14 +24,12 @@ import {
 } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { CONFIG } from "./data/productos.js";
-import { getUsuario, getPedidos, getQuiz } from "./storage.js";
+import { getUsuario, getPedidos, getQuiz, getCupones } from "./storage.js";
 
 const T = TEXTOS;
 const P = T.perfil;
 const contenido = document.getElementById("contenido");
 
-const formatoFecha = (iso) =>
-  new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
 
 // Título con el sello CH, igual que en el inicio
 const titulo = (texto) => `
@@ -88,7 +88,7 @@ function htmlEstilo() {
 function htmlInsignia() {
   const prendas = totalPrendasCompradas();
   const insignia = estadoInsignia(prendas);
-  const pct = descuentoDisponible();
+  const listos = cuponesDisponibles().length;
 
   return `
     <article class="tarjeta-perfil">
@@ -102,9 +102,41 @@ function htmlInsignia() {
       </div>
       ${htmlBarraInsignia(insignia)}
       ${htmlCaminoInsignias(insignia.indice)}
-      ${pct ? `<p class="insignia__descuento">${P.descuentoDisponible(pct)}</p>` : `<p class="texto-suave">${P.sinDescuento}</p>`}
+      ${listos ? `<p class="insignia__descuento">${P.cuponesListos(listos)}</p>` : `<p class="texto-suave">${P.sinDescuento}</p>`}
       <p class="texto-suave">${T.carrito.reglaInsignia(CONFIG.prendasPorNivel, CONFIG.descuentoPorNivel)}</p>
     </article>`;
+}
+
+// ---------- Descuentos (cupones) ----------
+// Cada cupón muestra si está disponible, usado o vencido. Los
+// disponibles van primero; así la persona ve de una lo que puede usar.
+function htmlCupon(cupon) {
+  const estado = estadoCupon(cupon);
+  let detalle;
+  if (estado === "usado") detalle = P.usadoEn(cupon.usadoEn);
+  else if (estado === "vencido") detalle = P.vencioEl(formatoFecha(cupon.vence));
+  else detalle = T.carrito.venceEl(formatoFecha(cupon.vence));
+  const etiqueta = estado === "usado" ? P.usadoEn(cupon.usadoEn) : P.estadoCupon[estado];
+
+  return `
+    <li class="cupon-perfil cupon-perfil--${estado}">
+      <span class="cupon-perfil__pct">${cupon.pct}%</span>
+      <div>
+        <p class="cupon-perfil__titulo">${T.carrito.cupon(cupon.pct, cupon.nivel)}</p>
+        <p class="texto-suave">${P.ganadoEl(formatoFecha(cupon.ganado))} · ${detalle}</p>
+      </div>
+      ${estado === "usado" ? "" : `<span class="cupon-perfil__estado">${etiqueta}</span>`}
+    </li>`;
+}
+
+function htmlDescuentos() {
+  const orden = { disponible: 0, usado: 1, vencido: 2 };
+  const cupones = [...getCupones()].sort((a, b) => orden[estadoCupon(a)] - orden[estadoCupon(b)]);
+  const cuerpo = cupones.length
+    ? `<ul class="cupones-perfil">${cupones.map(htmlCupon).join("")}</ul>
+       <p class="texto-suave">${T.carrito.vigencia(CONFIG.diasVigenciaDescuento)}</p>`
+    : `<p>${P.sinCupones}</p>`;
+  return `<section class="seccion contenedor">${titulo(P.descuentosTitulo)}${cuerpo}</section>`;
 }
 
 function htmlPedido(pedido) {
@@ -167,6 +199,7 @@ function renderPerfil() {
         ${htmlInsignia()}
       </div>
     </section>
+    ${htmlDescuentos()}
     ${htmlPedidos()}
     ${htmlCloset()}`;
 }

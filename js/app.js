@@ -16,6 +16,7 @@ import {
   cerrarSesion,
   contarPrendasCarrito,
   getPedidos,
+  getCupones,
 } from "./storage.js";
 
 const T = TEXTOS;
@@ -160,16 +161,51 @@ export function nivelDaDescuento(indice) {
   return indice >= 1;
 }
 
-// El descuento no se guarda aparte: se deduce del último pedido.
-// Si ese pedido te hizo subir a un nivel con premio, tienes descuento
-// ahora; apenas haces otra compra, se "gasta" solo.
-export function descuentoDisponible() {
-  const pedidos = getPedidos();
-  const ultimo = pedidos[pedidos.length - 1];
-  if (!ultimo) return 0;
-  // Pedidos viejos no traen "ganoDescuento": usamos "subioNivel"
-  const gano = ultimo.ganoDescuento ?? ultimo.subioNivel;
-  return gano ? CONFIG.descuentoPorNivel : 0;
+// ---------- Cupones de descuento ----------
+// Un cupón es como un bono de regalo: se gana al llegar a un nivel
+// con premio, se usa UNA sola vez, cuando la persona quiera, y tiene
+// fecha de vencimiento (como los bonos del supermercado).
+
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
+
+// Fecha bonita: "12 de diciembre de 2026"
+export function formatoFecha(iso) {
+  return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
+}
+
+export function crearCupon(indiceNivel, fecha = new Date()) {
+  return {
+    id: `c${Date.now()}${indiceNivel}`,
+    nivel: T.insignias.niveles[indiceNivel],
+    pct: CONFIG.descuentoPorNivel,
+    ganado: fecha.toISOString(),
+    vence: new Date(fecha.getTime() + CONFIG.diasVigenciaDescuento * MS_POR_DIA).toISOString(),
+    usadoEn: null,
+  };
+}
+
+// "disponible", "usado" o "vencido"
+export function estadoCupon(cupon, ahora = new Date()) {
+  if (cupon.usadoEn) return "usado";
+  return new Date(cupon.vence) < ahora ? "vencido" : "disponible";
+}
+
+// Los que se pueden usar, primero el que vence antes (para que no se pierda)
+export function cuponesDisponibles() {
+  return getCupones()
+    .filter((c) => estadoCupon(c) === "disponible")
+    .sort((a, b) => new Date(a.vence) - new Date(b.vence));
+}
+
+// Índices de los niveles con premio que se cruzan al pasar de
+// "antes" a "despues" prendas. Normalmente es uno, pero si alguien
+// compra 8 prendas de una, cruza Runner y Chaser: gana dos cupones.
+export function nivelesConPremioEntre(prendasAntes, prendasDespues) {
+  const desde = nivelPorPrendas(prendasAntes);
+  const hasta = nivelPorPrendas(prendasDespues);
+  const niveles = [];
+  for (let i = desde + 1; i <= hasta; i++) if (nivelDaDescuento(i)) niveles.push(i);
+  return niveles;
 }
 
 // ---------- Piezas visuales de la insignia ----------

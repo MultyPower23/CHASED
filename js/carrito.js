@@ -14,7 +14,10 @@ import {
   capitalizar,
   escaparHTML,
   pedirRegistro,
-  descuentoDisponible,
+  cuponesDisponibles,
+  crearCupon,
+  nivelesConPremioEntre,
+  formatoFecha,
   totalPrendasCompradas,
   nivelPorPrendas,
   estadoInsignia,
@@ -31,6 +34,8 @@ import {
   quitarDelCarrito,
   vaciarCarrito,
   guardarPedido,
+  getCupones,
+  guardarCupones,
 } from "./storage.js";
 
 const T = TEXTOS;
@@ -44,14 +49,41 @@ function itemsConProducto() {
     .filter((item) => item.producto);
 }
 
+// ¿Qué descuento eligió usar en ESTE pedido? (solo uno por pedido)
+//   null                       → ninguno (por defecto: lo usa cuando quiera)
+//   { tipo: "guardado", id }   → un cupón que ya tenía
+//   { tipo: "nuevo" }          → el que gana con este mismo pedido
+let seleccion = null;
+
+const contarPrendas = (items) => items.reduce((suma, i) => suma + i.cantidad, 0);
+
+// Niveles con premio que este carrito haría alcanzar
+function premiosDeEsteCarrito(items) {
+  const antes = totalPrendasCompradas();
+  return nivelesConPremioEntre(antes, antes + contarPrendas(items));
+}
+
+// Si cambió el carrito (o venció algo), la selección puede quedar
+// inválida: por ejemplo, eligió "canjear ahora" y luego quitó prendas.
+function validarSeleccion(items) {
+  if (seleccion?.tipo === "nuevo" && !premiosDeEsteCarrito(items).length) seleccion = null;
+  if (seleccion?.tipo === "guardado" && !cuponesDisponibles().some((c) => c.id === seleccion.id)) seleccion = null;
+}
+
+function porcentajeSeleccionado() {
+  if (!seleccion) return 0;
+  if (seleccion.tipo === "nuevo") return CONFIG.descuentoPorNivel;
+  return cuponesDisponibles().find((c) => c.id === seleccion.id)?.pct ?? 0;
+}
+
 // Toda la plata se calcula en un solo lugar para que el resumen y
 // el pedido guardado nunca muestren números distintos.
 function calcularTotales(items) {
+  validarSeleccion(items);
   const subtotal = items.reduce((suma, i) => suma + i.producto.precio * i.cantidad, 0);
-  const descuentoPct = descuentoDisponible();
+  const descuentoPct = porcentajeSeleccionado();
   const descuento = Math.round((subtotal * descuentoPct) / 100);
-  const prendas = items.reduce((suma, i) => suma + i.cantidad, 0);
-  return { subtotal, descuentoPct, descuento, total: subtotal - descuento, prendas };
+  return { subtotal, descuentoPct, descuento, total: subtotal - descuento, prendas: contarPrendas(items) };
 }
 
 // ---------- Pintar ----------
@@ -96,32 +128,88 @@ function htmlInsigniaCarrito(totales) {
   } else if (ahora.esMaximo) mensaje = T.carrito.nivelMaximo;
   else mensaje = T.carrito.llevas(despues.faltan, despues.siguiente);
 
-  const avisoDescuento = totales.descuentoPct
-    ? `<p class="insignia__descuento">${T.carrito.descuentoActivo(ahora.nombre, totales.descuentoPct)}</p>`
-    : "";
-
   return `
     <div class="insignia">
       <p class="insignia__nivel">
         ${htmlIconoInsignia(ahora.indice, "icono-insignia--chico")}
         <span>${T.carrito.tuInsignia}: <strong>${ahora.nombre ?? T.insignias.sinInsignia}</strong></span>
       </p>
-      ${avisoDescuento}
-      <div class="bloques" aria-hidden="true">${htmlBloques(despues)}</div>
+      <div class="bloques" aria-hidden="true">${htmlBloques(despues, despues.indice > ahora.indice)}</div>
       <p class="insignia__texto">${mensaje}</p>
       <p class="texto-suave">${T.carrito.reglaInsignia(CONFIG.prendasPorNivel, pct)}</p>
     </div>`;
 }
 
 // Solo los cuadritos de la barra (para el carrito, donde el texto es otro)
-function htmlBloques(estado) {
+// "completo" = este pedido llena el nivel: se ven todos llenos
+function htmlBloques(estado, completo = false) {
   return Array.from(
     { length: estado.meta },
-    (_, i) => `<span class="${i < estado.enEsteNivel || estado.esMaximo ? "lleno" : ""}"></span>`
+    (_, i) => `<span class="${completo || i < estado.enEsteNivel || estado.esMaximo ? "lleno" : ""}"></span>`
   ).join("");
 }
 
-function htmlResumen(totales) {
+// Botón que activa/desactiva un descuento. aria-pressed le dice al
+// lector de pantalla (y al CSS) si está puesto o no.
+function htmlBotonCupon(activo, datos, textoUsar) {
+  const boton = `<button class="boton ${activo ? "" : "boton--claro"} boton--cupon" type="button"
+    aria-pressed="${activo}" ${datos}>${activo ? T.carrito.cuponAplicado : textoUsar}</button>`;
+  // Si ya está aplicado, damos la salida clara para no usarlo todavía
+  const guardar = activo
+    ? `<button class="boton-texto" type="button" ${datos}>${T.carrito.noUsarCupon}</button>`
+    : "";
+  return boton + guardar;
+}
+
+// Los descuentos que puede usar: el que ya tenía guardado (el que
+// vence primero) y/o el que gana con este mismo carrito.
+function htmlDescuentos(items) {
+  const guardados = cuponesDisponibles();
+  const premios = premiosDeEsteCarrito(items);
+  if (!guardados.length && !premios.length) return "";
+
+  let bloques = "";
+
+  if (guardados.length) {
+    const cupon = guardados[0];
+    const activo = seleccion?.tipo === "guardado" && seleccion.id === cupon.id;
+    bloques += `
+      <div class="cupon ${activo ? "cupon--activo" : ""}">
+        <p class="cupon__titulo">${T.carrito.cupon(cupon.pct, cupon.nivel)}</p>
+        <p class="cupon__vence">${T.carrito.venceEl(formatoFecha(cupon.vence))}</p>
+        ${htmlBotonCupon(activo, `data-accion="cupon-guardado" data-cupon="${cupon.id}"`, T.carrito.usarCupon)}
+        ${guardados.length > 1 ? `<p class="texto-suave">${T.carrito.otrosCupones(guardados.length - 1)}</p>` : ""}
+      </div>`;
+  }
+
+  if (premios.length) {
+    // Si cruza varios niveles de una (ej. 8 prendas), gana varios cupones
+    const nivel = T.insignias.niveles[premios[premios.length - 1]];
+    const pct = CONFIG.descuentoPorNivel;
+    const mensaje = premios.length > 1
+      ? T.carrito.ganasVarios(nivel, premios.length, pct)
+      : T.carrito.ganasYa(nivel, pct);
+    const activo = seleccion?.tipo === "nuevo";
+    // Si ya está usando uno guardado, el nuevo no se puede usar (uno por pedido)
+    const ocupado = seleccion?.tipo === "guardado";
+    bloques += `
+      <div class="cupon cupon--nuevo ${activo ? "cupon--activo" : ""}">
+        <p class="cupon__titulo">${mensaje}</p>
+        ${ocupado
+          ? `<p class="texto-suave">${T.carrito.unoPorPedido}</p>`
+          : htmlBotonCupon(activo, `data-accion="cupon-nuevo"`, T.carrito.canjearAhora(pct))}
+      </div>`;
+  }
+
+  return `
+    <div class="descuentos">
+      <p class="descuentos__titulo">${T.carrito.tusDescuentos}</p>
+      ${bloques}
+      <p class="texto-suave">${T.carrito.vigencia(CONFIG.diasVigenciaDescuento)}</p>
+    </div>`;
+}
+
+function htmlResumen(totales, items) {
   const filaDescuento = totales.descuentoPct
     ? `<div class="resumen__fila">
          <span>${T.carrito.descuento} (${totales.descuentoPct}% ${T.general.referencial})</span>
@@ -139,6 +227,7 @@ function htmlResumen(totales) {
         <span>${T.carrito.total}</span>
         <strong>${formatearPrecio(totales.total)}</strong>
       </div>
+      ${htmlDescuentos(items)}
       ${htmlInsigniaCarrito(totales)}
       <button class="boton boton--ancho" type="button" data-accion="confirmar">${T.carrito.confirmar}</button>
       <p class="texto-suave">${T.carrito.simulado}</p>
@@ -163,7 +252,7 @@ function renderCarrito() {
       <h1>${T.carrito.titulo}</h1>
       <div class="carrito">
         <ul class="lista-items">${items.map(htmlItem).join("")}</ul>
-        ${htmlResumen(calcularTotales(items))}
+        ${htmlResumen(calcularTotales(items), items)}
       </div>
     </section>`;
 }
@@ -174,9 +263,13 @@ function renderConfirmacion(pedido) {
   const insignia = estadoInsignia();
   let celebracion = "";
   if (pedido.subioNivel) {
-    const texto = pedido.ganoDescuento
-      ? T.carrito.subisteNivel(pedido.nivel)
-      : T.carrito.primeraInsignia(pedido.nivel);
+    const pct = CONFIG.descuentoPorNivel;
+    let texto = T.carrito.primeraInsignia(pedido.nivel);
+    if (pedido.cuponesGanados > 0) {
+      texto = pedido.canjeoAlInstante
+        ? T.carrito.subisteYCanjeaste(pedido.nivel, pct)
+        : T.carrito.subisteNivel(pedido.nivel, pct);
+    }
     celebracion = `
       <div class="confirmacion__nivel">
         ${htmlIconoInsignia(insignia.indice, "icono-insignia--grande")}
@@ -224,10 +317,22 @@ async function confirmarPedido() {
   const prendasAntes = totalPrendasCompradas();
   const nivelAntes = nivelPorPrendas(prendasAntes);
   const nivelDespues = nivelPorPrendas(prendasAntes + totales.prendas);
+  // Un número corto basado en la hora: suficiente para un prototipo
+  const idPedido = String(Date.now()).slice(-6);
+
+  // Cupones: se crean los que gana con este pedido y se marca como
+  // usado el que haya elegido (uno guardado o el recién ganado)
+  const cupones = getCupones();
+  const nuevos = nivelesConPremioEntre(prendasAntes, prendasAntes + totales.prendas).map((i) => crearCupon(i));
+  if (seleccion?.tipo === "nuevo" && nuevos.length) nuevos[0].usadoEn = idPedido;
+  if (seleccion?.tipo === "guardado") {
+    const usado = cupones.find((c) => c.id === seleccion.id);
+    if (usado) usado.usadoEn = idPedido;
+  }
+  guardarCupones([...cupones, ...nuevos]);
 
   const pedido = {
-    // Un número corto basado en la hora: suficiente para un prototipo
-    id: String(Date.now()).slice(-6),
+    id: idPedido,
     fecha: new Date().toISOString(),
     // Guardamos nombre y precio del momento, como en un recibo de verdad
     items: items.map((i) => ({
@@ -242,13 +347,15 @@ async function confirmarPedido() {
     descuentoPct: totales.descuentoPct,
     total: totales.total,
     subioNivel: nivelDespues > nivelAntes,
-    // La primera insignia es de bienvenida; el descuento llega desde Runner
-    ganoDescuento: nivelDespues > nivelAntes && nivelDaDescuento(nivelDespues),
     nivel: T.insignias.niveles[nivelDespues],
+    // La primera insignia es de bienvenida; los cupones llegan desde Runner
+    cuponesGanados: nuevos.length,
+    canjeoAlInstante: seleccion?.tipo === "nuevo",
     estado: "confirmado",
   };
 
   guardarPedido(pedido);
+  seleccion = null;
   vaciarCarrito();
   renderConfirmacion(pedido);
   window.scrollTo(0, 0);
@@ -265,6 +372,15 @@ contenido.addEventListener("click", (e) => {
   if (cambio) cambiarCantidad(id, talla, Number(cambio));
   else if (accion === "quitar") quitarDelCarrito(id, talla);
   else if (accion === "confirmar") confirmarPedido();
+  // Tocar un descuento lo pone; tocarlo otra vez lo quita (vuelve a guardarse)
+  else if (accion === "cupon-guardado") {
+    const yaEstaba = seleccion?.tipo === "guardado" && seleccion.id === boton.dataset.cupon;
+    seleccion = yaEstaba ? null : { tipo: "guardado", id: boton.dataset.cupon };
+    renderCarrito();
+  } else if (accion === "cupon-nuevo") {
+    seleccion = seleccion?.tipo === "nuevo" ? null : { tipo: "nuevo" };
+    renderCarrito();
+  }
 });
 
 // Cada vez que el carrito cambia, se vuelve a pintar (salvo si ya

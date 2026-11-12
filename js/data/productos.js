@@ -20,6 +20,7 @@ export const CONFIG = {
   moneda: "COP",
   prendasPorNivel: 4, // definido por el equipo: cada 4 prendas subes de nivel
   descuentoPorNivel: 10, // % — TODO confirmar con el equipo/Chased
+  diasVigenciaDescuento: 30, // días que dura un descuento ganado — TODO confirmar con Chased
   tallas: ["S", "M", "L", "XL"], // TODO confirmar tallas reales
 };
 

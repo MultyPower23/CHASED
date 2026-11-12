@@ -99,6 +99,18 @@ export function guardarPedido(pedido) {
   escribir("pedidos", pedidos);
 }
 
+// ---------- Cupones de descuento ----------
+// Cada vez que la persona llega a un nivel con premio gana un cupón:
+// { id, nivel, pct, ganado, vence, usadoEn }. "usadoEn" es el número
+// del pedido donde lo canjeó (null = todavía sin usar).
+export function getCupones() {
+  return leer("cupones", []);
+}
+
+export function guardarCupones(cupones) {
+  escribir("cupones", cupones);
+}
+
 // ---------- Resultado del quiz ----------
 // Se guarda aunque la persona no esté registrada: el quiz es opcional
 // y no queremos ponerle trabas. { estilo, puntajes, respuestas, fecha }

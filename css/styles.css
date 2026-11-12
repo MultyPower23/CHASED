@@ -1550,3 +1550,88 @@ body.noche {
 }
 
 .barra--carga span { width: 0; }
+
+/* ---------- Cupones de descuento ---------- */
+.descuentos {
+  margin: 18px 0 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gris-claro);
+}
+
+.descuentos__titulo {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gris-medio);
+}
+
+/* Cada cupón parece un ticket: borde punteado, como para recortar */
+.cupon {
+  border: 1.5px dashed var(--gris-medio);
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.cupon p { margin: 0 0 6px; }
+.cupon__titulo { font-weight: 700; }
+.cupon__vence { font-size: 0.85rem; color: var(--gris-oscuro); }
+.cupon--nuevo { border-style: solid; border-color: var(--negro); }
+.cupon--activo { border-style: solid; border-color: var(--negro); background: var(--gris-claro); }
+
+.boton--cupon {
+  min-height: 40px;
+  padding: 0 16px;
+  margin: 6px 12px 0 0;
+}
+
+/* En el perfil: lista de cupones con su estado */
+.cupones-perfil {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.cupon-perfil {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 14px 16px;
+  border: 1.5px dashed var(--gris-medio);
+}
+
+.cupon-perfil p { margin: 0; }
+.cupon-perfil__titulo { font-weight: 700; }
+
+.cupon-perfil__pct {
+  grid-row: span 2;
+  font-family: var(--fuente-titulos);
+  font-size: 1.8rem;
+}
+
+.cupon-perfil__estado {
+  grid-column: 2;
+  justify-self: start;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+/* Disponible: ticket negro, que salte a la vista */
+.cupon-perfil--disponible { border-style: solid; border-color: var(--negro); }
+
+/* Usado o vencido: en gris, como un ticket ya gastado */
+.cupon-perfil--usado,
+.cupon-perfil--vencido { color: var(--gris-medio); }
+.cupon-perfil--vencido .cupon-perfil__estado { background: var(--gris-claro); color: var(--gris-oscuro); }
+
+@media (min-width: 700px) {
+  .cupon-perfil { grid-template-columns: auto 1fr auto; }
+  .cupon-perfil__pct { grid-row: auto; }
+  .cupon-perfil__estado { grid-column: auto; justify-self: end; }
+}
