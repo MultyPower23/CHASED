@@ -909,7 +909,7 @@ body.noche {
   margin-bottom: 10px;
 }
 
-.insignia__nivel img { height: 28px; width: auto; }
+
 
 .insignia__descuento {
   background: var(--negro);
@@ -1129,25 +1129,6 @@ body.noche {
   gap: 10px;
 }
 
-.opcion {
-  min-height: 56px;
-  padding: 12px 18px;
-  border: 1px solid var(--gris-claro);
-  background: var(--blanco);
-  text-align: left;
-  font-size: 1.05rem;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.opcion:hover { border-color: var(--negro); }
-
-.opcion[aria-pressed="true"] {
-  background: var(--negro);
-  color: var(--blanco);
-  border-color: var(--negro);
-}
-
 .quiz__estilo {
   font-size: 3rem;
   margin: 4px 0 12px;
@@ -1213,39 +1194,7 @@ body.noche {
   gap: 14px;
 }
 
-.insignia-grande img { height: 64px; width: auto; }
 .insignia-grande p { margin: 0; }
-
-/* Los 4 niveles como una línea de metro: punto lleno = alcanzado */
-.niveles {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  list-style: none;
-  padding: 0;
-  margin: 20px 0 12px;
-  font-size: 0.8rem;
-  color: var(--gris-medio);
-  text-align: center;
-}
-
-.niveles li {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.niveles__punto {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid var(--gris-medio);
-  background: var(--blanco);
-}
-
-.niveles .alcanzado { color: var(--negro); }
-.niveles .alcanzado .niveles__punto { background: var(--negro); border-color: var(--negro); }
-.niveles .actual { font-weight: 700; }
 
 .tarjeta-perfil .barra { margin-bottom: 10px; }
 
@@ -1298,4 +1247,264 @@ body.noche {
 
 @media (min-width: 960px) {
   .fila-scroll { grid-auto-columns: 23%; }
+}
+
+/* ============================================================
+   FASE 2 (ajustes) — Insignias, estilo con foto y quiz animado
+   ============================================================ */
+
+/* ---------- Botones extra ---------- */
+.boton:disabled {
+  background: var(--gris-claro);
+  border-color: var(--gris-claro);
+  color: var(--gris-medio);
+  cursor: not-allowed;
+}
+
+.boton-texto--claro { color: var(--blanco); }
+
+/* ---------- Icono de insignia: círculo negro con el icono ---------- */
+.icono-insignia {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--negro);
+}
+
+/* El icono (CH o custom) solo se escala por ancho: nunca se deforma */
+.icono-insignia img {
+  width: 62%;
+  height: auto;
+}
+
+.icono-insignia--chico { width: 40px; height: 40px; }
+.icono-insignia--grande { width: 88px; height: 88px; }
+
+/* Nivel sin ganar: círculo vacío punteado */
+.icono-insignia--vacia {
+  background: var(--blanco);
+  border: 1.5px dashed var(--gris-medio);
+}
+
+/* ---------- Barra por bloques (una cajita por prenda) ---------- */
+.bloques {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 0 6px;
+}
+
+.bloques span {
+  height: 16px;
+  background: var(--gris-claro);
+  transition: background 0.4s;
+}
+
+.bloques span.lleno { background: var(--negro); }
+
+.progreso-insignia__texto {
+  font-weight: 700;
+  margin: 6px 0 0;
+}
+
+/* ---------- Camino de niveles ---------- */
+.camino {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 18px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--gris-medio);
+}
+
+/* La línea que une las insignias, por detrás de los círculos */
+.camino::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 1.5px;
+  background: var(--gris-claro);
+}
+
+.camino li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.camino strong { font-weight: 400; margin-top: 4px; }
+.camino .alcanzado { color: var(--negro); }
+.camino .actual strong { font-weight: 700; }
+
+/* El nivel actual lleva un anillo para que se note dónde vas */
+.camino .actual .icono-insignia { box-shadow: 0 0 0 3px var(--blanco), 0 0 0 4.5px var(--negro); }
+
+.insignia-grande .perfil-estilo { margin: 0; }
+
+.confirmacion__nivel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirmacion__nivel .icono-insignia { border: 2px solid var(--blanco); }
+.confirmacion__nivel p { margin: 0; }
+
+/* ---------- Tarjeta de estilo con foto ---------- */
+.tarjeta-estilo {
+  position: relative;
+  min-height: 380px;
+  overflow: hidden;
+  background: var(--negro);
+  color: var(--blanco);
+  display: flex;
+  align-items: flex-end;
+}
+
+.tarjeta-estilo__fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* foto, no logo */
+  object-position: center 30%;
+}
+
+/* Franja negra sólida: el texto siempre se lee, sin degradados */
+.tarjeta-estilo__franja {
+  position: relative;
+  width: 100%;
+  background: var(--negro);
+  padding: 20px 22px 22px;
+}
+
+.tarjeta-estilo__icono {
+  width: 44px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.tarjeta-estilo__etiqueta {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gris-claro);
+}
+
+.tarjeta-estilo__nombre {
+  font-family: var(--fuente-titulos);
+  font-size: 2.4rem;
+  line-height: 1.1;
+  margin: 0 0 6px;
+}
+
+.tarjeta-estilo__descripcion { color: var(--gris-claro); }
+
+.tarjeta-estilo--grande { min-height: 560px; }
+.tarjeta-estilo--grande .tarjeta-estilo__nombre { font-size: 3.2rem; }
+
+.tarjeta-perfil--negra {
+  background: var(--negro);
+  color: var(--blanco);
+  border-color: var(--negro);
+}
+
+.tarjeta-perfil--negra h2 { color: var(--gris-claro); }
+
+/* ---------- Quiz: opciones, navegación y animación ---------- */
+.quiz__marco { overflow: hidden; } /* que el deslizamiento no cree scroll lateral */
+
+.barra--quiz { height: 8px; }
+.barra--quiz span { transition: width 0.45s ease; }
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--gris-claro);
+  background: var(--gris-claro); /* gris del manual: se separa del fondo blanco */
+  color: var(--negro);
+  text-align: left;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.opcion:hover { border-color: var(--negro); }
+
+.opcion__letra {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 0.95rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.opcion[aria-pressed="true"] {
+  background: var(--negro);
+  border-color: var(--negro);
+  color: var(--blanco);
+}
+
+.opcion[aria-pressed="true"] .opcion__letra {
+  background: var(--blanco);
+  color: var(--negro);
+}
+
+.quiz__navegacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.quiz__navegacion .boton { min-width: 150px; }
+
+.quiz__saltar {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.quiz__acciones--izq {
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.quiz__guardado { margin-top: 14px; }
+
+/* Pasar de pregunta: la actual se va y la nueva entra del otro lado */
+.sale-izquierda { animation: salir-izquierda 0.22s ease-in forwards; }
+.sale-derecha { animation: salir-derecha 0.22s ease-in forwards; }
+.entra-derecha { animation: entrar-derecha 0.32s ease-out; }
+.entra-izquierda { animation: entrar-izquierda 0.32s ease-out; }
+
+@keyframes salir-izquierda { to { opacity: 0; transform: translateX(-48px); } }
+@keyframes salir-derecha { to { opacity: 0; transform: translateX(48px); } }
+@keyframes entrar-derecha { from { opacity: 0; transform: translateX(48px); } }
+@keyframes entrar-izquierda { from { opacity: 0; transform: translateX(-48px); } }
+
+@media (min-width: 700px) {
+  /* En pantallas grandes la franja va a un lado y deja ver la foto */
+  .tarjeta-estilo__franja { width: 72%; }
+  .tarjeta-estilo--grande .tarjeta-estilo__franja { width: 56%; padding: 32px; }
+  .quiz__acciones--izq { flex-direction: row; flex-wrap: wrap; align-items: center; }
 }

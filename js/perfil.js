@@ -15,6 +15,10 @@ import {
   estadoInsignia,
   descuentoDisponible,
   totalPrendasCompradas,
+  htmlTarjetaEstilo,
+  htmlIconoInsignia,
+  htmlBarraInsignia,
+  htmlCaminoInsignias,
 } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { CONFIG } from "./data/productos.js";
@@ -67,57 +71,37 @@ function htmlEstilo() {
   const quiz = getQuiz();
   if (!quiz) {
     return `
-      <article class="tarjeta-perfil">
+      <article class="tarjeta-perfil tarjeta-perfil--negra">
         <h2>${P.estilo}</h2>
+        <p class="perfil-estilo">?</p>
         <p>${P.sinQuiz}</p>
-        <a class="boton" href="quiz.html">${P.hacerQuiz}</a>
+        <a class="boton boton--invertido" href="quiz.html">${P.hacerQuiz}</a>
       </article>`;
   }
-  const estilo = T.quiz.estilos[quiz.estilo];
   // El quiz se puede repetir: el estilo de una persona cambia, y está bien
-  return `
-    <article class="tarjeta-perfil">
-      <h2>${P.estilo}</h2>
-      <p class="perfil-estilo">${estilo.nombre}</p>
-      <p>${estilo.descripcion}</p>
-      <a class="boton boton--claro" href="quiz.html">${T.quiz.repetir}</a>
-    </article>`;
-}
-
-// Los 4 niveles en fila: los que ya alcanzó van en negro
-function htmlNiveles(indiceActual) {
-  return `
-    <ol class="niveles" aria-label="${P.niveles}">
-      ${T.insignias.niveles
-        .map(
-          (nombre, i) => `
-          <li class="${i <= indiceActual ? "alcanzado" : ""} ${i === indiceActual ? "actual" : ""}">
-            <span class="niveles__punto"></span>${nombre}
-          </li>`
-        )
-        .join("")}
-    </ol>`;
+  return htmlTarjetaEstilo(quiz.estilo, {
+    etiqueta: P.estilo,
+    acciones: `<a class="boton boton--invertido" href="quiz.html">${T.quiz.repetir}</a>`,
+  });
 }
 
 function htmlInsignia() {
   const prendas = totalPrendasCompradas();
   const insignia = estadoInsignia(prendas);
   const pct = descuentoDisponible();
-  const porcentaje = insignia.esMaximo ? 100 : Math.round((insignia.enEsteNivel / insignia.meta) * 100);
 
   return `
     <article class="tarjeta-perfil">
       <h2>${P.insignia}</h2>
       <div class="insignia-grande">
-        <img src="assets/logo/simbolo-ch-negro.png" alt="">
+        ${htmlIconoInsignia(insignia.indice, "icono-insignia--grande")}
         <div>
-          <p class="perfil-estilo">${insignia.nombre}</p>
+          <p class="perfil-estilo">${insignia.nombre ?? T.insignias.sinInsignia}</p>
           <p class="texto-suave">${P.prendasCompradas(prendas)}</p>
         </div>
       </div>
-      ${htmlNiveles(insignia.indice)}
-      <div class="barra"><span style="width:${porcentaje}%"></span></div>
-      <p>${insignia.esMaximo ? T.carrito.nivelMaximo : P.progreso(insignia.faltan)}</p>
+      ${htmlBarraInsignia(insignia)}
+      ${htmlCaminoInsignias(insignia.indice)}
       ${pct ? `<p class="insignia__descuento">${P.descuentoDisponible(pct)}</p>` : `<p class="texto-suave">${P.sinDescuento}</p>`}
       <p class="texto-suave">${T.carrito.reglaInsignia(CONFIG.prendasPorNivel, CONFIG.descuentoPorNivel)}</p>
     </article>`;

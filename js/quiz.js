@@ -7,7 +7,7 @@
 // cualquier momento) y no pide registro.
 // ============================================================
 
-import { htmlTarjeta } from "./app.js";
+import { htmlTarjeta, htmlTarjetaEstilo } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { guardarQuiz, guardarPreferencia } from "./storage.js";
 import { recomendarParaTi } from "./recomendador.js";
@@ -19,6 +19,9 @@ const contenido = document.getElementById("contenido");
 // respuestas[i] = índice de la opción elegida en la pregunta i
 let respuestas = [];
 let preguntaActual = 0;
+// Mientras una pregunta se está yendo, ignoramos clics (si no, un
+// doble clic rápido se saltaría una pregunta)
+let animando = false;
 
 // ---------- Calcular el estilo ----------
 // Cada opción trae tags. Sumamos un punto por tag y gana el que más
@@ -51,54 +54,96 @@ function renderIntro() {
     </section>`;
 }
 
-function renderPregunta() {
-  const total = Q.preguntas.length;
+// El esqueleto de las preguntas se arma UNA vez; luego solo se
+// cambia lo de adentro. Así la barra de arriba puede crecer con
+// una transición suave en vez de aparecer de golpe.
+function montarPreguntas() {
+  contenido.innerHTML = `
+    <section class="seccion contenedor quiz">
+      <p class="texto-suave" id="quiz-contador"></p>
+      <div class="barra barra--quiz"><span id="quiz-barra"></span></div>
+      <div class="quiz__marco"><div class="quiz__panel" id="quiz-panel"></div></div>
+      <div class="quiz__navegacion">
+        <button class="boton-texto" type="button" data-accion="atras" id="quiz-atras">${Q.atras}</button>
+        <button class="boton" type="button" data-accion="siguiente" id="quiz-siguiente">${Q.siguiente}</button>
+      </div>
+      <div class="quiz__saltar">${botonSaltar()}</div>
+    </section>`;
+}
+
+const LETRAS = ["A", "B", "C", "D", "E", "F"];
+
+function htmlPregunta() {
   const pregunta = Q.preguntas[preguntaActual];
   const elegida = respuestas[preguntaActual];
-  const porcentaje = Math.round((preguntaActual / total) * 100);
-
   const opciones = pregunta.opciones
     .map(
       (op, i) => `
       <button class="opcion" type="button" data-opcion="${i}" aria-pressed="${elegida === i}">
-        ${op.texto}
+        <span class="opcion__letra">${LETRAS[i]}</span>
+        <span>${op.texto}</span>
       </button>`
     )
     .join("");
+  return `
+    <h1 class="quiz__pregunta">${pregunta.texto}</h1>
+    <div class="opciones">${opciones}</div>`;
+}
 
-  contenido.innerHTML = `
-    <section class="seccion contenedor quiz">
-      <p class="texto-suave">${Q.pregunta(preguntaActual + 1, total)}</p>
-      <div class="barra"><span style="width:${porcentaje}%"></span></div>
-      <h1 class="quiz__pregunta">${pregunta.texto}</h1>
-      <div class="opciones">${opciones}</div>
-      <div class="quiz__acciones quiz__acciones--fila">
-        ${preguntaActual > 0 ? `<button class="boton-texto" type="button" data-accion="atras">${Q.atras}</button>` : "<span></span>"}
-        ${botonSaltar()}
-      </div>
-    </section>`;
+// Actualiza contador, barra y botones según la pregunta actual
+function actualizarControles() {
+  const total = Q.preguntas.length;
+  document.getElementById("quiz-contador").textContent = Q.pregunta(preguntaActual + 1, total);
+  document.getElementById("quiz-barra").style.width = `${Math.round(((preguntaActual + 1) / total) * 100)}%`;
+  document.getElementById("quiz-atras").style.visibility = preguntaActual > 0 ? "visible" : "hidden";
+  const siguiente = document.getElementById("quiz-siguiente");
+  siguiente.disabled = respuestas[preguntaActual] === undefined;
+  siguiente.textContent = preguntaActual === total - 1 ? Q.verResultado : Q.siguiente;
+}
+
+// Cambio de pregunta con animación: la actual se va hacia un lado
+// y la nueva entra desde el otro (como pasar páginas). direccion:
+// 1 = adelante, -1 = atrás, 0 = sin animación (la primera vez).
+const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function pintarPregunta(direccion = 0) {
+  const panel = document.getElementById("quiz-panel");
+  const entrar = () => {
+    panel.innerHTML = htmlPregunta();
+    actualizarControles();
+    if (direccion && !sinMovimiento) {
+      panel.className = "quiz__panel " + (direccion > 0 ? "entra-derecha" : "entra-izquierda");
+      panel.addEventListener("animationend", () => (animando = false), { once: true });
+    } else {
+      animando = false;
+    }
+  };
+
+  if (!direccion || sinMovimiento) return entrar();
+  animando = true;
+  panel.className = "quiz__panel " + (direccion > 0 ? "sale-izquierda" : "sale-derecha");
+  // Cuando termina la animación de salida, pintamos la nueva pregunta
+  panel.addEventListener("animationend", entrar, { once: true });
 }
 
 function renderResultado(resultado) {
-  const estilo = Q.estilos[resultado.estilo];
   // Ya guardamos el quiz, así que el recomendador ya "sabe" el estilo
   const sugeridas = recomendarParaTi(8)
     .lista.filter((r) => !r.descubre)
     .slice(0, 4)
     .map((r) => r.producto);
 
+  const acciones = `
+    <div class="quiz__acciones quiz__acciones--izq">
+      <a class="boton boton--invertido" href="catalogo.html">${Q.verParaTi}</a>
+      <a class="boton boton--borde" href="perfil.html">${Q.irPerfil}</a>
+      <button class="boton-texto boton-texto--claro" type="button" data-accion="repetir">${Q.repetir}</button>
+    </div>`;
+
   contenido.innerHTML = `
-    <section class="seccion contenedor quiz quiz--resultado">
-      <img class="quiz__ch" src="assets/logo/simbolo-ch-negro.png" alt="">
-      <p class="texto-suave">${Q.resultado}</p>
-      <h1 class="quiz__estilo">${estilo.nombre}</h1>
-      <p class="quiz__intro">${estilo.descripcion}</p>
-      <p class="texto-suave">${Q.guardado}</p>
-      <div class="quiz__acciones">
-        <a class="boton" href="catalogo.html">${Q.verParaTi}</a>
-        <a class="boton boton--claro" href="perfil.html">${Q.irPerfil}</a>
-        <button class="boton-texto" type="button" data-accion="repetir">${Q.repetir}</button>
-      </div>
+    <section class="seccion contenedor quiz--resultado">
+      ${htmlTarjetaEstilo(resultado.estilo, { etiqueta: Q.resultado, acciones, grande: true })}
+      <p class="texto-suave quiz__guardado">${Q.guardado}</p>
     </section>
     <section class="seccion contenedor">
       <h2>${Q.leVa}</h2>
@@ -107,35 +152,49 @@ function renderResultado(resultado) {
 }
 
 // ---------- Eventos ----------
-function elegirOpcion(indice) {
-  respuestas[preguntaActual] = indice;
+// Elegir solo marca la respuesta; para avanzar está "Siguiente"
+// (así puede cambiar de opinión antes de pasar).
+function elegirOpcion(boton) {
+  respuestas[preguntaActual] = Number(boton.dataset.opcion);
+  document.querySelectorAll(".opcion").forEach((b) => b.setAttribute("aria-pressed", b === boton));
+  actualizarControles();
+}
+
+function avanzar() {
+  if (animando || respuestas[preguntaActual] === undefined) return;
   if (preguntaActual < Q.preguntas.length - 1) {
     preguntaActual += 1;
-    renderPregunta();
+    pintarPregunta(1);
   } else {
     const resultado = calcularResultado();
     guardarQuiz(resultado);
     renderResultado(resultado);
+    window.scrollTo(0, 0);
   }
-  window.scrollTo(0, 0);
+}
+
+function retroceder() {
+  if (animando || preguntaActual === 0) return;
+  preguntaActual -= 1;
+  pintarPregunta(-1);
 }
 
 function empezar() {
   respuestas = [];
   preguntaActual = 0;
-  renderPregunta();
+  montarPreguntas();
+  pintarPregunta(0);
+  window.scrollTo(0, 0);
 }
 
 contenido.addEventListener("click", (e) => {
   const opcion = e.target.closest("[data-opcion]");
-  if (opcion) return elegirOpcion(Number(opcion.dataset.opcion));
+  if (opcion) return elegirOpcion(opcion);
 
   const accion = e.target.closest("[data-accion]")?.dataset.accion;
   if (accion === "empezar" || accion === "repetir") empezar();
-  if (accion === "atras") {
-    preguntaActual -= 1;
-    renderPregunta();
-  }
+  if (accion === "siguiente") avanzar();
+  if (accion === "atras") retroceder();
   // "Ahora no": respetamos la decisión y no volvemos a invitarlo en el inicio
   if (accion === "saltar") guardarPreferencia("quizOculto", true);
 });

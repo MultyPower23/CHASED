@@ -134,6 +134,8 @@ export const TEXTOS = {
     confirmar: "Confirmar pedido",
     confirmado: "¡Pedido confirmado! Chased se pondrá en contacto para coordinar la entrega.",
     subisteNivel: (nivel) => `¡Subiste a ${nivel}! Tu próxima compra tiene descuento.`,
+    primeraInsignia: (nivel) => `¡Ganaste tu primera insignia: ${nivel}! Ya eres parte oficial de la familia.`,
+    conEstePedidoPrimera: (nivel) => `Con este pedido ganas tu primera insignia: ${nivel}.`,
     talla: "Talla",
     quitar: "Quitar",
     menos: "Una menos",
@@ -146,11 +148,15 @@ export const TEXTOS = {
     prendas: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
     gracias: "Gracias por formar parte de la familia Chased.",
     tuInsignia: "Tu insignia",
-    llevas: (actual, meta, siguiente) => `Con este pedido llevarías ${actual} de ${meta} prendas para ser ${siguiente}.`,
+    llevas: (faltan, siguiente) =>
+      faltan === 1
+        ? `Con este pedido te faltaría 1 prenda para ser ${siguiente}.`
+        : `Con este pedido te faltarían ${faltan} prendas para ser ${siguiente}.`,
     conEstePedido: (nivel, pct) => `Con este pedido subes a ${nivel} y ganas ${pct}% en tu próxima compra.`,
     descuentoActivo: (nivel, pct) => `Por ser ${nivel} tienes ${pct}% de descuento en este pedido.`,
     nivelMaximo: "Llegaste al nivel más alto. ¡Eres leyenda!",
-    reglaInsignia: (n, pct) => `Cada ${n} prendas subes de nivel y ganas ${pct}% en la siguiente compra (referencial).`,
+    reglaInsignia: (n, pct) =>
+      `Tu primera compra te da la insignia Rookie. Desde ahí, cada ${n} prendas subes de nivel y ganas ${pct}% en la siguiente compra (referencial).`,
   },
 
   // Quiz — sin peso, sin altura, sin temas polémicos. BORRADOR.
@@ -160,6 +166,8 @@ export const TEXTOS = {
     saltar: "Ahora no",
     repetir: "Repetir quiz",
     resultado: "Tu estilo Chased es",
+    siguiente: "Siguiente",
+    verResultado: "Ver mi estilo",
     empezar: "Empezar",
     atras: "Atrás",
     pregunta: (n, total) => `Pregunta ${n} de ${total}`,
@@ -248,6 +256,12 @@ export const TEXTOS = {
   // Insignias — nombres BORRADOR (TODO confirmar con el equipo)
   insignias: {
     niveles: ["Rookie", "Runner", "Chaser", "Leyenda Chased"],
+    sinInsignia: "Sin insignia todavía",
+    primeraCompra: "Haz tu primera compra y gana tu primera insignia: Rookie.",
+    // Lo que pide cada nivel: el primero es por comprar una vez, el resto por prendas
+    requisito: (indice, prendas) => (indice === 0 ? "1.ª compra" : `${prendas} prendas`),
+    faltanPara: (faltan, siguiente) =>
+      faltan === 1 ? `Te falta 1 prenda para ${siguiente}` : `Te faltan ${faltan} prendas para ${siguiente}`,
   },
 
   comunidad: {

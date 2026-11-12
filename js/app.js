@@ -9,6 +9,7 @@
 
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, CONFIG, COLECCIONES, GENEROS } from "./data/productos.js";
+import { ICONOS_INSIGNIAS, ICONO_RESPALDO, ESTILOS_VISUALES } from "./data/apariencia.js";
 import {
   getUsuario,
   guardarUsuario,
@@ -118,36 +119,127 @@ export function totalPrendasCompradas() {
   return getPedidos().reduce((total, pedido) => total + pedido.prendas, 0);
 }
 
+// Cuántas prendas pide cada nivel: Rookie se gana con la primera
+// compra (1 prenda) y los demás cada 4 prendas (4, 8, 12).
+export function prendasParaNivel(indice) {
+  return indice === 0 ? 1 : indice * CONFIG.prendasPorNivel;
+}
+
+// -1 = todavía sin insignia (no ha comprado nada)
 export function nivelPorPrendas(prendas) {
+  if (prendas < 1) return -1;
   const ultimo = T.insignias.niveles.length - 1;
   return Math.min(Math.floor(prendas / CONFIG.prendasPorNivel), ultimo);
 }
 
 // Todo lo que hay que saber de la insignia a partir de las prendas:
-// en qué nivel vas, cuál sigue y cuántas prendas te faltan.
+// en qué nivel vas, cuál sigue, cuánto te falta y cómo va la barra.
 export function estadoInsignia(prendas = totalPrendasCompradas()) {
   const niveles = T.insignias.niveles;
+  const meta = CONFIG.prendasPorNivel;
   const indice = nivelPorPrendas(prendas);
   const esMaximo = indice === niveles.length - 1;
-  const meta = CONFIG.prendasPorNivel;
+  const objetivo = esMaximo ? prendas : prendasParaNivel(indice + 1);
   return {
     indice,
-    nombre: niveles[indice],
+    nombre: indice >= 0 ? niveles[indice] : null,
     siguiente: esMaximo ? null : niveles[indice + 1],
     esMaximo,
+    prendas,
+    objetivo, // prendas totales que pide el siguiente nivel
+    faltan: esMaximo ? 0 : objetivo - prendas,
     meta,
-    enEsteNivel: esMaximo ? meta : prendas % meta, // prendas que llevas dentro del nivel
-    faltan: esMaximo ? 0 : meta - (prendas % meta),
+    // Bloques llenos de la barra (de 4 en 4). Sin insignia: 0.
+    enEsteNivel: esMaximo ? meta : indice < 0 ? 0 : prendas % meta,
   };
 }
 
+// ¿Este cambio de nivel da descuento? Rookie es la bienvenida (sin
+// descuento); de Runner en adelante sí.
+export function nivelDaDescuento(indice) {
+  return indice >= 1;
+}
+
 // El descuento no se guarda aparte: se deduce del último pedido.
-// Si ese pedido te hizo subir de nivel, tienes descuento ahora;
-// apenas haces otra compra, se "gasta" solo. Menos datos = menos errores.
+// Si ese pedido te hizo subir a un nivel con premio, tienes descuento
+// ahora; apenas haces otra compra, se "gasta" solo.
 export function descuentoDisponible() {
   const pedidos = getPedidos();
   const ultimo = pedidos[pedidos.length - 1];
-  return ultimo && ultimo.subioNivel ? CONFIG.descuentoPorNivel : 0;
+  if (!ultimo) return 0;
+  // Pedidos viejos no traen "ganoDescuento": usamos "subioNivel"
+  const gano = ultimo.ganoDescuento ?? ultimo.subioNivel;
+  return gano ? CONFIG.descuentoPorNivel : 0;
+}
+
+// ---------- Piezas visuales de la insignia ----------
+// Las usan el carrito, la confirmación y el perfil, para que se
+// vean igual en todos lados.
+
+// Círculo con el icono del nivel. Si no hay icono custom en
+// assets/img/insignias/, el onerror pone el CH oficial.
+export function htmlIconoInsignia(indice, clase = "") {
+  if (indice < 0) return `<span class="icono-insignia icono-insignia--vacia ${clase}"></span>`;
+  return `
+    <span class="icono-insignia ${clase}">
+      <img src="${ICONOS_INSIGNIAS[indice] ?? ICONO_RESPALDO}" alt=""
+        onerror="this.onerror=null;this.src='${ICONO_RESPALDO}'">
+    </span>`;
+}
+
+// Barra por bloques: un bloque por prenda, de 4 en 4. Se lee de un
+// vistazo ("me faltan 2 cuadritos") mejor que una barra lisa.
+export function htmlBarraInsignia(estado) {
+  const bloques = Array.from(
+    { length: estado.meta },
+    (_, i) => `<span class="${i < estado.enEsteNivel ? "lleno" : ""}"></span>`
+  ).join("");
+  const texto = estado.esMaximo
+    ? T.carrito.nivelMaximo
+    : estado.indice < 0
+      ? T.insignias.primeraCompra
+      : T.insignias.faltanPara(estado.faltan, estado.siguiente);
+  return `
+    <div class="progreso-insignia">
+      <div class="bloques" role="progressbar" aria-valuemin="0" aria-valuemax="${estado.meta}"
+        aria-valuenow="${estado.enEsteNivel}">${bloques}</div>
+      <p class="progreso-insignia__texto">${texto}</p>
+    </div>`;
+}
+
+// ---------- Tarjeta de estilo ----------
+// Foto del estilo de fondo y el texto sobre una franja negra sólida
+// (nada de degradados: se lee perfecto y se ve limpio). La usan el
+// perfil y el resultado del quiz. "acciones" = botones extra.
+export function htmlTarjetaEstilo(clave, { etiqueta = "", acciones = "", grande = false } = {}) {
+  const estilo = T.quiz.estilos[clave];
+  const visual = ESTILOS_VISUALES[clave] ?? {};
+  return `
+    <article class="tarjeta-estilo ${grande ? "tarjeta-estilo--grande" : ""}">
+      ${visual.fondo ? `<img class="tarjeta-estilo__fondo" src="${visual.fondo}" alt="" onerror="this.remove()">` : ""}
+      <div class="tarjeta-estilo__franja">
+        ${visual.icono ? `<img class="tarjeta-estilo__icono" src="${visual.icono}" alt="" onerror="this.remove()">` : ""}
+        ${etiqueta ? `<p class="tarjeta-estilo__etiqueta">${etiqueta}</p>` : ""}
+        <p class="tarjeta-estilo__nombre">${estilo.nombre}</p>
+        <p class="tarjeta-estilo__descripcion">${estilo.descripcion}</p>
+        ${acciones}
+      </div>
+    </article>`;
+}
+
+// Camino de los 4 niveles conectados (como paradas de metro)
+export function htmlCaminoInsignias(indiceActual) {
+  const pasos = T.insignias.niveles
+    .map(
+      (nombre, i) => `
+      <li class="${i <= indiceActual ? "alcanzado" : ""} ${i === indiceActual ? "actual" : ""}">
+        ${htmlIconoInsignia(i <= indiceActual ? i : -1, "icono-insignia--chico")}
+        <strong>${nombre}</strong>
+        <span>${T.insignias.requisito(i, prendasParaNivel(i))}</span>
+      </li>`
+    )
+    .join("");
+  return `<ol class="camino">${pasos}</ol>`;
 }
 
 // ---------- Avisos (toast) ----------

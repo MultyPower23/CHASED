@@ -18,6 +18,9 @@ import {
   totalPrendasCompradas,
   nivelPorPrendas,
   estadoInsignia,
+  nivelDaDescuento,
+  htmlIconoInsignia,
+  htmlBarraInsignia,
 } from "./app.js";
 import { CONFIG } from "./data/productos.js";
 import { TEXTOS } from "./textos.js";
@@ -74,15 +77,8 @@ function htmlItem(item) {
     </li>`;
 }
 
-// Barra de progreso hacia el siguiente nivel
-function htmlBarra(actual, meta) {
-  const porcentaje = Math.min(100, Math.round((actual / meta) * 100));
-  return `<div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="${meta}"
-    aria-valuenow="${actual}"><span style="width:${porcentaje}%"></span></div>`;
-}
-
 // La insignia se muestra ANTES de comprar: así la persona ve que
-// cada prenda cuenta, y que si llega a 4 sube de nivel.
+// cada prenda cuenta. La barra muestra cómo quedaría CON este pedido.
 function htmlInsigniaCarrito(totales) {
   const prendasAntes = totalPrendasCompradas();
   const ahora = estadoInsignia(prendasAntes);
@@ -90,13 +86,15 @@ function htmlInsigniaCarrito(totales) {
   const pct = CONFIG.descuentoPorNivel;
 
   let mensaje;
-  if (despues.indice > ahora.indice) mensaje = `<strong>${T.carrito.conEstePedido(despues.nombre, pct)}</strong>`;
-  else if (ahora.esMaximo) mensaje = T.carrito.nivelMaximo;
-  else mensaje = T.carrito.llevas(despues.enEsteNivel, despues.meta, despues.siguiente);
-
-  const barra = despues.indice > ahora.indice || ahora.esMaximo
-    ? htmlBarra(1, 1)
-    : htmlBarra(despues.enEsteNivel, despues.meta);
+  if (despues.indice > ahora.indice) {
+    // Primera insignia (bienvenida) o subida con descuento
+    mensaje = `<strong>${
+      nivelDaDescuento(despues.indice)
+        ? T.carrito.conEstePedido(despues.nombre, pct)
+        : T.carrito.conEstePedidoPrimera(despues.nombre)
+    }</strong>`;
+  } else if (ahora.esMaximo) mensaje = T.carrito.nivelMaximo;
+  else mensaje = T.carrito.llevas(despues.faltan, despues.siguiente);
 
   const avisoDescuento = totales.descuentoPct
     ? `<p class="insignia__descuento">${T.carrito.descuentoActivo(ahora.nombre, totales.descuentoPct)}</p>`
@@ -105,14 +103,22 @@ function htmlInsigniaCarrito(totales) {
   return `
     <div class="insignia">
       <p class="insignia__nivel">
-        <img src="assets/logo/simbolo-ch-negro.png" alt="">
-        <span>${T.carrito.tuInsignia}: <strong>${ahora.nombre}</strong></span>
+        ${htmlIconoInsignia(ahora.indice, "icono-insignia--chico")}
+        <span>${T.carrito.tuInsignia}: <strong>${ahora.nombre ?? T.insignias.sinInsignia}</strong></span>
       </p>
       ${avisoDescuento}
-      ${barra}
+      <div class="bloques" aria-hidden="true">${htmlBloques(despues)}</div>
       <p class="insignia__texto">${mensaje}</p>
       <p class="texto-suave">${T.carrito.reglaInsignia(CONFIG.prendasPorNivel, pct)}</p>
     </div>`;
+}
+
+// Solo los cuadritos de la barra (para el carrito, donde el texto es otro)
+function htmlBloques(estado) {
+  return Array.from(
+    { length: estado.meta },
+    (_, i) => `<span class="${i < estado.enEsteNivel || estado.esMaximo ? "lleno" : ""}"></span>`
+  ).join("");
 }
 
 function htmlResumen(totales) {
@@ -166,13 +172,23 @@ function renderConfirmacion(pedido) {
   // Si subió de nivel, lo celebramos en grande; si no, le contamos
   // cuánto le falta para el siguiente (para que quiera volver).
   const insignia = estadoInsignia();
-  const mensajeNivel = pedido.subioNivel
-    ? `<p class="confirmacion__nivel">${T.carrito.subisteNivel(pedido.nivel)}</p>`
-    : `<div class="confirmacion__progreso">
-         <p>${T.carrito.tuInsignia}: <strong>${insignia.nombre}</strong></p>
-         ${insignia.esMaximo ? "" : htmlBarra(insignia.enEsteNivel, insignia.meta)}
-         <p class="texto-suave">${insignia.esMaximo ? T.carrito.nivelMaximo : T.perfil.progreso(insignia.faltan)}</p>
-       </div>`;
+  let celebracion = "";
+  if (pedido.subioNivel) {
+    const texto = pedido.ganoDescuento
+      ? T.carrito.subisteNivel(pedido.nivel)
+      : T.carrito.primeraInsignia(pedido.nivel);
+    celebracion = `
+      <div class="confirmacion__nivel">
+        ${htmlIconoInsignia(insignia.indice, "icono-insignia--grande")}
+        <p>${texto}</p>
+      </div>`;
+  }
+  const mensajeNivel = `
+    ${celebracion}
+    <div class="confirmacion__progreso">
+      <p>${T.carrito.tuInsignia}: <strong>${insignia.nombre}</strong></p>
+      ${htmlBarraInsignia(insignia)}
+    </div>`;
   contenido.innerHTML = `
     <section class="seccion contenedor">
       <div class="confirmacion">
@@ -226,6 +242,8 @@ async function confirmarPedido() {
     descuentoPct: totales.descuentoPct,
     total: totales.total,
     subioNivel: nivelDespues > nivelAntes,
+    // La primera insignia es de bienvenida; el descuento llega desde Runner
+    ganoDescuento: nivelDespues > nivelAntes && nivelDaDescuento(nivelDespues),
     nivel: T.insignias.niveles[nivelDespues],
     estado: "confirmado",
   };
