@@ -36,7 +36,6 @@ export const TEXTOS = {
     cerrar: "Cerrar",
     menu: "Abrir menú",
     referencial: "referencial",
-    agregado: (nombre) => `${nombre} quedó en tu carrito`,
     proximamente: "Estamos terminando esta sección. Muy pronto la vas a ver aquí.",
     volverInicio: "Volver al inicio",
     hola: (nombre) => `Hola, ${nombre}`,
@@ -148,6 +147,24 @@ export const TEXTOS = {
     simulado: "Pedido simulado: no se hace ningún cobro. Precios y descuento son referenciales.",
     prendas: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
     gracias: "Gracias por formar parte de la familia Chased.",
+    // Carga al confirmar la compra — BORRADOR (misma animación del quiz)
+    cargando: [
+      "Confirmando tu pedido…",
+      "Separando tus prendas…",
+      "Revisando tallas y detalles…",
+      "Contando tus prendas para la insignia…",
+      "¡Listo! Ya es tuyo.",
+    ],
+    // Si está registrad@, la segunda frase lleva su nombre
+    cargandoNombre: (nombre) => `Empacando todo con cariño para ti, ${nombre}…`,
+    // Panel que aparece al agregar algo al carrito
+    agregadoTitulo: "¡Quedó en tu carrito!",
+    irAlCarrito: (n) => `Ir al carrito (${n})`,
+    seguirNavegando: "Seguir navegando",
+    // Deshacer al quitar una prenda
+    quitado: (nombre) => `Quitaste ${nombre}`,
+    deshacer: "Deshacer",
+    restaurado: (nombre) => `${nombre} volvió a tu carrito`,
     tuInsignia: "Tu insignia",
     llevas: (faltan, siguiente) =>
       faltan === 1

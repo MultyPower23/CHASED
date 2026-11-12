@@ -10,9 +10,8 @@
 import { htmlTarjeta, htmlTarjetaEstilo } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { guardarQuiz, guardarPreferencia, getUsuario } from "./storage.js";
-// Anime.js: librería de animación famosa (copiada en js/vendor para
-// que funcione sin internet). Solo se usa en la pantalla de carga.
-import anime from "./vendor/anime.es.js";
+// La carga de cuadritos (Anime.js) es compartida con la compra
+import { mostrarCarga } from "./animaciones.js";
 import { recomendarParaTi } from "./recomendador.js";
 
 const T = TEXTOS;
@@ -133,70 +132,12 @@ function pintarPregunta(direccion = 0) {
 // Es una carga de mentiritas: el resultado ya está calculado. Pero
 // esos segundos hacen que se sienta que alguien de verdad está
 // pensando en ti, como cuando el vendedor dice "déjame ver qué
-// tengo para ti" y se va a la bodega.
-const MS_POR_FRASE = 900;
-const LADO_GRILLA = 5; // grilla de 5x5 cuadritos
-
+// tengo para ti" y se va a la bodega. (La animación vive en animaciones.js)
 function frasesDeCarga() {
   const frases = [...Q.cargando];
   const usuario = getUsuario();
   if (usuario) frases[1] = Q.cargandoNombre(usuario.nombre); // toque personal
   return frases;
-}
-
-function mostrarCarga() {
-  const total = LADO_GRILLA * LADO_GRILLA;
-  // Cuadritos negros y grises intercalados: como prendas acomodándose
-  const cuadritos = Array.from({ length: total }, (_, i) => `<span class="${i % 3 === 0 ? "gris" : ""}"></span>`).join("");
-
-  contenido.innerHTML = `
-    <section class="seccion contenedor carga">
-      <div class="carga__grilla" aria-hidden="true">${cuadritos}</div>
-      <p class="carga__frase" id="carga-frase" aria-live="polite"></p>
-      <div class="barra barra--carga" aria-hidden="true"><span id="carga-barra"></span></div>
-    </section>`;
-  window.scrollTo(0, 0);
-
-  const frases = frasesDeCarga();
-  const duracion = frases.length * MS_POR_FRASE;
-  const textoFrase = document.getElementById("carga-frase");
-
-  // La onda: cada cuadrito se encoge y vuelve, empezando desde el
-  // centro de la grilla hacia afuera (el famoso "stagger grid" de Anime.js)
-  const onda = sinMovimiento
-    ? null
-    : anime({
-        targets: ".carga__grilla span",
-        scale: [
-          { value: 0.25, easing: "easeOutSine", duration: 450 },
-          { value: 1, easing: "easeInOutQuad", duration: 650 },
-        ],
-        opacity: [
-          { value: 0.35, easing: "easeOutSine", duration: 450 },
-          { value: 1, easing: "easeInOutQuad", duration: 650 },
-        ],
-        delay: anime.stagger(110, { grid: [LADO_GRILLA, LADO_GRILLA], from: "center" }),
-        loop: true,
-      });
-
-  // La barra se llena durante toda la carga
-  anime({ targets: "#carga-barra", width: ["0%", "100%"], duration: duracion, easing: "easeInOutSine" });
-
-  // Las frases van entrando una tras otra, suavecito desde abajo
-  frases.forEach((frase, i) => {
-    setTimeout(() => {
-      textoFrase.textContent = frase;
-      anime({ targets: textoFrase, opacity: [0, 1], translateY: [10, 0], duration: 400, easing: "easeOutQuad" });
-    }, i * MS_POR_FRASE);
-  });
-
-  // Promesa: "avísame cuando termine", para luego mostrar el resultado
-  return new Promise((resolve) =>
-    setTimeout(() => {
-      onda?.pause();
-      resolve();
-    }, duracion + 300)
-  );
 }
 
 function renderResultado(resultado) {
@@ -242,7 +183,7 @@ function avanzar() {
     const resultado = calcularResultado();
     guardarQuiz(resultado);
     animando = true; // que nadie toque nada mientras "carga"
-    mostrarCarga().then(() => {
+    mostrarCarga(contenido, frasesDeCarga()).then(() => {
       animando = false;
       renderResultado(resultado);
       window.scrollTo(0, 0);

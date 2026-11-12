@@ -80,6 +80,16 @@ export function quitarDelCarrito(id, talla) {
   guardarCarrito(getCarrito().filter((i) => !(i.id === id && i.talla === talla)));
 }
 
+// Para el "Deshacer": devuelve la fila tal como estaba y en el mismo
+// puesto de la lista (si ya hay una igual, solo suma la cantidad)
+export function restaurarEnCarrito(item, posicion) {
+  const carrito = getCarrito();
+  const existente = carrito.find((i) => i.id === item.id && i.talla === item.talla);
+  if (existente) existente.cantidad += item.cantidad;
+  else carrito.splice(Math.min(posicion, carrito.length), 0, { ...item });
+  guardarCarrito(carrito);
+}
+
 export function vaciarCarrito() {
   guardarCarrito([]);
 }

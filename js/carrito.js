@@ -24,6 +24,7 @@ import {
   nivelDaDescuento,
   htmlIconoInsignia,
   htmlBarraInsignia,
+  mostrarAviso,
 } from "./app.js";
 import { CONFIG } from "./data/productos.js";
 import { TEXTOS } from "./textos.js";
@@ -36,10 +37,16 @@ import {
   guardarPedido,
   getCupones,
   guardarCupones,
+  restaurarEnCarrito,
 } from "./storage.js";
+import { mostrarCarga, entrarEnCascada, llenarBloques, salirDeslizando, aparecer } from "./animaciones.js";
 
 const T = TEXTOS;
 const contenido = document.getElementById("contenido");
+
+// Mientras se muestra la carga de la compra, el carrito no se debe
+// volver a pintar (si no, la animación se borraría a la mitad)
+let procesandoCompra = false;
 
 // Junta cada ítem del carrito con su producto (precio, foto, nombre).
 // Si un producto ya no existe en productos.js, lo ignoramos.
@@ -91,7 +98,7 @@ function htmlItem(item) {
   const p = item.producto;
   const datos = `data-id="${p.id}" data-talla="${item.talla}"`;
   return `
-    <li class="item">
+    <li class="item" data-fila="${p.id}|${item.talla}">
       ${htmlFoto(p)}
       <div>
         <h3>${escaparHTML(p.nombre)}</h3>
@@ -299,6 +306,18 @@ function renderConfirmacion(pedido) {
         </div>
       </div>
     </section>`;
+
+  // Cada parte entra una tras otra, y después los bloques de la
+  // insignia se llenan de a uno (para que se sienta el progreso)
+  entrarEnCascada(".confirmacion > *");
+  llenarBloques(".confirmacion .bloques span.lleno", 900);
+}
+
+function frasesDeCompra() {
+  const frases = [...T.carrito.cargando];
+  const usuario = getUsuario();
+  if (usuario) frases[1] = T.carrito.cargandoNombre(usuario.nombre); // toque personal
+  return frases;
 }
 
 // ---------- Confirmar pedido ----------
@@ -356,9 +375,54 @@ async function confirmarPedido() {
 
   guardarPedido(pedido);
   seleccion = null;
+  procesandoCompra = true;
   vaciarCarrito();
+  // Unos segundos de "estamos empacando tu pedido" y luego la confirmación
+  await mostrarCarga(contenido, frasesDeCompra());
   renderConfirmacion(pedido);
   window.scrollTo(0, 0);
+}
+
+// ---------- Quitar con "Deshacer" ----------
+// Quitar algo sin querer da rabia. Por eso guardamos lo que se quitó
+// unos segundos y ofrecemos devolverlo (como la papelera del PC).
+const MS_DESHACER = 6000;
+let temporizadorDeshacer;
+
+async function quitarConDeshacer(id, talla) {
+  const carrito = getCarrito();
+  const posicion = carrito.findIndex((i) => i.id === id && i.talla === talla);
+  if (posicion < 0) return;
+  const quitado = { ...carrito[posicion] };
+
+  // Primero la prenda sale deslizándose, luego sí se quita de verdad
+  const fila = contenido.querySelector(`[data-fila="${id}|${talla}"]`);
+  if (fila) await salirDeslizando(fila);
+  quitarDelCarrito(id, talla);
+  mostrarDeshacer(quitado, posicion);
+}
+
+function mostrarDeshacer(item, posicion) {
+  document.querySelector(".deshacer")?.remove();
+  clearTimeout(temporizadorDeshacer);
+  const nombre = buscarProducto(item.id)?.nombre ?? "";
+
+  const barra = document.createElement("div");
+  barra.className = "deshacer";
+  barra.setAttribute("role", "status");
+  barra.innerHTML = `
+    <span>${escaparHTML(T.carrito.quitado(nombre))}</span>
+    <button type="button">${T.carrito.deshacer}</button>`;
+  document.body.append(barra);
+  aparecer(barra, 20);
+
+  barra.querySelector("button").addEventListener("click", () => {
+    clearTimeout(temporizadorDeshacer);
+    barra.remove();
+    restaurarEnCarrito(item, posicion);
+    mostrarAviso(T.carrito.restaurado(nombre));
+  });
+  temporizadorDeshacer = setTimeout(() => barra.remove(), MS_DESHACER);
 }
 
 // ---------- Eventos ----------
@@ -369,8 +433,12 @@ contenido.addEventListener("click", (e) => {
   if (!boton) return;
   const { id, talla, cambio, accion } = boton.dataset;
 
-  if (cambio) cambiarCantidad(id, talla, Number(cambio));
-  else if (accion === "quitar") quitarDelCarrito(id, talla);
+  if (cambio) {
+    // Bajar de 1 a 0 es lo mismo que quitar: también ofrece "Deshacer"
+    const item = getCarrito().find((i) => i.id === id && i.talla === talla);
+    if (Number(cambio) < 0 && item?.cantidad === 1) quitarConDeshacer(id, talla);
+    else cambiarCantidad(id, talla, Number(cambio));
+  } else if (accion === "quitar") quitarConDeshacer(id, talla);
   else if (accion === "confirmar") confirmarPedido();
   // Tocar un descuento lo pone; tocarlo otra vez lo quita (vuelve a guardarse)
   else if (accion === "cupon-guardado") {
@@ -386,7 +454,7 @@ contenido.addEventListener("click", (e) => {
 // Cada vez que el carrito cambia, se vuelve a pintar (salvo si ya
 // estamos mostrando la confirmación del pedido)
 window.addEventListener("carrito-cambio", () => {
-  if (!contenido.querySelector(".confirmacion")) renderCarrito();
+  if (!procesandoCompra && !contenido.querySelector(".confirmacion")) renderCarrito();
 });
 
 renderCarrito();

@@ -11,7 +11,6 @@ import {
   htmlFoto,
   htmlPrecio,
   abrirModal,
-  mostrarAviso,
   buscarProducto,
   capitalizar,
   escaparHTML,
@@ -21,7 +20,8 @@ import {
 } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, CONFIG, GENEROS } from "./data/productos.js";
-import { agregarAlCarrito } from "./storage.js";
+import { agregarAlCarrito, contarPrendasCarrito } from "./storage.js";
+import { aparecer } from "./animaciones.js";
 import { recomendarParaTi, puntajeProducto } from "./recomendador.js";
 
 const T = TEXTOS;
@@ -259,13 +259,41 @@ function abrirDetalle(id) {
     }
     agregarAlCarrito(producto.id, tallaElegida);
     modal.close();
-    mostrarAviso(T.general.agregado(producto.nombre));
+    mostrarAgregado(producto, tallaElegida);
   });
 
   // Mientras el detalle está abierto, el producto queda en la URL;
   // al cerrar lo quitamos pero dejamos los filtros como estaban.
   actualizarURL(producto.id);
   modal.addEventListener("close", () => actualizarURL());
+}
+
+// ---------- Panel "¡Quedó en tu carrito!" ----------
+// En vez de un avisito que se va solo, le preguntamos qué quiere
+// hacer: ir a pagar o seguir mirando. Como en una tienda física,
+// cuando el vendedor te pregunta "¿te lo llevo a caja o sigues viendo?".
+function mostrarAgregado(producto, talla) {
+  const panel = abrirModal(
+    `<div class="agregado">
+      <div class="agregado__producto">
+        ${htmlFoto(producto)}
+        <div>
+          <p class="agregado__titulo">${T.carrito.agregadoTitulo}</p>
+          <h2>${escaparHTML(producto.nombre)}</h2>
+          <p class="texto-suave">${escaparHTML(capitalizar(producto.color))} · ${T.carrito.talla} ${talla}</p>
+          ${htmlPrecio(producto)}
+        </div>
+      </div>
+      <div class="agregado__acciones">
+        <a class="boton boton--ancho boton--grande" href="carrito.html">${T.carrito.irAlCarrito(contarPrendasCarrito())}</a>
+        <button class="boton boton--claro boton--ancho" type="button" data-accion="seguir">${T.carrito.seguirNavegando}</button>
+      </div>
+    </div>`,
+    { chico: true }
+  );
+  panel.classList.add("modal--hoja");
+  panel.querySelector('[data-accion="seguir"]').addEventListener("click", () => panel.close());
+  aparecer(panel, 60);
 }
 
 // ---------- Eventos ----------
