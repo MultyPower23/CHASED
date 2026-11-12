@@ -12,6 +12,7 @@
 export const CONCURSO = {
   fecha: null, // TODO confirmar con Chased (se muestra "Por confirmar")
   lugar: null, // TODO confirmar con Chased
+  votosPorPersona: 3, // decisión del equipo: cada persona reparte 3 votos (uno por participante)
 };
 
 // votosBase = votos de ejemplo con los que arranca cada uno

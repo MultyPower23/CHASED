@@ -334,7 +334,7 @@ export const TEXTOS = {
       pasos: [
         { titulo: "Inscríbete", texto: "Aquí en la página o en el evento presencial." },
         { titulo: "Baila con tu outfit Chased", texto: "Sube tu video o publícalo etiquetando a @chased_med." },
-        { titulo: "La comunidad vota", texto: "Un voto por persona. Las prendas exclusivas son para quien más mueva a la familia." },
+        { titulo: "La comunidad vota", texto: "Reparte tus votos entre tus favoritos. Las prendas exclusivas son para quien más mueva a la familia." },
       ],
       pasados: "Eventos pasados",
       pasadosVacio: "Este es nuestro primer concurso. Aquí vamos a guardar los mejores momentos, y los tuyos pueden ser los primeros.",
@@ -344,9 +344,22 @@ export const TEXTOS = {
       tuVoto: "Tu voto",
       votos: (n) => (n === 1 ? "1 voto" : `${n} votos`),
       lider: "Va ganando",
-      unVoto: "Tienes un solo voto en el concurso: ya lo usaste.",
+      sinVotos: (total) => `Ya usaste tus ${total} votos. ¡Gracias por mover a la familia!`,
+      sinVotosBoton: "Sin votos",
+      votosRestantes: (quedan, total) =>
+        quedan === 0 ? `Usaste tus ${total} votos` : quedan === 1 ? `Te queda 1 de ${total} votos` : `Te quedan ${quedan} de ${total} votos`,
+      votosAyuda: "Puedes votar por varios participantes, pero solo una vez por cada uno.",
+      votosSinCuenta: (total) => `Tienes ${total} votos para repartir. Al votar te pedimos registrarte.`,
+      // Confirmación antes de votar
+      confirmarTitulo: (nombre) => `¿Votar por ${nombre}?`,
+      confirmarTexto: (quedan) =>
+        quedan === 1
+          ? "Es tu último voto. Una vez votes, no se puede cambiar."
+          : `Después te quedarán ${quedan - 1} votos. Una vez votes, no se puede cambiar.`,
+      confirmarSi: "Sí, votar",
+      confirmarNo: "Cancelar",
       votoGracias: (nombre) => `¡Votaste por ${nombre}! Gracias por mover a la familia.`,
-      registroVotar: "Para votar necesitamos saber quién eres (un voto por persona).",
+      registroVotar: "Para votar necesitamos saber quién eres (así cada persona tiene sus propios votos).",
       registroInscribir: "Para inscribirte al concurso necesitamos saber quién eres.",
       verVideo: "Ver video",
       sinVideo: "Video en camino",
@@ -392,6 +405,11 @@ export const TEXTOS = {
       vacio: "Nadie ha publicado outfits aún. ¡Sé el primero desde Mi closet!",
       armar: "Armar mi outfit",
       por: (autor) => `por ${autor}`,
+      verOutfit: "Ver outfit",
+      modalEtiqueta: "Outfit de la comunidad",
+      totalOutfit: "Todo el outfit",
+      agregarPrenda: "Agregar",
+      agregadaPrenda: "Agregada ✓",
     },
     familia: {
       titulo: "La familia Chased",

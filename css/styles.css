@@ -2176,3 +2176,102 @@ body.noche {
   .familia { grid-template-columns: repeat(5, 1fr); }
   .familia__foto:first-child { grid-column: auto; aspect-ratio: 3 / 4; }
 }
+
+/* ---------- Ajustes Fase 3: votos múltiples y outfit en ventana ---------- */
+.mis-votos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid var(--negro);
+}
+
+.mis-votos p { margin: 0; }
+.mis-votos__texto { font-weight: 700; }
+
+/* Un puntito por voto: negro = disponible, gris = ya usado */
+.mis-votos__puntos { display: flex; gap: 6px; }
+
+.mis-votos__puntos span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--negro);
+  transition: background 0.3s;
+}
+
+.mis-votos__puntos span.lleno { background: var(--negro); }
+
+/* Ventana de confirmación del voto */
+.confirmar { text-align: center; }
+
+.confirmar__iniciales {
+  display: inline-grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin-bottom: 14px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+}
+
+.confirmar__acciones {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* La tarjeta de outfit ahora es un botón: le quitamos la cara de botón */
+.outfit {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: var(--blanco);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.outfit:hover { border-color: var(--negro); }
+
+.outfit__ver {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+/* Ventana del outfit */
+.outfit-modal h2 { margin-bottom: 2px; }
+
+.outfit-modal__prendas {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.outfit-prenda {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--gris-claro);
+}
+
+.outfit-prenda h3 { margin: 0 0 2px; font-size: 1.05rem; }
+.outfit-prenda .texto-suave,
+.outfit-prenda .precio { margin: 0; }
+.outfit-prenda .tallas { margin: 10px 0 0; }
+.outfit-prenda .talla { min-width: 40px; height: 38px; }
+.outfit-prenda .error { margin: 4px 0; }
+
+.outfit-modal .resumen__fila--total { margin-bottom: 14px; }
+
+@media (min-width: 700px) {
+  .outfit-modal__prendas { grid-template-columns: 1fr 1fr; }
+  .outfit-prenda { grid-template-columns: 130px 1fr; border-bottom: 0; }
+  .confirmar__acciones { grid-template-columns: 1fr 1fr; }
+}

@@ -15,7 +15,11 @@ import {
   buscarProducto,
   htmlFoto,
   leerFotoReducida,
+  htmlPrecio,
+  formatearPrecio,
+  capitalizar,
 } from "./app.js";
+import { CONFIG } from "./data/productos.js";
 import { TEXTOS } from "./textos.js";
 import {
   CONCURSO,
@@ -33,6 +37,8 @@ import {
   getOutfits,
   getVotos,
   guardarVotos,
+  agregarAlCarrito,
+  contarPrendasCarrito,
 } from "./storage.js";
 import { contarHasta, revelarAlBajar, rebotar, aparecer } from "./animaciones.js";
 
@@ -53,9 +59,16 @@ const todosLosDisenos = () => [...DISENOS_EJEMPLO.map((d) => ({ ...d, ejemplo: t
 
 const todosLosOutfits = () => [...OUTFITS_EJEMPLO.map((o) => ({ ...o, ejemplo: true })), ...getOutfits()];
 
+// Antes se guardaba UN voto (texto); ahora son varios (lista). Esta
+// función acepta las dos formas, así no se dañan datos de pruebas viejas.
+const comoLista = (voto) => (Array.isArray(voto) ? voto : voto ? [voto] : []);
+
+const VOTOS_POR_PERSONA = CONCURSO.votosPorPersona;
+
 // Los votos de UNA persona (por su correo)
 function votosDe(correo) {
-  return getVotos()[correo] ?? { concurso: null, disenos: [] };
+  const votos = getVotos()[correo] ?? {};
+  return { concurso: comoLista(votos.concurso), disenos: votos.disenos ?? [] };
 }
 
 function guardarVotosDe(correo, votosPersona) {
@@ -64,7 +77,7 @@ function guardarVotosDe(correo, votosPersona) {
 
 // Votos de un participante = los de ejemplo + los que dio la gente
 function votosDeParticipante(participante) {
-  const deLaGente = Object.values(getVotos()).filter((v) => v.concurso === participante.id).length;
+  const deLaGente = Object.values(getVotos()).filter((v) => comoLista(v.concurso).includes(participante.id)).length;
   return (participante.votosBase ?? 0) + deLaGente;
 }
 
@@ -170,6 +183,7 @@ function htmlConcurso() {
 
       <div class="revelar">
         <h3 class="subtitulo-seccion">${E.participantes}</h3>
+        <div class="mis-votos" id="mis-votos"></div>
         <div class="participantes" id="participantes"></div>
       </div>
 
@@ -191,15 +205,16 @@ function renderAccionesConcurso() {
     <a class="boton boton--claro" href="${T.marca.instagramUrl}" target="_blank" rel="noopener">${C.evento.etiquetar}</a>`;
 }
 
-function htmlParticipante(participante, puesto, miVoto, correo) {
+function htmlParticipante(participante, puesto, misVotos, correo) {
   const votos = votosDeParticipante(participante);
   const esLider = puesto === 1;
   const esMio = correo && participante.correo === correo;
-  const votePorEste = miVoto === participante.id;
+  const votePorEste = misVotos.includes(participante.id);
+  const sinVotos = misVotos.length >= VOTOS_POR_PERSONA;
 
   let boton;
   if (votePorEste) boton = `<button class="boton boton--voto" type="button" disabled>${C.evento.tuVoto} ✓</button>`;
-  else if (miVoto) boton = `<button class="boton boton--claro boton--voto" type="button" data-accion="votar" data-id="${participante.id}">${C.evento.votar}</button>`;
+  else if (sinVotos) boton = `<button class="boton boton--claro boton--voto" type="button" disabled>${C.evento.sinVotosBoton}</button>`;
   else boton = `<button class="boton boton--voto" type="button" data-accion="votar" data-id="${participante.id}">${C.evento.votar}</button>`;
 
   const video = participante.video
@@ -232,11 +247,58 @@ function htmlParticipante(participante, puesto, miVoto, correo) {
 // Ranking: el que más votos tiene va primero
 function renderParticipantes() {
   const usuario = getUsuario();
-  const miVoto = usuario ? votosDe(usuario.correo).concurso : null;
+  const misVotos = usuario ? votosDe(usuario.correo).concurso : [];
   const ordenados = todosLosParticipantes().sort((a, b) => votosDeParticipante(b) - votosDeParticipante(a));
   document.getElementById("participantes").innerHTML = ordenados
-    .map((p, i) => htmlParticipante(p, i + 1, miVoto, usuario?.correo))
+    .map((p, i) => htmlParticipante(p, i + 1, misVotos, usuario?.correo))
     .join("");
+  renderMisVotos(usuario, misVotos.length);
+}
+
+// "Te quedan 2 de 3 votos" con puntitos: lleno = voto disponible
+function renderMisVotos(usuario, usados) {
+  const quedan = VOTOS_POR_PERSONA - usados;
+  const puntos = Array.from(
+    { length: VOTOS_POR_PERSONA },
+    (_, i) => `<span class="${i < quedan ? "lleno" : ""}"></span>`
+  ).join("");
+  const texto = usuario
+    ? C.evento.votosRestantes(quedan, VOTOS_POR_PERSONA)
+    : C.evento.votosSinCuenta(VOTOS_POR_PERSONA);
+  document.getElementById("mis-votos").innerHTML = `
+    <div class="mis-votos__puntos" aria-hidden="true">${puntos}</div>
+    <div>
+      <p class="mis-votos__texto">${texto}</p>
+      <p class="texto-suave">${C.evento.votosAyuda}</p>
+    </div>`;
+}
+
+// Ventanita de "¿Seguro?" antes de votar. Devuelve true o false.
+function confirmarVoto(participante, quedan) {
+  return new Promise((resolve) => {
+    let respuesta = false;
+    const modal = abrirModal(
+      `<div class="modal__cuerpo confirmar">
+        <span class="confirmar__iniciales">${escaparHTML(iniciales(participante.nombre))}</span>
+        <h2>${escaparHTML(C.evento.confirmarTitulo(participante.nombre))}</h2>
+        <p class="texto-suave">${escaparHTML(participante.estilo)}</p>
+        <p>${C.evento.confirmarTexto(quedan)}</p>
+        <div class="confirmar__acciones">
+          <button class="boton boton--grande" type="button" data-respuesta="si">${C.evento.confirmarSi}</button>
+          <button class="boton boton--claro" type="button" data-respuesta="no">${C.evento.confirmarNo}</button>
+        </div>
+      </div>`,
+      { chico: true }
+    );
+    modal.addEventListener("click", (e) => {
+      const boton = e.target.closest("[data-respuesta]");
+      if (!boton) return;
+      respuesta = boton.dataset.respuesta === "si";
+      modal.close();
+    });
+    modal.addEventListener("close", () => resolve(respuesta));
+    aparecer(modal.querySelector(".confirmar"), 16);
+  });
 }
 
 async function votarParticipante(id) {
@@ -244,15 +306,20 @@ async function votarParticipante(id) {
   if (!usuario) return;
 
   const misVotos = votosDe(usuario.correo);
-  // Un solo voto por persona: si ya votó, se lo recordamos con cariño
-  if (misVotos.concurso) {
-    mostrarAviso(C.evento.unVoto);
+  // Si ya votó por este, o ya gastó todos sus votos, no se puede más
+  if (misVotos.concurso.includes(id)) return renderParticipantes();
+  if (misVotos.concurso.length >= VOTOS_POR_PERSONA) {
+    mostrarAviso(C.evento.sinVotos(VOTOS_POR_PERSONA));
     return renderParticipantes();
   }
 
   const participante = todosLosParticipantes().find((p) => p.id === id);
+  const quedan = VOTOS_POR_PERSONA - misVotos.concurso.length;
+  // Votar es algo que no se puede deshacer: mejor preguntar primero
+  if (!(await confirmarVoto(participante, quedan))) return;
+
   const antes = votosDeParticipante(participante);
-  guardarVotosDe(usuario.correo, { ...misVotos, concurso: id });
+  guardarVotosDe(usuario.correo, { ...misVotos, concurso: [...misVotos.concurso, id] });
 
   renderParticipantes();
   renderStats();
@@ -466,21 +533,86 @@ async function abrirPostulacion() {
 // Outfits y familia
 // ============================================================
 
+// La tarjeta entera es un botón: abre el outfit AQUÍ MISMO (en una
+// ventanita), sin mandar a la persona al catálogo.
 function htmlOutfit(outfit) {
   const prendas = outfit.prendas.map(buscarProducto).filter(Boolean);
-  const fotos = prendas
-    .map((p) => `<a href="catalogo.html?producto=${p.id}" title="${escaparHTML(p.nombre)}">${htmlFoto(p)}</a>`)
-    .join("");
+  const fotos = prendas.map((p) => htmlFoto(p)).join("");
   const nombres = prendas.map((p) => escaparHTML(p.nombre)).join(" + ");
   return `
-    <article class="outfit">
+    <button class="outfit" type="button" data-accion="ver-outfit" data-id="${outfit.id}">
       <div class="outfit__fotos">${fotos}</div>
       <div class="outfit__info">
         ${outfit.ejemplo ? etiqueta(C.ejemplo) : ""}
         <p class="outfit__prendas">${nombres}</p>
         <p class="texto-suave">${C.outfits.por(escaparHTML(outfit.autor))}</p>
+        <span class="outfit__ver">${C.outfits.verOutfit} →</span>
+      </div>
+    </button>`;
+}
+
+// Cada prenda del outfit con su foto, precio, tallas y "Agregar"
+function htmlPrendaOutfit(producto) {
+  const tallas = (producto.tallas ?? CONFIG.tallas)
+    .map((t) => `<button class="talla" type="button" aria-pressed="false" data-talla="${t}">${t}</button>`)
+    .join("");
+  return `
+    <article class="outfit-prenda" data-prenda="${producto.id}">
+      ${htmlFoto(producto)}
+      <div class="outfit-prenda__info">
+        <h3>${escaparHTML(producto.nombre)}</h3>
+        <p class="texto-suave">${escaparHTML(capitalizar(producto.color))}</p>
+        ${htmlPrecio(producto)}
+        <div class="tallas" role="group" aria-label="${T.catalogo.elegirTalla}">${tallas}</div>
+        <p class="error" aria-live="polite"></p>
+        <button class="boton boton--voto" type="button" data-agregar="${producto.id}">${C.outfits.agregarPrenda}</button>
       </div>
     </article>`;
+}
+
+function abrirOutfit(id) {
+  const outfit = todosLosOutfits().find((o) => o.id === id);
+  if (!outfit) return;
+  const prendas = outfit.prendas.map(buscarProducto).filter(Boolean);
+  const total = prendas.reduce((suma, p) => suma + p.precio, 0);
+
+  const modal = abrirModal(`
+    <div class="modal__cuerpo outfit-modal">
+      <p class="agregado__titulo">${C.outfits.modalEtiqueta}</p>
+      <h2>${prendas.map((p) => escaparHTML(p.nombre)).join(" + ")}</h2>
+      <p class="texto-suave">${C.outfits.por(escaparHTML(outfit.autor))}</p>
+      <div class="outfit-modal__prendas">${prendas.map(htmlPrendaOutfit).join("")}</div>
+      <div class="resumen__fila resumen__fila--total">
+        <span>${C.outfits.totalOutfit}</span>
+        <strong>${formatearPrecio(total)} <span class="precio__nota">· ${T.general.referencial}</span></strong>
+      </div>
+      <a class="boton boton--ancho oculto" href="carrito.html" data-ir-carrito></a>
+    </div>`);
+
+  // Tallas y "Agregar" de cada prenda, sin salir de la comunidad
+  modal.addEventListener("click", (e) => {
+    const talla = e.target.closest(".talla");
+    if (talla) {
+      const prenda = talla.closest(".outfit-prenda");
+      prenda.querySelectorAll(".talla").forEach((b) => b.setAttribute("aria-pressed", b === talla));
+      prenda.querySelector(".error").textContent = "";
+      return;
+    }
+    const agregar = e.target.closest("[data-agregar]");
+    if (!agregar) return;
+    const prenda = agregar.closest(".outfit-prenda");
+    const elegida = prenda.querySelector('.talla[aria-pressed="true"]');
+    if (!elegida) return (prenda.querySelector(".error").textContent = T.catalogo.errorTalla);
+
+    agregarAlCarrito(agregar.dataset.agregar, elegida.dataset.talla);
+    agregar.textContent = C.outfits.agregadaPrenda;
+    rebotar(agregar);
+    // Aparece el botón para ir al carrito, con la cantidad actualizada
+    const irCarrito = modal.querySelector("[data-ir-carrito]");
+    irCarrito.textContent = T.carrito.irAlCarrito(contarPrendasCarrito());
+    irCarrito.classList.remove("oculto");
+  });
+  aparecer(modal.querySelector(".outfit-modal"), 20);
 }
 
 function htmlOutfits() {
@@ -550,6 +682,7 @@ contenido.addEventListener("click", (e) => {
   if (accion === "inscribirse") abrirInscripcion();
   if (accion === "like") alternarLike(id);
   if (accion === "postular") abrirPostulacion();
+  if (accion === "ver-outfit") abrirOutfit(id);
 });
 
 // Si entra o sale de la sesión, sus votos y su "Tú" cambian
