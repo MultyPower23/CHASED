@@ -167,7 +167,7 @@ function htmlBannerEvento() {
       <div class="banner-evento">
         <img class="banner-evento__logo" src="${LOGOS_BLANCOS.stencil}" alt="">
         <h2>${T.inicio.eventoBanner}</h2>
-        <a class="boton boton--invertido" href="comunidad.html">${T.inicio.eventoBoton}</a>
+        <a class="boton boton--invertido" href="comunidad.html#concurso">${T.inicio.eventoBoton}</a>
       </div>
     </section>`;
 }

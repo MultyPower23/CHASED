@@ -121,6 +121,44 @@ export function guardarCupones(cupones) {
   escribir("cupones", cupones);
 }
 
+// ---------- Comunidad ----------
+// Participantes del concurso, diseños y outfits que publica la gente.
+// (Los de ejemplo viven en js/data/comunidad.js, no aquí.)
+export function getParticipantes() {
+  return leer("participantes", []);
+}
+
+export function guardarParticipante(participante) {
+  escribir("participantes", [...getParticipantes(), participante]);
+}
+
+export function getDisenos() {
+  return leer("disenos", []);
+}
+
+export function guardarDiseno(diseno) {
+  escribir("disenos", [...getDisenos(), diseno]);
+}
+
+export function getOutfits() {
+  return leer("outfits", []);
+}
+
+export function guardarOutfit(outfit) {
+  escribir("outfits", [...getOutfits(), outfit]);
+}
+
+// Votos: se guardan POR CORREO, así cada persona tiene su propio voto
+// aunque usen el mismo computador (útil en las pruebas con usuarios).
+// { "correo@x.com": { concurso: "p-ej-1", disenos: ["d-ej-2", ...] } }
+export function getVotos() {
+  return leer("votos", {});
+}
+
+export function guardarVotos(votos) {
+  escribir("votos", votos);
+}
+
 // ---------- Resultado del quiz ----------
 // Se guarda aunque la persona no esté registrada: el quiz es opcional
 // y no queremos ponerle trabas. { estilo, puntajes, respuestas, fecha }

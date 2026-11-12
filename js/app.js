@@ -322,7 +322,8 @@ export function abrirModal(contenidoHTML, { chico = false } = {}) {
 
 // Reduce la foto de perfil a 160px antes de guardarla. Una foto del
 // celular pesa megas y el localStorage solo aguanta ~5 MB en total.
-function leerFotoReducida(archivo) {
+// "lado" = tamaño máximo en px (160 para avatar, más grande para diseños)
+export function leerFotoReducida(archivo, lado = 160) {
   return new Promise((resolve) => {
     if (!archivo) return resolve(null);
     const lector = new FileReader();
@@ -331,7 +332,7 @@ function leerFotoReducida(archivo) {
       const img = new Image();
       img.onerror = () => resolve(null);
       img.onload = () => {
-        const escala = Math.min(1, 160 / Math.max(img.width, img.height));
+        const escala = Math.min(1, lado / Math.max(img.width, img.height));
         const lienzo = document.createElement("canvas");
         lienzo.width = Math.round(img.width * escala);
         lienzo.height = Math.round(img.height * escala);

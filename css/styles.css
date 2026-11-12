@@ -1707,3 +1707,472 @@ body.noche {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ============================================================
+   FASE 3 — Comunidad (el corazón de la propuesta)
+   ============================================================ */
+
+/* Al saltar a #concurso, que el header pegado no tape el título */
+[id] { scroll-margin-top: calc(var(--alto-header) + 12px); }
+
+.centrado { text-align: center; margin-top: 28px; }
+
+/* Variantes de etiqueta para la comunidad */
+.participante__etiquetas,
+.diseno .participante__etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.participante__etiquetas .etiqueta { margin-top: 0 !important; }
+.etiqueta--negra { background: var(--negro); color: var(--blanco); border-color: var(--negro); }
+.etiqueta--clara { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+.etiqueta--borde-claro { border-color: var(--gris-medio); color: var(--gris-claro); }
+
+.subtitulo-seccion {
+  margin: 48px 0 18px;
+  font-size: 1.25rem;
+}
+
+.aviso-borde {
+  border: 1.5px dashed var(--gris-medio);
+  padding: 22px;
+  color: var(--gris-oscuro);
+  text-align: center;
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+}
+
+/* ---------- Portada negra ---------- */
+.portada-comunidad {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 48px 0 32px;
+  text-align: center;
+}
+
+.portada-comunidad__logo {
+  width: min(70vw, 380px);
+  height: auto;
+  margin: 0 auto 8px;
+}
+
+.portada-comunidad h1 { font-size: 2.2rem; margin-bottom: 8px; }
+
+.portada-comunidad__intro {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  color: var(--gris-claro);
+  font-size: 1.15rem;
+}
+
+/* Contadores tipo marcador */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 520px;
+  margin: 28px auto;
+  border-top: 1px solid var(--gris-oscuro);
+  border-bottom: 1px solid var(--gris-oscuro);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 4px;
+}
+
+.stat + .stat { border-left: 1px solid var(--gris-oscuro); }
+
+.stat strong {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.stat span {
+  color: var(--gris-claro);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Atajos a cada sección */
+.atajos {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.atajos a {
+  padding: 8px 16px;
+  border: 1px solid var(--gris-oscuro);
+  color: var(--blanco);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.atajos a:hover { background: var(--blanco); color: var(--negro); }
+
+/* ---------- Concurso ---------- */
+.concurso {
+  display: grid;
+  gap: 32px;
+}
+
+.concurso__descripcion { font-size: 1.1rem; }
+
+.concurso__premio {
+  display: inline-block;
+  padding: 8px 14px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+}
+
+.concurso__datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 8px 0 20px;
+}
+
+.concurso__datos div {
+  border-top: 1px solid var(--gris-claro);
+  padding-top: 8px;
+}
+
+.concurso__datos dt {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gris-medio);
+}
+
+.concurso__datos dd { margin: 2px 0 0; }
+
+.concurso__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* Los 3 pasos con número grande */
+.pasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.paso {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 18px;
+  background: var(--gris-claro);
+}
+
+.paso__numero {
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.paso h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.paso p { margin: 0; color: var(--gris-oscuro); }
+
+/* ---------- Participantes (ranking) ---------- */
+.participantes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.participante {
+  border: 1px solid var(--gris-claro);
+  display: flex;
+  flex-direction: column;
+}
+
+/* "Video": cuadro negro con iniciales grandes y un botón de play */
+.participante__video {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--negro);
+  color: var(--blanco);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.participante__iniciales {
+  font-family: var(--fuente-titulos);
+  font-size: 3rem;
+  letter-spacing: 0.05em;
+}
+
+/* Triángulo de "play" hecho con bordes (no es una imagen) */
+.participante__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 42px 0 0 -9px;
+  border-left: 18px solid var(--blanco);
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+  opacity: 0.8;
+}
+
+.participante__puesto {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+}
+
+.participante__ver {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px;
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--blanco);
+  border-top: 1px solid var(--gris-oscuro);
+}
+
+.participante__ver--sin { color: var(--gris-medio); }
+
+.participante__info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.participante__info h4 {
+  margin: 4px 0 0;
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+  font-size: 1.1rem;
+}
+
+.participante__info p { margin: 0; }
+
+.participante__votos {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 6px 0 8px !important;
+}
+
+.boton--voto {
+  min-height: 40px;
+  padding: 0 14px;
+  margin-top: auto;
+}
+
+/* El que va ganando lleva borde negro grueso */
+.participante--lider { border: 2px solid var(--negro); }
+.participante--votado .participante__video { outline: 3px solid var(--gris-medio); outline-offset: -3px; }
+
+/* ---------- Sección negra de diseños ---------- */
+.seccion-negra {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 56px 0;
+  margin: 24px 0;
+}
+
+.seccion-negra__intro { color: var(--gris-claro); font-size: 1.1rem; max-width: 34em; }
+
+.premios {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 28px;
+  display: grid;
+  gap: 2px;
+}
+
+.premios li {
+  padding: 18px;
+  border: 1px solid var(--gris-oscuro);
+}
+
+.premio__numero {
+  font-family: var(--fuente-titulos);
+  color: var(--gris-medio);
+}
+
+.premios h3 { margin: 6px 0 4px; font-size: 1.1rem; }
+.premios p { margin: 0; color: var(--gris-claro); }
+
+.disenos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.diseno {
+  border: 1px solid var(--gris-oscuro);
+  display: flex;
+  flex-direction: column;
+}
+
+.diseno__imagen {
+  aspect-ratio: 1;
+  background: var(--blanco);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+/* Imagen del diseño: se ve completa (no se recorta el dibujo) */
+.diseno__imagen img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Diseños de ejemplo sin imagen: el nombre en grande, como un estampado */
+.diseno__tipografico {
+  padding: 24px;
+  color: var(--negro);
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.diseno__info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.diseno__info h3 { margin: 6px 0 0; }
+.diseno__info p { margin: 0; color: var(--gris-claro); }
+.diseno__autor { font-size: 0.85rem; color: var(--gris-medio) !important; }
+
+.diseno__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.diseno__likes { display: inline-block; font-weight: 700; }
+
+/* Formulario de diseño: textarea y vista previa */
+.campo textarea {
+  padding: 10px;
+  border: 1px solid var(--gris-claro);
+  font: inherit;
+  resize: vertical;
+}
+
+.vista-previa img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  background: var(--gris-claro);
+}
+
+.vista-previa p { margin: 0 0 6px; }
+
+/* ---------- Outfits ---------- */
+.outfits {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.outfit { border: 1px solid var(--gris-claro); }
+
+.outfit__fotos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: var(--gris-claro);
+}
+
+.outfit__fotos a { display: block; }
+
+.outfit__info { padding: 12px 14px 14px; }
+.outfit__info .etiqueta { margin-top: 0 !important; }
+.outfit__prendas { margin: 6px 0 2px; font-family: var(--fuente-titulos); }
+.outfit__info .texto-suave { margin: 0; }
+
+/* ---------- Familia (mosaico de sesiones) ---------- */
+.familia {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.familia__foto {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--gris-claro);
+}
+
+/* La primera foto es la protagonista: ocupa el doble */
+.familia__foto:first-child {
+  grid-column: span 2;
+  aspect-ratio: 4 / 3;
+}
+
+.familia__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fotos, no logo */
+  transition: transform 0.5s;
+}
+
+.familia__foto:hover img { transform: scale(1.03); }
+
+.familia__foto figcaption {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 4px 10px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 700px) {
+  .portada-comunidad { padding: 72px 0 48px; }
+  .portada-comunidad h1 { font-size: 3rem; }
+  .stat strong { font-size: 2.6rem; }
+  .concurso { grid-template-columns: 1.2fr 1fr; align-items: start; }
+  .participantes { grid-template-columns: repeat(3, 1fr); }
+  .premios { grid-template-columns: repeat(3, 1fr); }
+  .disenos { grid-template-columns: repeat(2, 1fr); }
+  .outfits { grid-template-columns: repeat(3, 1fr); }
+  .participante__video { aspect-ratio: 1; }
+}
+
+@media (min-width: 960px) {
+  .participantes { grid-template-columns: repeat(4, 1fr); }
+  .disenos { grid-template-columns: repeat(3, 1fr); }
+  /* Las fotos originales son pequeñas: en fila pareja se ven nítidas */
+  .familia { grid-template-columns: repeat(5, 1fr); }
+  .familia__foto:first-child { grid-column: auto; aspect-ratio: 3 / 4; }
+}
