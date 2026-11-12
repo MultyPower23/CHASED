@@ -29,10 +29,10 @@ const PORTADAS_GENERO = {
   unisex: "assets/img/comunidad/familia-01.jpg",
 };
 
-// Las dos caras del logo: el serif (principal) y el stencil (urbano).
-// Se van turnando en la portada y en la cinta.
+// El serif es el logo principal y vive en el header y el footer.
+// El stencil (más urbano) es el protagonista de la portada negra,
+// de la cinta y del banner del concurso.
 const LOGOS_BLANCOS = {
-  serif: "assets/logo/logo-chased-blanco.png",
   stencil: "assets/logo/logo-stencil-blanco.png",
 };
 
@@ -96,11 +96,8 @@ function htmlPortada() {
   return `
     <section class="portada" id="portada">
       <div class="contenedor portada__centro">
-        <!-- Los dos logos van uno encima del otro; inicio.js va
-             prendiendo uno y apagando el otro (sin tocar el logo en sí) -->
         <h1 class="portada__titulo">
-          <img class="portada__logo visible" src="${LOGOS_BLANCOS.serif}" alt="${T.marca.nombre}">
-          <img class="portada__logo portada__logo--stencil" src="${LOGOS_BLANCOS.stencil}" alt="">
+          <img src="${LOGOS_BLANCOS.stencil}" alt="${T.marca.nombre}">
         </h1>
         <p class="portada__frase">${fraseAleatoria()}</p>
         <div class="portada__botones">
@@ -215,20 +212,6 @@ function htmlInvitacionQuiz() {
     </section>`;
 }
 
-// ---------- Logo que se turna ----------
-// Cada 4 segundos cambia de serif a stencil y viceversa. Si la
-// persona pidió "menos movimiento" en su sistema, se queda quieto.
-function alternarLogoPortada() {
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const logos = document.querySelectorAll(".portada__logo");
-  let actual = 0;
-  setInterval(() => {
-    logos[actual].classList.remove("visible");
-    actual = (actual + 1) % logos.length;
-    logos[actual].classList.add("visible");
-  }, 4000);
-}
-
 // ---------- Del negro al blanco ----------
 // Un "vigilante" (IntersectionObserver) mira la portada. Mientras
 // se vea buena parte de ella, la página está en modo noche; cuando
@@ -258,7 +241,6 @@ function renderInicio() {
   });
 
   activarCambioDeFondo();
-  alternarLogoPortada();
 }
 
 renderInicio();
