@@ -22,12 +22,13 @@ Antes de hacer cualquier cosa, lee `docs/CONTEXTO.md` (todo el contexto) y `docs
 4. **Manual de marca intocable:**
    - Colores: solo `#000000`, `#FFFFFF`, `#4F4F4F`, `#787878` y `#D9D9D9`, definidos como variables CSS en `:root`.
    - Tipografías: `Libre Baskerville` (de Google Fonts) para títulos y `Corbel` para textos, con respaldo `Corbel, Candara, "Segoe UI", sans-serif`.
-   - Logo: se usa la imagen de `assets/logo/`, nunca se recrea con texto ni con CSS. Prohibido rotarlo, deformarlo, recolorearlo o ponerle sombras o efectos. Siempre con aire alrededor.
+   - Logo: se usan los PNG de `assets/logo/` (lee su `LEEME.md`). El principal es `logo-chased-negro.png` (o `-blanco.png` sobre fondo oscuro). **Ya traen el espacio de respeto incluido**, así que se ajusta solo el alto **o** el ancho, sin `object-fit: cover` ni recortes. Nunca se recrea con texto ni con CSS. Prohibido rotarlo, deformarlo, recolorearlo o ponerle sombras o efectos. Favicon: `assets/logo/favicon.png`.
    - Estética **minimalista**: mucho espacio en blanco, nada saturado, sin efectos exagerados.
 5. **El registro no aparece de primeras.** Está en el header y se pide solo al comprar, encargar, votar o publicar.
 6. **El quiz es opcional y no invasivo**: nada de peso, altura ni temas polémicos, y se puede repetir desde el perfil.
 7. **No hay botón de WhatsApp**: los pedidos se manejan dentro de la página. En el footer sí van los links a Instagram (@chased_med).
-8. Si falta una foto, se muestra un placeholder gris (`#D9D9D9`) con el nombre del producto, para que nada se rompa.
+8. **Fotos:** las de producto ya están en `assets/img/productos/` con el nombre que pide `productos.js`. En `assets/img/comunidad/` hay fotos de la "familia Chased" (sesiones de fotos, **no** son eventos: no las presentes como eventos pasados). En `assets/img/novedades/drop-godwoven.jpg` está el anuncio del drop GODWOVEN del 20/NOV **de 2025 (ya pasó)**: úsalo solo como ejemplo de un drop anterior, nunca como próximo lanzamiento ni con cuenta regresiva.
+9. Si falta una foto, se muestra un placeholder gris (`#D9D9D9`) con el nombre del producto, para que nada se rompa.
 
 ## Estilo de código
 - Comentarios **casuales y sencillos**, que expliquen el **por qué** y no solo el qué. Cuando ayude, usa analogías, por ejemplo: "el localStorage es como la mochila del navegador: guarda cosas aunque cierres la página".
