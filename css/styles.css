@@ -2275,3 +2275,163 @@ body.noche {
   .outfit-prenda { grid-template-columns: 130px 1fr; border-bottom: 0; }
   .confirmar__acciones { grid-template-columns: 1fr 1fr; }
 }
+
+/* ============================================================
+   FASE 4 — Mi closet y maniquí (boceto)
+   ============================================================ */
+.maniqui-cabecera { margin-bottom: 24px; }
+
+/* Etiqueta beta bien visible: borde punteado, como "en construcción" */
+.beta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 1.5px dashed var(--negro);
+  margin: 0;
+}
+
+.beta strong {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.beta span { color: var(--gris-oscuro); font-size: 0.95rem; }
+
+.maniqui-layout {
+  display: grid;
+  gap: 36px;
+}
+
+.maniqui-layout h2 { font-size: 1.2rem; }
+
+/* Sin esto, una columna de grilla no se encoge más que su contenido
+   y la página se sale por el lado en el celular */
+.maniqui-layout > div { min-width: 0; }
+.mini-grilla,
+.recos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.recos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* El maniquí: 3 casillas apiladas sobre un fondo gris, como un probador */
+.maniqui {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: var(--gris-claro);
+}
+
+.casilla {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 14px;
+  min-height: 120px;
+  padding: 10px;
+  background: var(--blanco);
+  border: 1.5px dashed var(--gris-medio);
+}
+
+.casilla--llena { border: 1.5px solid var(--negro); }
+
+.casilla__nombre {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 2px 8px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.casilla__vacia {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  color: var(--gris-medio);
+  font-style: italic;
+}
+
+.casilla__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-family: var(--fuente-titulos);
+}
+
+.armar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 10px;
+  margin: 18px 0 14px;
+}
+
+.maniqui-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.publicado {
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--negro);
+  color: var(--blanco);
+  text-align: center;
+}
+
+.publicado p { margin: 0 0 10px; }
+
+/* Lista de prendas para tocar y poner en el maniquí */
+.mini-grilla {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mini-prenda {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 0 6px;
+  border: 1.5px solid transparent;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mini-prenda:hover { border-color: var(--gris-claro); }
+
+/* La que ya está puesta en el maniquí se marca con borde negro */
+.mini-prenda--puesta { border-color: var(--negro); }
+
+.mini-prenda__nombre { font-size: 0.85rem; margin-top: 4px; padding: 0 4px; }
+.mini-prenda .texto-suave { font-size: 0.75rem; padding: 0 4px; }
+
+.agregar-closet {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.recos-bloque h3 { margin: 28px 0 12px; font-size: 1.05rem; }
+
+.recos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 900px) {
+  .maniqui-layout { grid-template-columns: 420px 1fr; align-items: start; }
+  .mini-grilla { grid-template-columns: repeat(4, 1fr); }
+  .casilla { grid-template-columns: 120px 1fr; min-height: 150px; }
+}

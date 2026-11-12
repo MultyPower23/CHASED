@@ -430,6 +430,28 @@ export const TEXTOS = {
     publicar: "Publicar outfit",
     publicado: "¡Outfit publicado en Comunidad!",
     recomendacion: "Esto le quedaría bien a tu outfit",
+    betaTexto: "Hoy armamos por estilos y palabras clave. La idea es que una IA aprenda de tu closet y tus gustos para proponerte conjuntos.",
+    maniqui: "Tu outfit",
+    casillaVacia: "Toca una prenda para ponerla aquí",
+    quitar: "Quitar",
+    pestanas: { closet: "Tu closet", catalogo: "Catálogo" },
+    closetVacio: "Tu closet está vacío. Compra algo o agrega prendas Chased que ya tengas.",
+    elegirPrenda: "Elige una prenda",
+    agregar: "Agregar",
+    agregadaCloset: (nombre) => `${nombre} quedó en tu closet`,
+    deCompra: "Comprada",
+    armado: "Listo: lo armamos pensando en tu plan.",
+    limpiar: "Empezar de nuevo",
+    errorPublicar: "Arma al menos la parte de arriba y la de abajo para publicar.",
+    registroPublicar: "Para publicar tu outfit en la comunidad necesitamos saber quién eres.",
+    verComunidad: "Ver en Comunidad",
+    // Palabras clave → estilo, para "Armar por mí" (BORRADOR)
+    palabrasClave: {
+      flow: ["bailar", "baile", "entrenar", "gym", "deporte", "ensayo"],
+      urbano: ["salir", "fiesta", "calle", "concierto", "parche", "rumba"],
+      comfy: ["casa", "tranqui", "descansar", "frío", "frio", "viaje", "estudiar"],
+      minimal: ["clase", "colegio", "trabajo", "reunión", "reunion", "básico", "basico"],
+    },
   },
 
   footer: {

@@ -159,6 +159,18 @@ export function guardarVotos(votos) {
   escribir("votos", votos);
 }
 
+// ---------- Closet ----------
+// Prendas que la persona agregó a mano ("ya la tengo"). Las compradas
+// salen de los pedidos, no se guardan dos veces.
+export function getClosetManual() {
+  return leer("closet", []);
+}
+
+export function agregarAlCloset(id) {
+  const closet = getClosetManual();
+  if (!closet.includes(id)) escribir("closet", [...closet, id]);
+}
+
 // ---------- Resultado del quiz ----------
 // Se guarda aunque la persona no esté registrada: el quiz es opcional
 // y no queremos ponerle trabas. { estilo, puntajes, respuestas, fecha }
