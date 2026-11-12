@@ -1,0 +1,202 @@
+// ============================================================
+// catalogo.js — El catálogo con filtros, orden y detalle
+// ------------------------------------------------------------
+// La idea: que explorar la ropa sea tan fácil como pasar fotos en
+// Instagram, pero pudiendo filtrar y comparar (lo que hoy no se
+// puede hacer por WhatsApp). La sección "Para ti" llega en la Fase 2.
+// ============================================================
+
+import {
+  htmlTarjeta,
+  htmlFoto,
+  htmlPrecio,
+  abrirModal,
+  mostrarAviso,
+  buscarProducto,
+  capitalizar,
+  escaparHTML,
+} from "./app.js";
+import { TEXTOS } from "./textos.js";
+import { PRODUCTOS, CONFIG } from "./data/productos.js";
+import { agregarAlCarrito } from "./storage.js";
+
+const T = TEXTOS;
+const contenido = document.getElementById("contenido");
+
+// Lo que la persona tiene escogido ahora mismo. "" = todos.
+const estado = { tipo: "", color: "", talla: "", genero: "", orden: "relevancia" };
+
+// Si un producto no trae tallas propias, usamos las generales (referenciales)
+const tallasDe = (producto) => producto.tallas ?? CONFIG.tallas;
+
+// Las opciones de los filtros salen de los mismos productos: si Chased
+// agrega un color nuevo en productos.js, aparece solito en el filtro.
+function valoresUnicos(campo) {
+  return [...new Set(PRODUCTOS.map((p) => p[campo]))];
+}
+
+const OPCIONES = {
+  tipo: valoresUnicos("tipo"),
+  color: valoresUnicos("color"),
+  talla: CONFIG.tallas,
+  genero: valoresUnicos("genero"),
+};
+
+// ---------- Filtrar y ordenar ----------
+function productosVisibles() {
+  const filtrados = PRODUCTOS.filter(
+    (p) =>
+      (!estado.tipo || p.tipo === estado.tipo) &&
+      (!estado.color || p.color === estado.color) &&
+      (!estado.genero || p.genero === estado.genero) &&
+      (!estado.talla || tallasDe(p).includes(estado.talla))
+  );
+
+  // Copiamos antes de ordenar para no desordenar la lista original
+  const lista = [...filtrados];
+  if (estado.orden === "menor") lista.sort((a, b) => a.precio - b.precio);
+  else if (estado.orden === "mayor") lista.sort((a, b) => b.precio - a.precio);
+  else lista.sort((a, b) => Number(b.destacado) - Number(a.destacado)); // destacados primero
+  return lista;
+}
+
+// ---------- Pintar ----------
+function htmlSelectFiltro(campo) {
+  const opciones = OPCIONES[campo]
+    .map((valor) => `<option value="${valor}">${escaparHTML(capitalizar(valor))}</option>`)
+    .join("");
+  return `
+    <label class="campo">${T.catalogo.filtros[campo]}
+      <select data-filtro="${campo}">
+        <option value="">${T.catalogo.filtros.todos}</option>
+        ${opciones}
+      </select>
+    </label>`;
+}
+
+function htmlSelectOrden() {
+  const o = T.catalogo.ordenar;
+  return `
+    <label class="campo">${o.label}
+      <select data-filtro="orden">
+        <option value="relevancia">${o.relevancia}</option>
+        <option value="menor">${o.menor}</option>
+        <option value="mayor">${o.mayor}</option>
+      </select>
+    </label>`;
+}
+
+function renderEstructura() {
+  contenido.innerHTML = `
+    <section class="seccion contenedor">
+      <h1>${T.catalogo.titulo}</h1>
+      <div class="filtros">
+        ${["tipo", "color", "talla", "genero"].map(htmlSelectFiltro).join("")}
+        ${htmlSelectOrden()}
+      </div>
+      <div class="filtros__pie">
+        <span class="texto-suave" id="conteo"></span>
+        <button class="boton-texto" type="button" id="limpiar">${T.catalogo.limpiarFiltros}</button>
+      </div>
+      <div id="resultados"></div>
+    </section>`;
+}
+
+function renderProductos() {
+  const lista = productosVisibles();
+  document.getElementById("conteo").textContent = T.catalogo.resultados(lista.length);
+  document.getElementById("resultados").innerHTML = lista.length
+    ? `<div class="grilla">${lista.map(htmlTarjeta).join("")}</div>`
+    : `<p class="vacio">${T.catalogo.sinResultados}</p>`;
+}
+
+// ---------- Detalle del producto (modal) ----------
+function abrirDetalle(id) {
+  const producto = buscarProducto(id);
+  if (!producto) return;
+
+  const botonesTalla = tallasDe(producto)
+    .map((t) => `<button class="talla" type="button" aria-pressed="false" data-talla="${t}">${t}</button>`)
+    .join("");
+
+  const modal = abrirModal(`
+    <div class="detalle">
+      ${htmlFoto(producto)}
+      <div class="modal__cuerpo">
+        <h2>${escaparHTML(producto.nombre)}</h2>
+        ${htmlPrecio(producto, true)}
+        <p class="detalle__descripcion">${escaparHTML(producto.descripcion)}</p>
+        <p class="texto-suave">${T.catalogo.color}: ${escaparHTML(capitalizar(producto.color))}</p>
+        <fieldset class="tallas">
+          <legend>${T.catalogo.elegirTalla}</legend>
+          ${botonesTalla}
+        </fieldset>
+        <p class="error" aria-live="polite"></p>
+        <button class="boton boton--ancho" type="button" data-accion="agregar">${T.catalogo.agregar}</button>
+        <details class="guia-tallas">
+          <summary>${T.catalogo.guiaTallas}</summary>
+          <p>${T.catalogo.guiaTallasNota}</p>
+        </details>
+      </div>
+    </div>`);
+
+  let tallaElegida = null;
+  const error = modal.querySelector(".error");
+
+  // Solo una talla puede estar marcada a la vez (como un radio, pero más bonito)
+  modal.querySelectorAll(".talla").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      modal.querySelectorAll(".talla").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      boton.setAttribute("aria-pressed", "true");
+      tallaElegida = boton.dataset.talla;
+      error.textContent = "";
+    });
+  });
+
+  // Agregar al carrito NO pide registro: eso llega solo al confirmar el pedido
+  modal.querySelector('[data-accion="agregar"]').addEventListener("click", () => {
+    if (!tallaElegida) {
+      error.textContent = T.catalogo.errorTalla;
+      return;
+    }
+    agregarAlCarrito(producto.id, tallaElegida);
+    modal.close();
+    mostrarAviso(T.general.agregado(producto.nombre));
+  });
+
+  // Si llegó con ?producto= en la URL, al cerrar dejamos la URL limpia
+  modal.addEventListener("close", () => history.replaceState(null, "", "catalogo.html"));
+}
+
+// ---------- Eventos ----------
+function conectarEventos() {
+  contenido.querySelectorAll("[data-filtro]").forEach((select) => {
+    select.addEventListener("change", () => {
+      estado[select.dataset.filtro] = select.value;
+      renderProductos();
+    });
+  });
+
+  document.getElementById("limpiar").addEventListener("click", () => {
+    Object.assign(estado, { tipo: "", color: "", talla: "", genero: "", orden: "relevancia" });
+    contenido.querySelectorAll("[data-filtro]").forEach((s) => (s.value = estado[s.dataset.filtro]));
+    renderProductos();
+  });
+
+  // Delegación: un solo "oído" en el contenedor escucha los clics de
+  // todas las tarjetas, aunque se vuelvan a pintar con cada filtro.
+  document.getElementById("resultados").addEventListener("click", (e) => {
+    const tarjeta = e.target.closest(".tarjeta");
+    if (!tarjeta) return;
+    e.preventDefault();
+    abrirDetalle(tarjeta.dataset.id);
+  });
+}
+
+renderEstructura();
+renderProductos();
+conectarEventos();
+
+// Si venimos del inicio con un producto en la URL, abrimos su detalle de una
+const idEnUrl = new URLSearchParams(location.search).get("producto");
+if (idEnUrl) abrirDetalle(idEnUrl);

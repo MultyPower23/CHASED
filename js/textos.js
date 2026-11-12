@@ -31,6 +31,18 @@ export const TEXTOS = {
     "La meta no se espera, se persigue.",
   ],
 
+  // Textos sueltos que se usan en varias páginas
+  general: {
+    cerrar: "Cerrar",
+    menu: "Abrir menú",
+    referencial: "referencial",
+    agregado: (nombre) => `${nombre} quedó en tu carrito`,
+    proximamente: "Estamos terminando esta sección. Muy pronto la vas a ver aquí.",
+    volverInicio: "Volver al inicio",
+    hola: (nombre) => `Hola, ${nombre}`,
+    sesionCerrada: "Cerraste sesión. ¡Vuelve pronto!",
+  },
+
   nav: {
     inicio: "Inicio",
     catalogo: "Catálogo",
@@ -59,6 +71,9 @@ export const TEXTOS = {
     foto: "Foto de perfil (opcional)",
     boton: "Entrar a la comunidad",
     bienvenida: (nombre) => `¡Bienvenid@, ${nombre}! Ya haces parte de Chased.`,
+    errorNombre: "Escribe tu nombre para seguir.",
+    errorCorreo: "Revisa el correo, parece que le falta algo.",
+    nota: "Prototipo: tus datos solo se guardan en este navegador.",
   },
 
   catalogo: {
@@ -72,6 +87,11 @@ export const TEXTOS = {
     elegirTalla: "Elige tu talla",
     guiaTallas: "Guía de tallas (referencial)",
     sinResultados: "Nada por aquí con esos filtros. Prueba otra combinación.",
+    limpiarFiltros: "Limpiar filtros",
+    resultados: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
+    color: "Color",
+    errorTalla: "Primero elige tu talla.",
+    guiaTallasNota: "Las medidas reales las estamos confirmando con Chased. Por ahora las tallas son referenciales.",
   },
 
   carrito: {
@@ -83,6 +103,16 @@ export const TEXTOS = {
     confirmar: "Confirmar pedido",
     confirmado: "¡Pedido confirmado! Chased se pondrá en contacto para coordinar la entrega.",
     subisteNivel: (nivel) => `¡Subiste a ${nivel}! Tu próxima compra tiene descuento.`,
+    talla: "Talla",
+    quitar: "Quitar",
+    menos: "Una menos",
+    mas: "Una más",
+    seguirComprando: "Seguir comprando",
+    verPerfil: "Ver mi perfil",
+    numeroPedido: (id) => `Pedido #${id}`,
+    registroAntes: "Antes de confirmar, cuéntanos quién eres.",
+    simulado: "Pedido simulado: no se hace ningún cobro. Precios y descuento son referenciales.",
+    prendas: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
   },
 
   // Quiz — sin peso, sin altura, sin temas polémicos. BORRADOR.
@@ -209,6 +239,7 @@ export const TEXTOS = {
 
   footer: {
     texto: "Gracias por formar parte de la familia Chased.",
+    instagram: "Síguenos en Instagram",
     prototipo: "Prototipo académico — Expo InnvEm 2026 · Colegio UPB Marinilla",
   },
 };
