@@ -10,7 +10,7 @@
 import { htmlTarjeta, buscarProducto, productosDeColeccion } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, COLECCIONES } from "./data/productos.js";
-import { getPreferencia, guardarPreferencia } from "./storage.js";
+import { getPreferencia, guardarPreferencia, getQuiz } from "./storage.js";
 
 const T = TEXTOS;
 const contenido = document.getElementById("contenido");
@@ -198,7 +198,8 @@ function htmlDrops() {
 // El quiz es una invitación, no una obligación. Si dice "Ahora no",
 // guardamos esa decisión y no volvemos a insistir en el inicio.
 function htmlInvitacionQuiz() {
-  if (getPreferencia("quizOculto", false)) return "";
+  // Tampoco si ya lo hizo: lo puede repetir desde su perfil
+  if (getPreferencia("quizOculto", false) || getQuiz()) return "";
   return `
     <section class="seccion contenedor" id="bloque-quiz">
       <div class="invitacion-quiz">

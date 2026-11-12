@@ -99,6 +99,17 @@ export function guardarPedido(pedido) {
   escribir("pedidos", pedidos);
 }
 
+// ---------- Resultado del quiz ----------
+// Se guarda aunque la persona no esté registrada: el quiz es opcional
+// y no queremos ponerle trabas. { estilo, puntajes, respuestas, fecha }
+export function getQuiz() {
+  return leer("quiz", null);
+}
+
+export function guardarQuiz(resultado) {
+  escribir("quiz", resultado);
+}
+
 // ---------- Preferencias pequeñas ----------
 // Ej: si la persona dijo "Ahora no" al quiz, no se lo volvemos a
 // poner en la cara en el inicio.

@@ -264,12 +264,19 @@ export function pedirRegistro(subtitulo = T.registro.subtitulo) {
       if (usuarioNuevo) {
         renderHeader();
         mostrarAviso(T.registro.bienvenida(usuarioNuevo.nombre));
+        avisarCambioSesion();
       }
       resolve(usuarioNuevo);
     });
 
     form.nombre.focus();
   });
+}
+
+// Cuando alguien entra o sale, avisamos a la página (por ejemplo, el
+// perfil se vuelve a pintar sin tener que recargar)
+function avisarCambioSesion() {
+  window.dispatchEvent(new CustomEvent("sesion-cambio"));
 }
 
 // ---------- Header ----------
@@ -349,6 +356,7 @@ export function renderHeader() {
     cerrarSesion();
     renderHeader();
     mostrarAviso(T.general.sesionCerrada);
+    avisarCambioSesion();
   });
 
   actualizarContador();

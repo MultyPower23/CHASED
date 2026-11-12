@@ -1050,3 +1050,252 @@ body.noche {
   .header__acciones { order: 3; margin-left: 0; }
   .header .nav { margin-left: auto; }
 }
+
+/* ============================================================
+   FASE 2 — Quiz, perfil y "Para ti"
+   ============================================================ */
+
+/* ---------- "Para ti" en el catálogo ---------- */
+.para-ti { margin: 8px 0 32px; }
+.para-ti .texto-suave { margin: -8px 0 16px; }
+
+/* Fila que se desliza de lado (en celular y computador) */
+.fila-scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 44%;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+}
+
+.para-ti__item {
+  position: relative;
+  scroll-snap-align: start;
+}
+
+/* La etiqueta "Descubre algo distinto" va encima de la foto */
+.etiqueta--sobre {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  margin: 0 !important;
+  background: var(--blanco);
+  border-color: var(--negro);
+  color: var(--negro);
+}
+
+/* ---------- Quiz ---------- */
+.quiz {
+  max-width: 640px;
+  text-align: center;
+}
+
+.quiz__ch {
+  height: 56px;
+  width: auto;
+  margin: 0 auto 16px;
+}
+
+.quiz__intro {
+  color: var(--gris-oscuro);
+  max-width: 30em;
+  margin: 0 auto 24px;
+}
+
+.quiz__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.quiz__acciones--fila {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.quiz .barra { margin: 8px 0 28px; }
+.quiz .barra span { transition: width 0.3s; }
+
+.quiz__pregunta { margin-bottom: 24px; }
+
+.opciones {
+  display: grid;
+  gap: 10px;
+}
+
+.opcion {
+  min-height: 56px;
+  padding: 12px 18px;
+  border: 1px solid var(--gris-claro);
+  background: var(--blanco);
+  text-align: left;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.opcion:hover { border-color: var(--negro); }
+
+.opcion[aria-pressed="true"] {
+  background: var(--negro);
+  color: var(--blanco);
+  border-color: var(--negro);
+}
+
+.quiz__estilo {
+  font-size: 3rem;
+  margin: 4px 0 12px;
+}
+
+/* ---------- Perfil ---------- */
+.perfil-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.perfil-cabecera h1 { margin-bottom: 2px; }
+.perfil-cabecera p { margin: 0; }
+
+.avatar {
+  flex: none;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--gris-claro);
+}
+
+.avatar--inicial {
+  display: grid;
+  place-items: center;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 2.2rem;
+}
+
+.perfil-tarjetas {
+  display: grid;
+  gap: 16px;
+}
+
+.tarjeta-perfil {
+  border: 1px solid var(--gris-claro);
+  padding: 22px;
+}
+
+.tarjeta-perfil h2 {
+  font-size: 0.85rem;
+  font-family: var(--fuente-texto);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gris-medio);
+}
+
+.perfil-estilo {
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 0 0 8px;
+}
+
+.insignia-grande {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.insignia-grande img { height: 64px; width: auto; }
+.insignia-grande p { margin: 0; }
+
+/* Los 4 niveles como una línea de metro: punto lleno = alcanzado */
+.niveles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 12px;
+  font-size: 0.8rem;
+  color: var(--gris-medio);
+  text-align: center;
+}
+
+.niveles li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.niveles__punto {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--gris-medio);
+  background: var(--blanco);
+}
+
+.niveles .alcanzado { color: var(--negro); }
+.niveles .alcanzado .niveles__punto { background: var(--negro); border-color: var(--negro); }
+.niveles .actual { font-weight: 700; }
+
+.tarjeta-perfil .barra { margin-bottom: 10px; }
+
+.pedidos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.pedido {
+  border: 1px solid var(--gris-claro);
+  padding: 16px 18px;
+}
+
+.pedido__cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pedido__items {
+  margin: 10px 0;
+  padding-left: 18px;
+  color: var(--gris-oscuro);
+  font-size: 0.95rem;
+}
+
+.closet {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.closet__prenda {
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.closet__prenda span { display: block; margin-top: 6px; }
+
+@media (min-width: 700px) {
+  .fila-scroll { grid-auto-columns: 30%; }
+  .perfil-tarjetas { grid-template-columns: 1fr 1fr; }
+  .closet { grid-template-columns: repeat(6, 1fr); }
+  .avatar { width: 110px; height: 110px; }
+}
+
+@media (min-width: 960px) {
+  .fila-scroll { grid-auto-columns: 23%; }
+}

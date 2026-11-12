@@ -22,6 +22,7 @@ import {
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, CONFIG, GENEROS } from "./data/productos.js";
 import { agregarAlCarrito } from "./storage.js";
+import { recomendarParaTi, puntajeProducto } from "./recomendador.js";
 
 const T = TEXTOS;
 const contenido = document.getElementById("contenido");
@@ -80,11 +81,49 @@ function productosVisibles() {
   else if (estado.orden === "mayor") lista.sort((a, b) => b.precio - a.precio);
   else {
     // Recomendado: primero lo que es exacto del género elegido (ej. lo
-    // de mujer antes que lo unisex), y luego los destacados.
-    const puntos = (p) => (p.genero === estado.genero ? 2 : 0) + (p.destacado ? 1 : 0);
+    // de mujer antes que lo unisex), luego lo que va con tus gustos
+    // (quiz y compras, según el recomendador) y por último los destacados.
+    const puntos = (p) =>
+      (p.genero === estado.genero ? 10 : 0) + puntajeProducto(p) * 2 + (p.destacado ? 1 : 0);
     lista.sort((a, b) => puntos(b) - puntos(a));
   }
   return lista;
+}
+
+// ---------- "Para ti" ----------
+// Se calcula UNA vez al abrir la página (tiene algo de azar, y si
+// cambiara con cada filtro se sentiría como que salta).
+const paraTi = recomendarParaTi(8);
+
+const SUBTITULOS_PARA_TI = {
+  quiz: () => T.catalogo.paraTiEstilo(T.quiz.estilos[paraTi.estilo]?.nombre ?? ""),
+  compras: () => T.catalogo.paraTiCompras,
+  destacados: () => T.catalogo.paraTiSinDatos,
+};
+
+function hayFiltros() {
+  return ["tipo", "color", "talla", "genero", "coleccion"].some((campo) => estado[campo]);
+}
+
+function htmlParaTi() {
+  const tarjetas = paraTi.lista
+    .map(
+      ({ producto, descubre }) => `
+      <div class="para-ti__item">
+        ${descubre ? `<span class="etiqueta etiqueta--sobre">${T.catalogo.descubre}</span>` : ""}
+        ${htmlTarjeta(producto)}
+      </div>`
+    )
+    .join("");
+  const linkQuiz = paraTi.modo === "destacados"
+    ? ` <a href="quiz.html">${T.inicio.quizBoton}</a>`
+    : "";
+  return `
+    <div class="para-ti">
+      <h2 class="titulo-ch"><img src="assets/logo/simbolo-ch-negro.png" alt="">${T.catalogo.paraTi}</h2>
+      <p class="texto-suave">${SUBTITULOS_PARA_TI[paraTi.modo]()}${linkQuiz}</p>
+      <div class="fila-scroll">${tarjetas}</div>
+    </div>`;
 }
 
 // ---------- Pintar ----------
@@ -142,6 +181,7 @@ function renderEstructura() {
       <h1>${T.catalogo.titulo}</h1>
       <div id="pestanas"></div>
       <div id="chip-coleccion"></div>
+      <div id="para-ti"></div>
       <div class="filtros">
         ${["tipo", "color", "talla"].map(htmlSelectFiltro).join("")}
         ${htmlSelectOrden()}
@@ -158,6 +198,9 @@ function renderProductos() {
   document.getElementById("pestanas").innerHTML = htmlPestanas();
   document.getElementById("chip-coleccion").innerHTML = htmlChipColeccion();
   actualizarURL();
+  // "Para ti" solo se muestra cuando está viendo todo: si ya filtró,
+  // sabe lo que busca y no le estorbamos.
+  document.getElementById("para-ti").innerHTML = hayFiltros() ? "" : htmlParaTi();
   const lista = productosVisibles();
   document.getElementById("conteo").textContent = T.catalogo.resultados(lista.length);
   document.getElementById("resultados").innerHTML = lista.length
@@ -255,7 +298,7 @@ function conectarEventos() {
 
   // Delegación: un solo "oído" en el contenedor escucha los clics de
   // todas las tarjetas, aunque se vuelvan a pintar con cada filtro.
-  document.getElementById("resultados").addEventListener("click", (e) => {
+  contenido.addEventListener("click", (e) => {
     const tarjeta = e.target.closest(".tarjeta");
     if (!tarjeta) return;
     e.preventDefault();
