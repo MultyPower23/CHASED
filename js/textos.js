@@ -87,7 +87,7 @@ export const TEXTOS = {
   },
 
   // Nombres de los géneros para filtros y portadas
-  generos: { hombre: "Hombre", mujer: "Mujer", todo: "Todo" },
+  generos: { hombre: "Hombre", mujer: "Mujer", unisex: "Unisex", todo: "Todo" },
 
   registro: {
     titulo: "Únete a la familia Chased",

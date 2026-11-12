@@ -22,10 +22,18 @@ const FOTOS_FAMILIA = [
   "assets/img/comunidad/familia-05.jpg",
 ];
 
-// Portadas de Hombre y Mujer (fotos de sesión de la familia Chased)
+// Portadas de Hombre, Mujer y Unisex (fotos de sesión de la familia Chased)
 const PORTADAS_GENERO = {
   hombre: "assets/img/comunidad/familia-04.jpg",
   mujer: "assets/img/comunidad/familia-02.jpg",
+  unisex: "assets/img/comunidad/familia-01.jpg",
+};
+
+// Las dos caras del logo: el serif (principal) y el stencil (urbano).
+// Se van turnando en la portada y en la cinta.
+const LOGOS_BLANCOS = {
+  serif: "assets/logo/logo-chased-blanco.png",
+  stencil: "assets/logo/logo-stencil-blanco.png",
 };
 
 // Una frase distinta cada vez que entras: así la portada se siente viva
@@ -67,8 +75,13 @@ function htmlBandera() {
   const fotos = fotosBandera()
     .map((src) => `<img src="${src}" alt="" loading="lazy" onerror="this.remove()">`)
     .join("");
+  // Separadores intercalados: CH, stencil, CH, stencil…
   const frases = T.inicio.cinta
-    .map((frase) => `<span>${frase}</span><img src="assets/logo/simbolo-ch-blanco.png" alt="">`)
+    .map((frase, i) =>
+      i % 2 === 0
+        ? `<span>${frase}</span><img src="assets/logo/simbolo-ch-blanco.png" alt="">`
+        : `<span>${frase}</span><img class="cinta__stencil" src="${LOGOS_BLANCOS.stencil}" alt="">`
+    )
     .join("");
   return `
     <div class="bandera" aria-hidden="true">
@@ -83,14 +96,18 @@ function htmlPortada() {
   return `
     <section class="portada" id="portada">
       <div class="contenedor portada__centro">
+        <!-- Los dos logos van uno encima del otro; inicio.js va
+             prendiendo uno y apagando el otro (sin tocar el logo en sí) -->
         <h1 class="portada__titulo">
-          <img src="assets/logo/logo-chased-blanco.png" alt="${T.marca.nombre}">
+          <img class="portada__logo visible" src="${LOGOS_BLANCOS.serif}" alt="${T.marca.nombre}">
+          <img class="portada__logo portada__logo--stencil" src="${LOGOS_BLANCOS.stencil}" alt="">
         </h1>
         <p class="portada__frase">${fraseAleatoria()}</p>
         <div class="portada__botones">
           <a class="boton boton--invertido" href="catalogo.html">${T.inicio.verCatalogo}</a>
           <a class="boton boton--borde" href="catalogo.html?genero=hombre">${T.generos.hombre}</a>
           <a class="boton boton--borde" href="catalogo.html?genero=mujer">${T.generos.mujer}</a>
+          <a class="boton boton--borde" href="catalogo.html?genero=unisex">${T.generos.unisex}</a>
         </div>
       </div>
       ${htmlBandera()}
@@ -108,7 +125,7 @@ function htmlGeneros() {
   return `
     <section class="seccion contenedor">
       ${htmlTitulo(T.inicio.paraQuienTitulo)}
-      <div class="generos">${tile("hombre")}${tile("mujer")}</div>
+      <div class="generos">${tile("hombre")}${tile("mujer")}${tile("unisex")}</div>
     </section>`;
 }
 
@@ -151,7 +168,7 @@ function htmlBannerEvento() {
   return `
     <section class="contenedor">
       <div class="banner-evento">
-        <img class="banner-evento__ch" src="assets/logo/simbolo-ch-blanco.png" alt="">
+        <img class="banner-evento__logo" src="${LOGOS_BLANCOS.stencil}" alt="">
         <h2>${T.inicio.eventoBanner}</h2>
         <a class="boton boton--invertido" href="comunidad.html">${T.inicio.eventoBoton}</a>
       </div>
@@ -198,6 +215,20 @@ function htmlInvitacionQuiz() {
     </section>`;
 }
 
+// ---------- Logo que se turna ----------
+// Cada 4 segundos cambia de serif a stencil y viceversa. Si la
+// persona pidió "menos movimiento" en su sistema, se queda quieto.
+function alternarLogoPortada() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const logos = document.querySelectorAll(".portada__logo");
+  let actual = 0;
+  setInterval(() => {
+    logos[actual].classList.remove("visible");
+    actual = (actual + 1) % logos.length;
+    logos[actual].classList.add("visible");
+  }, 4000);
+}
+
 // ---------- Del negro al blanco ----------
 // Un "vigilante" (IntersectionObserver) mira la portada. Mientras
 // se vea buena parte de ella, la página está en modo noche; cuando
@@ -227,6 +258,7 @@ function renderInicio() {
   });
 
   activarCambioDeFondo();
+  alternarLogoPortada();
 }
 
 renderInicio();

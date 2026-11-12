@@ -399,7 +399,21 @@ body.noche {
   padding-bottom: 32px;
 }
 
-.portada__titulo { margin: 0; }
+/* Los dos logos ocupan la MISMA celda de la grilla (uno encima del
+   otro) y solo se ve el que tenga la clase "visible". */
+.portada__titulo {
+  margin: 0;
+  display: grid;
+  place-items: center;
+}
+
+.portada__logo {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.portada__logo.visible { opacity: 1; }
 
 /* Logo protagonista: solo se fija el ancho (el alto se acomoda solo) */
 .portada__titulo img {
@@ -479,6 +493,9 @@ body.noche {
   width: auto;
 }
 
+/* El stencil es más ancho y bajito: un poco más de alto para que se lea */
+.cinta__pista .cinta__stencil { height: 34px; }
+
 @keyframes correr-derecha {
   from { transform: translateX(-50%); }
   to { transform: translateX(0); }
@@ -505,11 +522,20 @@ body.noche {
 .subtitulo { margin: -12px 0 20px; }
 
 /* Hombre / Mujer: dos fotos grandes con su nombre en una franja negra */
+/* En el celular: Hombre y Mujer lado a lado, Unisex a lo ancho debajo */
 .generos {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+
+.generos .genero:nth-child(3) {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 9;
+}
+
+/* En la foto apaisada se apunta un poco más arriba para no cortar caras */
+.generos .genero:nth-child(3) img { object-position: center 25%; }
 
 .genero {
   position: relative;
@@ -611,10 +637,10 @@ body.noche {
 
 .banner-evento h2 { max-width: 18em; margin: 0 auto 20px; }
 
-.banner-evento__ch {
-  height: 44px;
-  width: auto;
-  margin: 0 auto 16px;
+.banner-evento__logo {
+  width: min(70vw, 300px);
+  height: auto;
+  margin: 0 auto 8px;
 }
 
 .invitacion-quiz {
@@ -994,7 +1020,9 @@ body.noche {
   .filtros { grid-template-columns: repeat(4, 1fr); }
   .portada__frase { font-size: 1.7rem; }
   .bandera__pista img { width: 160px; height: 210px; }
-  .genero { aspect-ratio: 4 / 3; }
+  .generos { grid-template-columns: repeat(3, 1fr); }
+  .genero,
+  .generos .genero:nth-child(3) { grid-column: auto; aspect-ratio: 3 / 4; }
   .colecciones { grid-auto-columns: 38%; }
   .generos { gap: 20px; }
   .invitacion-quiz__acciones { flex-direction: row; justify-content: center; gap: 20px; }

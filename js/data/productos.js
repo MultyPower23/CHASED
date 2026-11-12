@@ -105,11 +105,13 @@ export const PRODUCTOS = [
 ];
 
 // Géneros: la mayoría de la ropa es unisex, así que cuenta tanto
-// para Hombre como para Mujer. Así no inventamos géneros que Chased
-// no ha definido: solo agrupamos lo que ya está.
+// para Hombre como para Mujer (y además tiene su propia sección).
+// Así no inventamos géneros que Chased no ha definido: solo
+// agrupamos lo que ya está.
 export const GENEROS = {
   hombre: ["hombre", "unisex"],
   mujer: ["mujer", "unisex"],
+  unisex: ["unisex"],
 };
 
 // Colecciones / temáticas del inicio. No son datos nuevos: son
