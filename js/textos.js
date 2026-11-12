@@ -175,6 +175,17 @@ export const TEXTOS = {
     verParaTi: "Ver mi \"Para ti\" en el catálogo",
     irPerfil: "Ir a mi perfil",
     guardado: "Tu resultado quedó guardado. Puedes repetir el quiz cuando quieras desde tu perfil.",
+    // Pantalla de "carga" al terminar el quiz — BORRADOR. Cada frase
+    // dura un momentico; la última es el cierre antes del resultado.
+    cargando: [
+      "Leyendo tus respuestas con calma…",
+      "Personalizando nuestro catálogo para ti…",
+      "Buscando las prendas que van con tu ritmo…",
+      "Armando tu estilo Chased…",
+      "Listo. Esto es solo para ti.",
+    ],
+    // Si ya está registrad@, la segunda frase lleva su nombre
+    cargandoNombre: (nombre) => `Preparando todo para ti, ${nombre}…`,
     preguntas: [
       {
         texto: "Un día perfecto para ti es…",

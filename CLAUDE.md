@@ -34,7 +34,7 @@ Antes de hacer cualquier cosa, lee `docs/CONTEXTO.md` (todo el contexto) y `docs
 - Comentarios **casuales y sencillos**, que expliquen el **por qué** y no solo el qué. Cuando ayude, usa analogías, por ejemplo: "el localStorage es como la mochila del navegador: guarda cosas aunque cierres la página".
 - Funciones cortas y con nombres en español (`renderCatalogo`, `agregarAlCarrito`).
 - Un archivo JS por página (`js/catalogo.js`, `js/perfil.js`…) más los compartidos (`app.js`, `storage.js`, `textos.js`, `recomendador.js`).
-- Nada de librerías externas, salvo Google Fonts.
+- Nada de librerías externas, salvo Google Fonts y **Anime.js** (copiado en `js/vendor/`, no por CDN; ver su `LEEME.md`).
 
 ## Git
 - Haz un commit al terminar cada fase del plan, con mensajes cortos en español, por ejemplo `feat: catálogo con filtros`.

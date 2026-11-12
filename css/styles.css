@@ -1508,3 +1508,45 @@ body.noche {
   .tarjeta-estilo--grande .tarjeta-estilo__franja { width: 56%; padding: 32px; }
   .quiz__acciones--izq { flex-direction: row; flex-wrap: wrap; align-items: center; }
 }
+
+/* ---------- Carga de mentiritas al terminar el quiz ---------- */
+.carga {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Grilla de 5x5 cuadritos que hace la "onda" con Anime.js */
+.carga__grilla {
+  display: grid;
+  grid-template-columns: repeat(5, 18px);
+  gap: 8px;
+  margin-bottom: 36px;
+}
+
+.carga__grilla span {
+  width: 18px;
+  height: 18px;
+  background: var(--negro);
+}
+
+.carga__grilla span.gris { background: var(--gris-medio); }
+
+.carga__frase {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: 1.35rem;
+  min-height: 3em; /* que el texto no haga saltar la página al cambiar */
+  max-width: 22em;
+  margin: 0 0 20px;
+}
+
+.barra--carga {
+  width: min(280px, 80%);
+  height: 4px;
+}
+
+.barra--carga span { width: 0; }
