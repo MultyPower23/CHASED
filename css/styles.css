@@ -21,7 +21,8 @@
 
   --ancho-max: 1120px;
   --espacio: 16px;
-  --alto-header: 64px;
+  --alto-header: 88px;
+  --transicion-modo: 0.7s ease;
 }
 
 /* ---------- Base ---------- */
@@ -45,6 +46,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Para que el paso de negro a blanco del inicio se vea suave */
+  transition: background-color var(--transicion-modo), color var(--transicion-modo);
 }
 
 main {
@@ -140,12 +143,19 @@ select {
 }
 
 /* ---------- Header ---------- */
-.header {
+/* El sticky va en el contenedor #header (y no en <header>): un
+   sticky solo se pega dentro de su papá, y el papá de <header> es
+   una cajita del mismo tamaño, así que nunca se pegaba. */
+#header {
   position: sticky;
   top: 0;
   z-index: 20;
+}
+
+.header {
   background: var(--blanco);
   border-bottom: 1px solid var(--gris-claro);
+  transition: background-color var(--transicion-modo), border-color var(--transicion-modo);
 }
 
 /* Logo, acciones y menú en una fila que "se parte": en el celular
@@ -163,9 +173,12 @@ select {
 /* El logo ya trae su espacio de respeto en el PNG:
    solo fijamos la altura y el ancho se acomoda solo. */
 .header__logo img {
-  height: 56px;
+  height: 86px;
   width: auto;
 }
+
+/* Por defecto (fondo blanco) se ve el logo negro */
+.header__logo .logo-blanco { display: none; }
 
 .header__acciones {
   margin-left: auto;
@@ -213,7 +226,7 @@ select {
   display: block;
   width: 22px;
   height: 1.5px;
-  background: var(--negro);
+  background: currentColor;
 }
 
 .nav {
@@ -259,7 +272,7 @@ select {
 }
 
 .footer__logo {
-  height: 90px;
+  height: 130px;
   width: auto;
   margin: 0 auto 8px;
 }
@@ -343,22 +356,240 @@ select {
   font-size: 0.75rem;
 }
 
-/* ---------- Inicio ---------- */
-.hero {
-  padding: 56px 0 48px;
+/* ---------- Modo noche (solo la portada del inicio) ----------
+   El body arranca con la clase "noche". inicio.js se la quita al
+   bajar, y todo lo que usa estos colores hace la transición solo. */
+body.noche {
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+.noche .header {
+  background: var(--negro);
+  border-color: var(--gris-oscuro);
+}
+
+.noche .header__logo .logo-negro { display: none; }
+.noche .header__logo .logo-blanco { display: block; }
+.noche .nav a,
+.noche .nav button { border-color: var(--gris-oscuro); }
+.noche .nav .nav__registro { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+.noche .contador--vacio { background: var(--gris-oscuro); color: var(--blanco); }
+.noche .texto-suave { color: var(--gris-claro); }
+
+/* ---------- Portada negra ---------- */
+.portada {
+  min-height: calc(100svh - var(--alto-header));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--negro);
+  color: var(--blanco);
+  overflow: hidden;
+}
+
+.portada__centro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  border-bottom: 1px solid var(--gris-claro);
+  padding-top: 24px;
+  padding-bottom: 32px;
 }
 
-.hero__frase {
-  font-size: 1.8rem;
-  max-width: 16em;
-  margin: 0 auto 16px;
+.portada__titulo { margin: 0; }
+
+/* Logo protagonista: solo se fija el ancho (el alto se acomoda solo) */
+.portada__titulo img {
+  /* min(): que nunca sea tan grande que empuje la banderita fuera de la pantalla */
+  width: min(86vw, 600px, 52svh);
+  height: auto;
 }
 
-.hero__eslogan {
+.portada__frase {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: 1.3rem;
+  max-width: 20em;
+  margin: 4px auto 28px;
+}
+
+.portada__botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Botón de solo borde, para fondos negros */
+.boton--borde {
+  background: transparent;
+  color: var(--blanco);
+  border-color: var(--blanco);
+}
+
+.boton--borde:hover { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+
+/* ---------- La banderita: fotos que corren de izquierda a derecha ---------- */
+.bandera {
+  overflow: hidden;
+  padding: 0 0 12px;
+}
+
+.bandera__pista,
+.cinta__pista {
+  display: flex;
+  width: max-content;
+  /* De -50% a 0 = se mueve hacia la derecha. Como el contenido está
+     repetido, al volver a empezar se ve igualito y no hay salto. */
+  animation: correr-derecha 60s linear infinite;
+}
+
+.bandera__pista img {
+  width: 130px;
+  height: 170px;
+  object-fit: cover; /* fotos, no logo */
+  margin-right: 10px;
+}
+
+.cinta {
+  overflow: hidden;
+  border-top: 1px solid var(--gris-oscuro);
+  padding: 14px 0;
+}
+
+.cinta__pista {
+  align-items: center;
+  animation-duration: 40s;
+}
+
+.cinta__pista span {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: 1.05rem;
+  white-space: nowrap;
+  padding: 0 18px;
+}
+
+/* El símbolo CH como separador: solo se fija la altura */
+.cinta__pista img {
+  height: 26px;
+  width: auto;
+}
+
+@keyframes correr-derecha {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+/* Si la persona pidió menos movimiento en su sistema, lo respetamos */
+@media (prefers-reduced-motion: reduce) {
+  .bandera__pista,
+  .cinta__pista { animation: none; }
+}
+
+/* ---------- Secciones del inicio ---------- */
+.titulo-ch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titulo-ch img {
+  height: 38px;
+  width: auto;
+}
+
+.subtitulo { margin: -12px 0 20px; }
+
+/* Hombre / Mujer: dos fotos grandes con su nombre en una franja negra */
+.generos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.genero {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--gris-claro);
+  text-decoration: none;
+}
+
+.genero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.genero:hover img { transform: scale(1.03); }
+
+.genero__nombre {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 10px 18px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 1.2rem;
+}
+
+/* Colecciones: en el celular se deslizan de lado, como historias */
+.colecciones {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 62%;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+}
+
+.coleccion {
+  display: block;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.coleccion h3 { margin: 12px 0 2px; font-size: 1rem; }
+.coleccion p { margin: 0; }
+
+.drops {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.drops h3 { margin: 12px 0 2px; font-size: 1rem; }
+.drop p { margin: 0; }
+
+.etiqueta {
+  display: inline-block;
+  margin-top: 12px !important;
+  padding: 2px 8px;
+  border: 1px solid var(--gris-medio);
   color: var(--gris-oscuro);
-  margin-bottom: 28px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.etiqueta + h3 { margin-top: 6px; }
+
+.proximo-drop {
+  margin: 24px 0 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--gris-claro);
+  border-bottom: 1px solid var(--gris-claro);
+  text-align: center;
+  font-family: var(--fuente-titulos);
+  font-style: italic;
 }
 
 .titulo-seccion {
@@ -380,6 +611,12 @@ select {
 
 .banner-evento h2 { max-width: 18em; margin: 0 auto 20px; }
 
+.banner-evento__ch {
+  height: 44px;
+  width: auto;
+  margin: 0 auto 16px;
+}
+
 .invitacion-quiz {
   border: 1px solid var(--gris-claro);
   padding: 28px 22px;
@@ -393,6 +630,52 @@ select {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+}
+
+/* ---------- Catálogo: pestañas Todo / Hombre / Mujer ---------- */
+.pestanas {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--gris-claro);
+}
+
+.pestana {
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+  color: var(--gris-medio);
+  cursor: pointer;
+}
+
+.pestana[aria-pressed="true"] {
+  color: var(--negro);
+  border-bottom-color: var(--negro);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 4px 4px 4px 12px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-size: 0.9rem;
+}
+
+.chip button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: none;
+  color: var(--blanco);
+  font-size: 1.2rem;
+  cursor: pointer;
 }
 
 /* ---------- Catálogo: filtros ---------- */
@@ -599,17 +882,70 @@ select {
 
 .resumen .texto-suave { margin: 14px 0 0; }
 
+/* Insignia dentro del resumen del carrito */
+.insignia {
+  margin: 16px 0 20px;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--gris-claro);
+}
+
+.insignia__nivel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.insignia__nivel img { height: 28px; width: auto; }
+
+.insignia__descuento {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.insignia__texto { margin: 10px 0 0; font-size: 0.95rem; }
+
+.barra {
+  height: 6px;
+  background: var(--gris-claro);
+}
+
+.barra span {
+  display: block;
+  height: 100%;
+  background: var(--negro);
+}
+
+.confirmacion__gracias {
+  margin: 0 auto 28px;
+  max-width: 260px;
+}
+
+.confirmacion__gracias img { width: 100%; height: auto; }
+
+.confirmacion__gracias figcaption {
+  margin-top: 12px;
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+}
+
+.confirmacion__progreso {
+  border: 1px solid var(--gris-claro);
+  padding: 16px 18px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.confirmacion__progreso .barra { margin: 8px 0; }
+.confirmacion__progreso p { margin: 0; }
+
 .confirmacion {
   text-align: center;
   max-width: 34em;
   margin: 0 auto;
   padding: 24px 0;
-}
-
-.confirmacion__simbolo {
-  height: 72px;
-  width: auto;
-  margin: 0 auto 20px;
 }
 
 .confirmacion__nivel {
@@ -655,9 +991,12 @@ select {
 @media (min-width: 700px) {
   h1 { font-size: 2.4rem; }
   .grilla { grid-template-columns: repeat(3, 1fr); gap: 32px 20px; }
-  .filtros { grid-template-columns: repeat(5, 1fr); }
-  .hero { padding: 88px 0 72px; }
-  .hero__frase { font-size: 2.6rem; }
+  .filtros { grid-template-columns: repeat(4, 1fr); }
+  .portada__frase { font-size: 1.7rem; }
+  .bandera__pista img { width: 160px; height: 210px; }
+  .genero { aspect-ratio: 4 / 3; }
+  .colecciones { grid-auto-columns: 38%; }
+  .generos { gap: 20px; }
   .invitacion-quiz__acciones { flex-direction: row; justify-content: center; gap: 20px; }
   .detalle { grid-template-columns: 1fr 1fr; }
   .detalle .foto { aspect-ratio: auto; height: 100%; min-height: 420px; }
@@ -668,6 +1007,13 @@ select {
 
 @media (min-width: 960px) {
   .grilla { grid-template-columns: repeat(4, 1fr); }
+  :root { --alto-header: 112px; }
+  .header__logo img { height: 110px; }
+  /* Los 6 destacados quedan parejos en 2 filas de 3 */
+  .grilla--destacados { grid-template-columns: repeat(3, 1fr); }
+  /* En el computador las 5 colecciones caben en una fila */
+  .colecciones { grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); overflow: visible; }
+  .drops { grid-template-columns: repeat(4, 1fr); }
 
   /* En el computador el menú se ve siempre, sin hamburguesa */
   .header__menu-btn { display: none; }

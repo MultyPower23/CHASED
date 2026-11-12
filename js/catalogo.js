@@ -15,16 +15,26 @@ import {
   buscarProducto,
   capitalizar,
   escaparHTML,
+  coincideGenero,
+  buscarColeccion,
+  productoEnColeccion,
 } from "./app.js";
 import { TEXTOS } from "./textos.js";
-import { PRODUCTOS, CONFIG } from "./data/productos.js";
+import { PRODUCTOS, CONFIG, GENEROS } from "./data/productos.js";
 import { agregarAlCarrito } from "./storage.js";
 
 const T = TEXTOS;
 const contenido = document.getElementById("contenido");
 
 // Lo que la persona tiene escogido ahora mismo. "" = todos.
-const estado = { tipo: "", color: "", talla: "", genero: "", orden: "relevancia" };
+const ESTADO_INICIAL = { tipo: "", color: "", talla: "", genero: "", coleccion: "", orden: "relevancia" };
+const estado = { ...ESTADO_INICIAL };
+
+// Si llega desde el inicio con ?genero=hombre o ?coleccion=bailar,
+// arrancamos con ese filtro ya puesto.
+const parametros = new URLSearchParams(location.search);
+if (GENEROS[parametros.get("genero")]) estado.genero = parametros.get("genero");
+if (buscarColeccion(parametros.get("coleccion"))) estado.coleccion = parametros.get("coleccion");
 
 // Si un producto no trae tallas propias, usamos las generales (referenciales)
 const tallasDe = (producto) => producto.tallas ?? CONFIG.tallas;
@@ -39,16 +49,28 @@ const OPCIONES = {
   tipo: valoresUnicos("tipo"),
   color: valoresUnicos("color"),
   talla: CONFIG.tallas,
-  genero: valoresUnicos("genero"),
 };
+
+// Guardamos los filtros de género y colección en la URL: así, si
+// recargas o compartes el link, ves lo mismo.
+function actualizarURL(productoId = "") {
+  const params = new URLSearchParams();
+  if (estado.genero) params.set("genero", estado.genero);
+  if (estado.coleccion) params.set("coleccion", estado.coleccion);
+  if (productoId) params.set("producto", productoId);
+  const query = params.toString();
+  history.replaceState(null, "", "catalogo.html" + (query ? "?" + query : ""));
+}
 
 // ---------- Filtrar y ordenar ----------
 function productosVisibles() {
+  const coleccion = buscarColeccion(estado.coleccion);
   const filtrados = PRODUCTOS.filter(
     (p) =>
       (!estado.tipo || p.tipo === estado.tipo) &&
       (!estado.color || p.color === estado.color) &&
-      (!estado.genero || p.genero === estado.genero) &&
+      coincideGenero(p, estado.genero) &&
+      (!coleccion || productoEnColeccion(p, coleccion)) &&
       (!estado.talla || tallasDe(p).includes(estado.talla))
   );
 
@@ -56,7 +78,12 @@ function productosVisibles() {
   const lista = [...filtrados];
   if (estado.orden === "menor") lista.sort((a, b) => a.precio - b.precio);
   else if (estado.orden === "mayor") lista.sort((a, b) => b.precio - a.precio);
-  else lista.sort((a, b) => Number(b.destacado) - Number(a.destacado)); // destacados primero
+  else {
+    // Recomendado: primero lo que es exacto del género elegido (ej. lo
+    // de mujer antes que lo unisex), y luego los destacados.
+    const puntos = (p) => (p.genero === estado.genero ? 2 : 0) + (p.destacado ? 1 : 0);
+    lista.sort((a, b) => puntos(b) - puntos(a));
+  }
   return lista;
 }
 
@@ -86,12 +113,37 @@ function htmlSelectOrden() {
     </label>`;
 }
 
+// Pestañas grandes de Todo / Hombre / Mujer: es lo primero que la
+// gente busca, por eso no va escondido en un select.
+function htmlPestanas() {
+  const opciones = ["", ...Object.keys(GENEROS)];
+  return `
+    <div class="pestanas">
+      ${opciones
+        .map(
+          (g) => `<button type="button" class="pestana" data-genero="${g}"
+            aria-pressed="${estado.genero === g}">${g ? T.generos[g] : T.generos.todo}</button>`
+        )
+        .join("")}
+    </div>`;
+}
+
+function htmlChipColeccion() {
+  if (!estado.coleccion) return "";
+  return `
+    <p class="chip">${T.catalogo.coleccion}: ${T.colecciones[estado.coleccion].nombre}
+      <button type="button" data-accion="quitar-coleccion" aria-label="${T.catalogo.quitarColeccion}">&times;</button>
+    </p>`;
+}
+
 function renderEstructura() {
   contenido.innerHTML = `
     <section class="seccion contenedor">
       <h1>${T.catalogo.titulo}</h1>
+      <div id="pestanas"></div>
+      <div id="chip-coleccion"></div>
       <div class="filtros">
-        ${["tipo", "color", "talla", "genero"].map(htmlSelectFiltro).join("")}
+        ${["tipo", "color", "talla"].map(htmlSelectFiltro).join("")}
         ${htmlSelectOrden()}
       </div>
       <div class="filtros__pie">
@@ -103,6 +155,9 @@ function renderEstructura() {
 }
 
 function renderProductos() {
+  document.getElementById("pestanas").innerHTML = htmlPestanas();
+  document.getElementById("chip-coleccion").innerHTML = htmlChipColeccion();
+  actualizarURL();
   const lista = productosVisibles();
   document.getElementById("conteo").textContent = T.catalogo.resultados(lista.length);
   document.getElementById("resultados").innerHTML = lista.length
@@ -164,8 +219,10 @@ function abrirDetalle(id) {
     mostrarAviso(T.general.agregado(producto.nombre));
   });
 
-  // Si llegó con ?producto= en la URL, al cerrar dejamos la URL limpia
-  modal.addEventListener("close", () => history.replaceState(null, "", "catalogo.html"));
+  // Mientras el detalle está abierto, el producto queda en la URL;
+  // al cerrar lo quitamos pero dejamos los filtros como estaban.
+  actualizarURL(producto.id);
+  modal.addEventListener("close", () => actualizarURL());
 }
 
 // ---------- Eventos ----------
@@ -178,9 +235,22 @@ function conectarEventos() {
   });
 
   document.getElementById("limpiar").addEventListener("click", () => {
-    Object.assign(estado, { tipo: "", color: "", talla: "", genero: "", orden: "relevancia" });
+    Object.assign(estado, ESTADO_INICIAL);
     contenido.querySelectorAll("[data-filtro]").forEach((s) => (s.value = estado[s.dataset.filtro]));
     renderProductos();
+  });
+
+  // Pestañas y chip se vuelven a pintar, así que los escuchamos desde arriba
+  contenido.addEventListener("click", (e) => {
+    const pestana = e.target.closest(".pestana");
+    if (pestana) {
+      estado.genero = pestana.dataset.genero;
+      renderProductos();
+    }
+    if (e.target.closest('[data-accion="quitar-coleccion"]')) {
+      estado.coleccion = "";
+      renderProductos();
+    }
   });
 
   // Delegación: un solo "oído" en el contenedor escucha los clics de
@@ -198,5 +268,5 @@ renderProductos();
 conectarEventos();
 
 // Si venimos del inicio con un producto en la URL, abrimos su detalle de una
-const idEnUrl = new URLSearchParams(location.search).get("producto");
+const idEnUrl = parametros.get("producto");
 if (idEnUrl) abrirDetalle(idEnUrl);

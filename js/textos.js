@@ -61,7 +61,33 @@ export const TEXTOS = {
     eventoBoton: "Quiero participar",
     quizInvitacion: "¿Te ayudamos a encontrar tu estilo? Son 5 preguntas, y si no quieres, no pasa nada.",
     quizBoton: "Hagámoslo",
+    // Cinta que corre en la portada negra — BORRADOR
+    cinta: ["Chasing your style", "Persigue lo tuyo", "Oversize desde Medellín", "Familia Chased"],
+    bajar: "Desliza",
+    paraQuienTitulo: "Encuentra lo tuyo",
+    coleccionesTitulo: "Colecciones",
+    coleccionesSub: "Arma tu estilo por temática.",
+    dropsTitulo: "Ediciones y drops",
+    dropAnteriorEtiqueta: "Drop anterior",
+    dropAnteriorTitulo: "GODWOVEN · 20/NOV/2025",
+    dropAnteriorTexto: "Así lanzamos nuestro último drop. Los próximos se anuncian aquí y en @chased_med.",
+    proximoDrop: "Próximo drop: muy pronto",
+    verColeccion: "Ver colección",
   },
+
+  // Colecciones del inicio. Qué productos entran se define en
+  // productos.js (COLECCIONES); aquí solo van los nombres. BORRADOR
+  colecciones: {
+    camisetas: { nombre: "Camisetas oversize", descripcion: "La base de todo outfit Chased." },
+    abrigo: { nombre: "Hoodies y buzos", descripcion: "Para las noches frías del Valle." },
+    joggers: { nombre: "Joggers y shorts", descripcion: "Comodidad de la cintura para abajo." },
+    bailar: { nombre: "Para bailar", descripcion: "Ropa que se mueve contigo." },
+    negro: { nombre: "Todo negro", descripcion: "El color que nunca falla." },
+    nov2024: { nombre: "Edición NOV. 2024", descripcion: "Hoodie y buzo de la edición NOV. 2024." },
+  },
+
+  // Nombres de los géneros para filtros y portadas
+  generos: { hombre: "Hombre", mujer: "Mujer", todo: "Todo" },
 
   registro: {
     titulo: "Únete a la familia Chased",
@@ -88,6 +114,8 @@ export const TEXTOS = {
     guiaTallas: "Guía de tallas (referencial)",
     sinResultados: "Nada por aquí con esos filtros. Prueba otra combinación.",
     limpiarFiltros: "Limpiar filtros",
+    coleccion: "Colección",
+    quitarColeccion: "Quitar colección",
     resultados: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
     color: "Color",
     errorTalla: "Primero elige tu talla.",
@@ -113,6 +141,13 @@ export const TEXTOS = {
     registroAntes: "Antes de confirmar, cuéntanos quién eres.",
     simulado: "Pedido simulado: no se hace ningún cobro. Precios y descuento son referenciales.",
     prendas: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
+    gracias: "Gracias por formar parte de la familia Chased.",
+    tuInsignia: "Tu insignia",
+    llevas: (actual, meta, siguiente) => `Con este pedido llevarías ${actual} de ${meta} prendas para ser ${siguiente}.`,
+    conEstePedido: (nivel, pct) => `Con este pedido subes a ${nivel} y ganas ${pct}% en tu próxima compra.`,
+    descuentoActivo: (nivel, pct) => `Por ser ${nivel} tienes ${pct}% de descuento en este pedido.`,
+    nivelMaximo: "Llegaste al nivel más alto. ¡Eres leyenda!",
+    reglaInsignia: (n, pct) => `Cada ${n} prendas subes de nivel y ganas ${pct}% en la siguiente compra (referencial).`,
   },
 
   // Quiz — sin peso, sin altura, sin temas polémicos. BORRADOR.
@@ -238,7 +273,6 @@ export const TEXTOS = {
   },
 
   footer: {
-    texto: "Gracias por formar parte de la familia Chased.",
     instagram: "Síguenos en Instagram",
     prototipo: "Prototipo académico — Expo InnvEm 2026 · Colegio UPB Marinilla",
   },

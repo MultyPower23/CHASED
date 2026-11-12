@@ -8,7 +8,7 @@
 // ============================================================
 
 import { TEXTOS } from "./textos.js";
-import { PRODUCTOS, CONFIG } from "./data/productos.js";
+import { PRODUCTOS, CONFIG, COLECCIONES, GENEROS } from "./data/productos.js";
 import {
   getUsuario,
   guardarUsuario,
@@ -45,6 +45,31 @@ export function formatearPrecio(valor) {
 
 export function buscarProducto(id) {
   return PRODUCTOS.find((p) => p.id === id);
+}
+
+// ¿El producto cuenta para "hombre" o "mujer"? Lo unisex cuenta para ambos.
+export function coincideGenero(producto, genero) {
+  if (!genero) return true;
+  return (GENEROS[genero] ?? [genero]).includes(producto.genero);
+}
+
+export function buscarColeccion(clave) {
+  return COLECCIONES.find((c) => c.clave === clave);
+}
+
+// Una colección es un "filtro guardado": el producto entra si cumple
+// TODAS las condiciones (tipo, color, tags o id) de la colección.
+export function productoEnColeccion(producto, coleccion) {
+  return Object.entries(coleccion.filtro).every(([campo, valores]) =>
+    campo === "tags"
+      ? producto.tags.some((tag) => valores.includes(tag))
+      : valores.includes(producto[campo])
+  );
+}
+
+export function productosDeColeccion(clave) {
+  const coleccion = buscarColeccion(clave);
+  return coleccion ? PRODUCTOS.filter((p) => productoEnColeccion(p, coleccion)) : [];
 }
 
 // Pone la primera letra en mayúscula: "azul celeste" → "Azul celeste"
@@ -96,6 +121,24 @@ export function totalPrendasCompradas() {
 export function nivelPorPrendas(prendas) {
   const ultimo = T.insignias.niveles.length - 1;
   return Math.min(Math.floor(prendas / CONFIG.prendasPorNivel), ultimo);
+}
+
+// Todo lo que hay que saber de la insignia a partir de las prendas:
+// en qué nivel vas, cuál sigue y cuántas prendas te faltan.
+export function estadoInsignia(prendas = totalPrendasCompradas()) {
+  const niveles = T.insignias.niveles;
+  const indice = nivelPorPrendas(prendas);
+  const esMaximo = indice === niveles.length - 1;
+  const meta = CONFIG.prendasPorNivel;
+  return {
+    indice,
+    nombre: niveles[indice],
+    siguiente: esMaximo ? null : niveles[indice + 1],
+    esMaximo,
+    meta,
+    enEsteNivel: esMaximo ? meta : prendas % meta, // prendas que llevas dentro del nivel
+    faltan: esMaximo ? 0 : meta - (prendas % meta),
+  };
 }
 
 // El descuento no se guarda aparte: se deduce del último pedido.
@@ -275,7 +318,10 @@ export function renderHeader() {
     <header class="header">
       <div class="contenedor header__interior">
         <a class="header__logo" href="index.html">
-          <img src="assets/logo/logo-chased-negro.png" alt="${T.marca.nombre}">
+          <!-- Dos versiones oficiales: negra para fondo blanco y blanca para
+               fondo negro. El CSS muestra la que toca según el modo. -->
+          <img class="logo-negro" src="assets/logo/logo-chased-negro.png" alt="${T.marca.nombre}">
+          <img class="logo-blanco" src="assets/logo/logo-chased-blanco.png" alt="">
         </a>
         <nav class="nav" id="menu-principal">
           ${htmlEnlacesMenu()}
@@ -316,7 +362,6 @@ function renderFooter() {
     <footer class="footer">
       <div class="contenedor">
         <img class="footer__logo" src="assets/logo/logo-chased-blanco.png" alt="${T.marca.nombre}">
-        <p>${T.footer.texto}</p>
         <p><a href="${T.marca.instagramUrl}" target="_blank" rel="noopener">${T.footer.instagram} ${T.marca.instagram}</a></p>
         <p class="footer__prototipo">${T.footer.prototipo}</p>
       </div>

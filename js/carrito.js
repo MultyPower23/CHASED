@@ -17,7 +17,9 @@ import {
   descuentoDisponible,
   totalPrendasCompradas,
   nivelPorPrendas,
+  estadoInsignia,
 } from "./app.js";
+import { CONFIG } from "./data/productos.js";
 import { TEXTOS } from "./textos.js";
 import {
   getCarrito,
@@ -72,6 +74,47 @@ function htmlItem(item) {
     </li>`;
 }
 
+// Barra de progreso hacia el siguiente nivel
+function htmlBarra(actual, meta) {
+  const porcentaje = Math.min(100, Math.round((actual / meta) * 100));
+  return `<div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="${meta}"
+    aria-valuenow="${actual}"><span style="width:${porcentaje}%"></span></div>`;
+}
+
+// La insignia se muestra ANTES de comprar: así la persona ve que
+// cada prenda cuenta, y que si llega a 4 sube de nivel.
+function htmlInsigniaCarrito(totales) {
+  const prendasAntes = totalPrendasCompradas();
+  const ahora = estadoInsignia(prendasAntes);
+  const despues = estadoInsignia(prendasAntes + totales.prendas);
+  const pct = CONFIG.descuentoPorNivel;
+
+  let mensaje;
+  if (despues.indice > ahora.indice) mensaje = `<strong>${T.carrito.conEstePedido(despues.nombre, pct)}</strong>`;
+  else if (ahora.esMaximo) mensaje = T.carrito.nivelMaximo;
+  else mensaje = T.carrito.llevas(despues.enEsteNivel, despues.meta, despues.siguiente);
+
+  const barra = despues.indice > ahora.indice || ahora.esMaximo
+    ? htmlBarra(1, 1)
+    : htmlBarra(despues.enEsteNivel, despues.meta);
+
+  const avisoDescuento = totales.descuentoPct
+    ? `<p class="insignia__descuento">${T.carrito.descuentoActivo(ahora.nombre, totales.descuentoPct)}</p>`
+    : "";
+
+  return `
+    <div class="insignia">
+      <p class="insignia__nivel">
+        <img src="assets/logo/simbolo-ch-negro.png" alt="">
+        <span>${T.carrito.tuInsignia}: <strong>${ahora.nombre}</strong></span>
+      </p>
+      ${avisoDescuento}
+      ${barra}
+      <p class="insignia__texto">${mensaje}</p>
+      <p class="texto-suave">${T.carrito.reglaInsignia(CONFIG.prendasPorNivel, pct)}</p>
+    </div>`;
+}
+
 function htmlResumen(totales) {
   const filaDescuento = totales.descuentoPct
     ? `<div class="resumen__fila">
@@ -90,6 +133,7 @@ function htmlResumen(totales) {
         <span>${T.carrito.total}</span>
         <strong>${formatearPrecio(totales.total)}</strong>
       </div>
+      ${htmlInsigniaCarrito(totales)}
       <button class="boton boton--ancho" type="button" data-accion="confirmar">${T.carrito.confirmar}</button>
       <p class="texto-suave">${T.carrito.simulado}</p>
     </aside>`;
@@ -119,13 +163,23 @@ function renderCarrito() {
 }
 
 function renderConfirmacion(pedido) {
+  // Si subió de nivel, lo celebramos en grande; si no, le contamos
+  // cuánto le falta para el siguiente (para que quiera volver).
+  const insignia = estadoInsignia();
   const mensajeNivel = pedido.subioNivel
     ? `<p class="confirmacion__nivel">${T.carrito.subisteNivel(pedido.nivel)}</p>`
-    : "";
+    : `<div class="confirmacion__progreso">
+         <p>${T.carrito.tuInsignia}: <strong>${insignia.nombre}</strong></p>
+         ${insignia.esMaximo ? "" : htmlBarra(insignia.enEsteNivel, insignia.meta)}
+         <p class="texto-suave">${insignia.esMaximo ? T.carrito.nivelMaximo : T.perfil.progreso(insignia.faltan)}</p>
+       </div>`;
   contenido.innerHTML = `
     <section class="seccion contenedor">
       <div class="confirmacion">
-        <img class="confirmacion__simbolo" src="assets/logo/simbolo-ch-negro.png" alt="${T.marca.nombre}">
+        <figure class="confirmacion__gracias">
+          <img src="assets/img/comunidad/gracias-familia.jpg" alt="" onerror="this.remove()">
+          <figcaption>${T.carrito.gracias}</figcaption>
+        </figure>
         <h1>${T.carrito.numeroPedido(pedido.id)}</h1>
         <p>${T.carrito.confirmado}</p>
         <p class="texto-suave">${T.carrito.prendas(pedido.prendas)} · ${T.carrito.total} ${formatearPrecio(pedido.total)}</p>
