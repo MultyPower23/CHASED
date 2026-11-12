@@ -2309,6 +2309,10 @@ body.noche {
 /* Sin esto, una columna de grilla no se encoge más que su contenido
    y la página se sale por el lado en el celular */
 .maniqui-layout > div { min-width: 0; }
+.armar .campo,
+.agregar-closet .campo { min-width: 0; }
+.armar input,
+.agregar-closet select { width: 100%; min-width: 0; }
 .mini-grilla,
 .recos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .recos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
