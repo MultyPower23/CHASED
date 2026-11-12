@@ -20,6 +20,7 @@ export const CONFIG = {
   moneda: "COP",
   prendasPorNivel: 4, // definido por el equipo: cada 4 prendas subes de nivel
   descuentoPorNivel: 10, // % — TODO confirmar con el equipo/Chased
+  diasVigenciaDescuento: 30, // días que dura un descuento ganado — TODO confirmar con Chased
   tallas: ["S", "M", "L", "XL"], // TODO confirmar tallas reales
 };
 
@@ -102,6 +103,29 @@ export const PRODUCTOS = [
   { id: "short-negro", nombre: "Short Chased", tipo: "short", color: "negro", genero: "unisex",
     precio: 60000, precioConfirmado: false, tags: ["flow"], destacado: false,
     descripcion: "Short negro con 'chased' lateral.", imagen: "assets/img/productos/short-negro.jpg" },
+];
+
+// Géneros: la mayoría de la ropa es unisex, así que cuenta tanto
+// para Hombre como para Mujer (y además tiene su propia sección).
+// Así no inventamos géneros que Chased no ha definido: solo
+// agrupamos lo que ya está.
+export const GENEROS = {
+  hombre: ["hombre", "unisex"],
+  mujer: ["mujer", "unisex"],
+  unisex: ["unisex"],
+};
+
+// Colecciones / temáticas del inicio. No son datos nuevos: son
+// "filtros guardados" sobre los productos de arriba (por tipo, color,
+// tag o id). portada = id del producto cuya foto se usa de portada.
+export const COLECCIONES = [
+  { clave: "camisetas", filtro: { tipo: ["camiseta"] }, portada: "cam-owg-negra" },
+  { clave: "abrigo", filtro: { tipo: ["hoodie", "buzo"] }, portada: "hoodie-chased-blanco" },
+  { clave: "joggers", filtro: { tipo: ["jogger", "short"] }, portada: "jogger-negro" },
+  { clave: "bailar", filtro: { tags: ["flow"] }, portada: "crop-hoodie-azul" },
+  { clave: "negro", filtro: { color: ["negro"] }, portada: "hoodie-time-negro" },
+  // Edición con nombre propio (sale de las prendas "NOV. 2024")
+  { clave: "nov2024", filtro: { id: ["hoodie-nov-azul", "buzo-nov-beige"] }, portada: "buzo-nov-beige", edicion: true },
 ];
 
 // Para el maniquí: qué casilla ocupa cada tipo de prenda

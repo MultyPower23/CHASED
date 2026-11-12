@@ -31,6 +31,17 @@ export const TEXTOS = {
     "La meta no se espera, se persigue.",
   ],
 
+  // Textos sueltos que se usan en varias páginas
+  general: {
+    cerrar: "Cerrar",
+    menu: "Abrir menú",
+    referencial: "referencial",
+    proximamente: "Estamos terminando esta sección. Muy pronto la vas a ver aquí.",
+    volverInicio: "Volver al inicio",
+    hola: (nombre) => `Hola, ${nombre}`,
+    sesionCerrada: "Cerraste sesión. ¡Vuelve pronto!",
+  },
+
   nav: {
     inicio: "Inicio",
     catalogo: "Catálogo",
@@ -49,7 +60,33 @@ export const TEXTOS = {
     eventoBoton: "Quiero participar",
     quizInvitacion: "¿Te ayudamos a encontrar tu estilo? Son 5 preguntas, y si no quieres, no pasa nada.",
     quizBoton: "Hagámoslo",
+    // Cinta que corre en la portada negra — BORRADOR
+    cinta: ["Chasing your style", "Persigue lo tuyo", "Oversize desde Medellín", "Familia Chased"],
+    bajar: "Desliza",
+    paraQuienTitulo: "Encuentra lo tuyo",
+    coleccionesTitulo: "Colecciones",
+    coleccionesSub: "Arma tu estilo por temática.",
+    dropsTitulo: "Ediciones y drops",
+    dropAnteriorEtiqueta: "Drop anterior",
+    dropAnteriorTitulo: "GODWOVEN · 20/NOV/2025",
+    dropAnteriorTexto: "Así lanzamos nuestro último drop. Los próximos se anuncian aquí y en @chased_med.",
+    proximoDrop: "Próximo drop: muy pronto",
+    verColeccion: "Ver colección",
   },
+
+  // Colecciones del inicio. Qué productos entran se define en
+  // productos.js (COLECCIONES); aquí solo van los nombres. BORRADOR
+  colecciones: {
+    camisetas: { nombre: "Camisetas oversize", descripcion: "La base de todo outfit Chased." },
+    abrigo: { nombre: "Hoodies y buzos", descripcion: "Para las noches frías del Valle." },
+    joggers: { nombre: "Joggers y shorts", descripcion: "Comodidad de la cintura para abajo." },
+    bailar: { nombre: "Para bailar", descripcion: "Ropa que se mueve contigo." },
+    negro: { nombre: "Todo negro", descripcion: "El color que nunca falla." },
+    nov2024: { nombre: "Edición NOV. 2024", descripcion: "Hoodie y buzo de la edición NOV. 2024." },
+  },
+
+  // Nombres de los géneros para filtros y portadas
+  generos: { hombre: "Hombre", mujer: "Mujer", unisex: "Unisex", todo: "Todo" },
 
   registro: {
     titulo: "Únete a la familia Chased",
@@ -59,12 +96,18 @@ export const TEXTOS = {
     foto: "Foto de perfil (opcional)",
     boton: "Entrar a la comunidad",
     bienvenida: (nombre) => `¡Bienvenid@, ${nombre}! Ya haces parte de Chased.`,
+    errorNombre: "Escribe tu nombre para seguir.",
+    errorCorreo: "Revisa el correo, parece que le falta algo.",
+    nota: "Prototipo: tus datos solo se guardan en este navegador.",
   },
 
   catalogo: {
     titulo: "Catálogo",
     paraTi: "Para ti",
     descubre: "Descubre algo distinto",
+    paraTiEstilo: (estilo) => `Elegido para tu estilo ${estilo}, con un par de sorpresas.`,
+    paraTiCompras: "Según lo que has comprado, con un par de sorpresas.",
+    paraTiSinDatos: "Lo más perseguido por ahora. Haz el quiz y esto se vuelve tuyo.",
     filtros: { tipo: "Tipo", color: "Color", talla: "Talla", genero: "Género", todos: "Todos" },
     ordenar: { label: "Ordenar", relevancia: "Recomendado", menor: "Precio: menor a mayor", mayor: "Precio: mayor a menor" },
     precioReferencial: "Precio referencial",
@@ -72,6 +115,13 @@ export const TEXTOS = {
     elegirTalla: "Elige tu talla",
     guiaTallas: "Guía de tallas (referencial)",
     sinResultados: "Nada por aquí con esos filtros. Prueba otra combinación.",
+    limpiarFiltros: "Limpiar filtros",
+    coleccion: "Colección",
+    quitarColeccion: "Quitar colección",
+    resultados: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
+    color: "Color",
+    errorTalla: "Primero elige tu talla.",
+    guiaTallasNota: "Las medidas reales las estamos confirmando con Chased. Por ahora las tallas son referenciales.",
   },
 
   carrito: {
@@ -82,7 +132,62 @@ export const TEXTOS = {
     total: "Total",
     confirmar: "Confirmar pedido",
     confirmado: "¡Pedido confirmado! Chased se pondrá en contacto para coordinar la entrega.",
-    subisteNivel: (nivel) => `¡Subiste a ${nivel}! Tu próxima compra tiene descuento.`,
+    subisteNivel: (nivel, pct) => `¡Subiste a ${nivel}! Ganaste ${pct}% de descuento: úsalo cuando quieras, lo tienes en tu perfil.`,
+    subisteYCanjeaste: (nivel, pct) => `¡Subiste a ${nivel} y canjeaste tu ${pct}% en esta misma compra!`,
+    primeraInsignia: (nivel) => `¡Ganaste tu primera insignia: ${nivel}! Ya eres parte oficial de la familia.`,
+    conEstePedidoPrimera: (nivel) => `Con este pedido ganas tu primera insignia: ${nivel}.`,
+    talla: "Talla",
+    quitar: "Quitar",
+    menos: "Una menos",
+    mas: "Una más",
+    seguirComprando: "Seguir comprando",
+    verPerfil: "Ver mi perfil",
+    numeroPedido: (id) => `Pedido #${id}`,
+    registroAntes: "Antes de confirmar, cuéntanos quién eres.",
+    simulado: "Pedido simulado: no se hace ningún cobro. Precios y descuento son referenciales.",
+    prendas: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
+    gracias: "Gracias por formar parte de la familia Chased.",
+    // Carga al confirmar la compra — BORRADOR (misma animación del quiz)
+    cargando: [
+      "Confirmando tu pedido…",
+      "Separando tus prendas…",
+      "Revisando tallas y detalles…",
+      "Contando tus prendas para la insignia…",
+      "¡Listo! Ya es tuyo.",
+    ],
+    // Si está registrad@, la segunda frase lleva su nombre
+    cargandoNombre: (nombre) => `Empacando todo con cariño para ti, ${nombre}…`,
+    // Panel que aparece al agregar algo al carrito
+    agregadoTitulo: "¡Quedó en tu carrito!",
+    irAlCarrito: (n) => `Ir al carrito (${n})`,
+    seguirNavegando: "Seguir navegando",
+    // Deshacer al quitar una prenda
+    quitado: (nombre) => `Quitaste ${nombre}`,
+    deshacer: "Deshacer",
+    restaurado: (nombre) => `${nombre} volvió a tu carrito`,
+    tuInsignia: "Tu insignia",
+    llevas: (faltan, siguiente) =>
+      faltan === 1
+        ? `Con este pedido te faltaría 1 prenda para ser ${siguiente}.`
+        : `Con este pedido te faltarían ${faltan} prendas para ser ${siguiente}.`,
+    conEstePedido: (nivel, pct) => `Con este pedido subes a ${nivel} y ganas ${pct}% de descuento.`,
+    // Cupones de descuento en el carrito
+    tusDescuentos: "Tus descuentos",
+    cupon: (pct, nivel) => `${pct}% por llegar a ${nivel}`,
+    venceEl: (fecha) => `Vence el ${fecha} (referencial)`,
+    usarCupon: "Usar en este pedido",
+    noUsarCupon: "Guardarlo para después",
+    cuponAplicado: "Aplicado ✓",
+    otrosCupones: (n) => (n === 1 ? "Tienes 1 descuento más guardado." : `Tienes ${n} descuentos más guardados.`),
+    ganasYa: (nivel, pct) => `¡Con este pedido llegas a ${nivel} y ganas ${pct}%! Puedes canjearlo ya mismo o guardarlo para después.`,
+    ganasVarios: (nivel, n, pct) =>
+      `¡Con este pedido llegas a ${nivel} y ganas ${n} descuentos de ${pct}%! Canjea uno ya mismo y el resto queda guardado.`,
+    canjearAhora: (pct) => `Canjear mi ${pct}% ahora`,
+    unoPorPedido: "Ya estás usando un descuento: el nuevo quedará guardado en tu perfil.",
+    vigencia: (dias) => `Cada descuento se usa una sola vez y vence ${dias} días después de ganarlo (referencial).`,
+    nivelMaximo: "Llegaste al nivel más alto. ¡Eres leyenda!",
+    reglaInsignia: (n, pct) =>
+      `Tu primera compra te da la insignia Rookie. Desde ahí, cada ${n} prendas subes de nivel y ganas un ${pct}% de descuento para usar cuando quieras (referencial).`,
   },
 
   // Quiz — sin peso, sin altura, sin temas polémicos. BORRADOR.
@@ -92,6 +197,26 @@ export const TEXTOS = {
     saltar: "Ahora no",
     repetir: "Repetir quiz",
     resultado: "Tu estilo Chased es",
+    siguiente: "Siguiente",
+    verResultado: "Ver mi estilo",
+    empezar: "Empezar",
+    atras: "Atrás",
+    pregunta: (n, total) => `Pregunta ${n} de ${total}`,
+    leVa: "Prendas que van con tu estilo",
+    verParaTi: "Ver mi \"Para ti\" en el catálogo",
+    irPerfil: "Ir a mi perfil",
+    guardado: "Tu resultado quedó guardado. Puedes repetir el quiz cuando quieras desde tu perfil.",
+    // Pantalla de "carga" al terminar el quiz — BORRADOR. Cada frase
+    // dura un momentico; la última es el cierre antes del resultado.
+    cargando: [
+      "Leyendo tus respuestas con calma…",
+      "Personalizando nuestro catálogo para ti…",
+      "Buscando las prendas que van con tu ritmo…",
+      "Armando tu estilo Chased…",
+      "Listo. Esto es solo para ti.",
+    ],
+    // Si ya está registrad@, la segunda frase lleva su nombre
+    cargandoNombre: (nombre) => `Preparando todo para ti, ${nombre}…`,
     preguntas: [
       {
         texto: "Un día perfecto para ti es…",
@@ -155,15 +280,36 @@ export const TEXTOS = {
     hacerQuiz: "Hacer el quiz",
     insignia: "Tu insignia",
     progreso: (faltan) => `Te faltan ${faltan} prendas para el siguiente nivel`,
-    descuentoDisponible: (pct) => `Tienes ${pct}% de descuento en tu próxima compra`,
+    cuponesListos: (n) => (n === 1 ? "Tienes 1 descuento listo para usar" : `Tienes ${n} descuentos listos para usar`),
+    descuentosTitulo: "Tus descuentos",
+    sinCupones: "Aún no tienes descuentos. Llega a Runner para ganar el primero.",
+    estadoCupon: { disponible: "Disponible", vencido: "Vencido" },
+    usadoEn: (id) => `Usado en el pedido #${id}`,
+    vencioEl: (fecha) => `Venció el ${fecha}`,
+    ganadoEl: (fecha) => `Ganado el ${fecha}`,
     pedidos: "Tus pedidos",
     sinPedidos: "Todavía no has hecho pedidos.",
     closet: "Tu closet",
+    sinRegistro: "Tu perfil guarda tu estilo, tu insignia y tus pedidos. Para verlo, únete a la familia Chased.",
+    miembroDesde: (fecha) => `En la familia desde ${fecha}`,
+    niveles: "Niveles",
+    prendasCompradas: (n) => (n === 1 ? "1 prenda comprada" : `${n} prendas compradas`),
+    sinDescuento: "Sube de nivel para ganar un descuento que puedes usar cuando quieras.",
+    conDescuento: (pct) => `Con ${pct}% de descuento`,
+    irCatalogo: "Ir al catálogo",
+    closetVacio: "Aquí aparecerán las prendas que compres.",
+    closetNota: "Pronto podrás armar outfits con ellas en Mi closet.",
   },
 
   // Insignias — nombres BORRADOR (TODO confirmar con el equipo)
   insignias: {
     niveles: ["Rookie", "Runner", "Chaser", "Leyenda Chased"],
+    sinInsignia: "Sin insignia todavía",
+    primeraCompra: "Haz tu primera compra y gana tu primera insignia: Rookie.",
+    // Lo que pide cada nivel: el primero es por comprar una vez, el resto por prendas
+    requisito: (indice, prendas) => (indice === 0 ? "1.ª compra" : `${prendas} prendas`),
+    faltanPara: (faltan, siguiente) =>
+      faltan === 1 ? `Te falta 1 prenda para ${siguiente}` : `Te faltan ${faltan} prendas para ${siguiente}`,
   },
 
   comunidad: {
@@ -208,7 +354,7 @@ export const TEXTOS = {
   },
 
   footer: {
-    texto: "Gracias por formar parte de la familia Chased.",
+    instagram: "Síguenos en Instagram",
     prototipo: "Prototipo académico — Expo InnvEm 2026 · Colegio UPB Marinilla",
   },
 };

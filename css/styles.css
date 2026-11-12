@@ -1,0 +1,1709 @@
+/* ============================================================
+   styles.css — La ropa de la página
+   ------------------------------------------------------------
+   Todo sale del manual de marca: 5 colores, 2 tipografías y
+   mucho espacio en blanco. Si algo se ve "cargado", es que nos
+   pasamos. Mobile-first: primero se diseña para el celular
+   (la gente llega desde Instagram) y luego se agranda.
+   ============================================================ */
+
+/* Los colores viven aquí y en ningún otro lado. Si Chased cambia
+   un gris, se cambia una línea y listo. */
+:root {
+  --negro: #000000;
+  --blanco: #ffffff;
+  --gris-oscuro: #4f4f4f;
+  --gris-medio: #787878;
+  --gris-claro: #d9d9d9;
+
+  --fuente-titulos: "Libre Baskerville", Georgia, serif;
+  --fuente-texto: Corbel, Candara, "Segoe UI", sans-serif;
+
+  --ancho-max: 1120px;
+  --espacio: 16px;
+  --alto-header: 88px;
+  --transicion-modo: 0.7s ease;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--blanco);
+  color: var(--negro);
+  font-family: var(--fuente-texto);
+  font-size: 17px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Para que el paso de negro a blanco del inicio se vea suave */
+  transition: background-color var(--transicion-modo), color var(--transicion-modo);
+}
+
+main {
+  flex: 1;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+  line-height: 1.25;
+  margin: 0 0 0.5em;
+}
+
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.45rem; }
+h3 { font-size: 1.1rem; }
+
+p { margin: 0 0 1em; }
+
+a { color: inherit; }
+
+img { max-width: 100%; display: block; }
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+.contenedor {
+  width: 100%;
+  max-width: var(--ancho-max);
+  margin: 0 auto;
+  padding: 0 var(--espacio);
+}
+
+/* Solo arriba y abajo: el espacio de los lados lo pone .contenedor */
+.seccion {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.texto-suave {
+  color: var(--gris-medio);
+  font-size: 0.92rem;
+}
+
+.oculto { display: none !important; }
+
+/* ---------- Botones ---------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--negro);
+  background: var(--negro);
+  color: var(--blanco);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.boton:hover { background: var(--gris-oscuro); border-color: var(--gris-oscuro); }
+
+.boton--claro { background: var(--blanco); color: var(--negro); }
+.boton--claro:hover { background: var(--negro); color: var(--blanco); border-color: var(--negro); }
+
+/* Sobre fondo negro el botón se invierte */
+.boton--invertido { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+.boton--invertido:hover { background: var(--gris-claro); border-color: var(--gris-claro); }
+
+.boton--ancho { width: 100%; }
+
+.boton-texto {
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  color: var(--gris-oscuro);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--negro);
+  outline-offset: 2px;
+}
+
+/* ---------- Header ---------- */
+/* El sticky va en el contenedor #header (y no en <header>): un
+   sticky solo se pega dentro de su papá, y el papá de <header> es
+   una cajita del mismo tamaño, así que nunca se pegaba. */
+#header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header {
+  background: var(--blanco);
+  border-bottom: 1px solid var(--gris-claro);
+  transition: background-color var(--transicion-modo), border-color var(--transicion-modo);
+}
+
+/* Logo, acciones y menú en una fila que "se parte": en el celular
+   el menú cae debajo a lo ancho; en el computador cabe todo en línea. */
+.header__interior {
+  min-height: var(--alto-header);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 12px;
+}
+
+.header__logo { display: block; }
+
+/* El logo ya trae su espacio de respeto en el PNG:
+   solo fijamos la altura y el ancho se acomoda solo. */
+.header__logo img {
+  height: 86px;
+  width: auto;
+}
+
+/* Por defecto (fondo blanco) se ve el logo negro */
+.header__logo .logo-blanco { display: none; }
+
+.header__acciones {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header__carrito {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  text-decoration: none;
+}
+
+.contador {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-size: 0.75rem;
+  line-height: 20px;
+  text-align: center;
+}
+
+.contador--vacio { background: var(--gris-claro); color: var(--gris-oscuro); }
+
+/* Hamburguesa hecha con 3 rayitas: no necesita íconos externos */
+.header__menu-btn {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+}
+
+.header__menu-btn span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+}
+
+.nav {
+  display: none;
+  order: 3;
+  width: 100%;
+  flex-direction: column;
+  padding: 8px 0 20px;
+}
+
+.nav.abierto { display: flex; }
+
+.nav a,
+.nav button {
+  padding: 12px 0;
+  text-decoration: none;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--gris-claro);
+  background: none;
+  cursor: pointer;
+}
+
+.nav a.activo { font-weight: 700; }
+
+/* El botón de registro sigue siendo negro aunque esté dentro del menú */
+.nav .nav__registro {
+  margin-top: 12px;
+  padding: 0 22px;
+  justify-content: center;
+  border: 1px solid var(--negro);
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 40px 0 28px;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.footer__logo {
+  height: 130px;
+  width: auto;
+  margin: 0 auto 8px;
+}
+
+.footer a { color: var(--blanco); }
+
+.footer__prototipo {
+  color: var(--gris-claro);
+  font-size: 0.8rem;
+  margin: 20px 0 0;
+}
+
+/* ---------- Fotos de producto ----------
+   Detrás de cada foto hay un fondo gris con el nombre. Si la foto
+   no carga, el <img> se borra solo y queda el placeholder. */
+.foto {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--gris-claro);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.foto__nombre {
+  padding: 12px;
+  text-align: center;
+  color: var(--gris-oscuro);
+  font-family: var(--fuente-titulos);
+  font-size: 0.9rem;
+}
+
+.foto img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ojo: esto es para fotos de producto, NUNCA para el logo */
+}
+
+/* ---------- Tarjetas de producto ---------- */
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 14px;
+}
+
+.tarjeta {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tarjeta .foto img { transition: transform 0.4s; }
+.tarjeta:hover .foto img { transform: scale(1.03); }
+
+.tarjeta__info { padding-top: 10px; }
+
+.tarjeta__nombre {
+  font-family: var(--fuente-titulos);
+  font-size: 0.95rem;
+  margin: 0 0 2px;
+}
+
+.tarjeta__detalle {
+  color: var(--gris-medio);
+  font-size: 0.85rem;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.precio { margin: 4px 0 0; }
+
+.precio__nota {
+  color: var(--gris-medio);
+  font-size: 0.75rem;
+}
+
+/* ---------- Modo noche (solo la portada del inicio) ----------
+   El body arranca con la clase "noche". inicio.js se la quita al
+   bajar, y todo lo que usa estos colores hace la transición solo. */
+body.noche {
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+.noche .header {
+  background: var(--negro);
+  border-color: var(--gris-oscuro);
+}
+
+.noche .header__logo .logo-negro { display: none; }
+.noche .header__logo .logo-blanco { display: block; }
+.noche .nav a,
+.noche .nav button { border-color: var(--gris-oscuro); }
+.noche .nav .nav__registro { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+.noche .contador--vacio { background: var(--gris-oscuro); color: var(--blanco); }
+.noche .texto-suave { color: var(--gris-claro); }
+
+/* ---------- Portada negra ---------- */
+.portada {
+  min-height: calc(100svh - var(--alto-header));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--negro);
+  color: var(--blanco);
+  overflow: hidden;
+}
+
+.portada__centro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+.portada__titulo { margin: 0; }
+
+/* Logo stencil protagonista: solo se fija el ancho (el alto se
+   acomoda solo). Como es más ancho que alto, aguanta más ancho
+   sin empujar la banderita fuera de la pantalla. */
+.portada__titulo img {
+  width: min(88vw, 640px, 80svh);
+  height: auto;
+}
+
+.portada__frase {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: 1.3rem;
+  max-width: 20em;
+  margin: 4px auto 28px;
+}
+
+.portada__botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Botón de solo borde, para fondos negros */
+.boton--borde {
+  background: transparent;
+  color: var(--blanco);
+  border-color: var(--blanco);
+}
+
+.boton--borde:hover { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+
+/* ---------- La banderita: fotos que corren de izquierda a derecha ---------- */
+.bandera {
+  overflow: hidden;
+  padding: 0 0 12px;
+}
+
+.bandera__pista,
+.cinta__pista {
+  display: flex;
+  width: max-content;
+  /* De -50% a 0 = se mueve hacia la derecha. Como el contenido está
+     repetido, al volver a empezar se ve igualito y no hay salto. */
+  animation: correr-derecha 60s linear infinite;
+}
+
+.bandera__pista img {
+  width: 130px;
+  height: 170px;
+  object-fit: cover; /* fotos, no logo */
+  margin-right: 10px;
+}
+
+.cinta {
+  overflow: hidden;
+  border-top: 1px solid var(--gris-oscuro);
+  padding: 14px 0;
+}
+
+.cinta__pista {
+  align-items: center;
+  animation-duration: 40s;
+}
+
+.cinta__pista span {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: 1.05rem;
+  white-space: nowrap;
+  padding: 0 18px;
+}
+
+/* El símbolo CH como separador: solo se fija la altura */
+.cinta__pista img {
+  height: 26px;
+  width: auto;
+}
+
+/* El stencil es más ancho y bajito: un poco más de alto para que se lea */
+.cinta__pista .cinta__stencil { height: 34px; }
+
+@keyframes correr-derecha {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+/* Si la persona pidió menos movimiento en su sistema, lo respetamos */
+@media (prefers-reduced-motion: reduce) {
+  .bandera__pista,
+  .cinta__pista { animation: none; }
+}
+
+/* ---------- Secciones del inicio ---------- */
+.titulo-ch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titulo-ch img {
+  height: 38px;
+  width: auto;
+}
+
+.subtitulo { margin: -12px 0 20px; }
+
+/* Hombre / Mujer: dos fotos grandes con su nombre en una franja negra */
+/* En el celular: Hombre y Mujer lado a lado, Unisex a lo ancho debajo */
+.generos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.generos .genero:nth-child(3) {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 9;
+}
+
+/* En la foto apaisada se apunta un poco más arriba para no cortar caras */
+.generos .genero:nth-child(3) img { object-position: center 25%; }
+
+.genero {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--gris-claro);
+  text-decoration: none;
+}
+
+.genero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.genero:hover img { transform: scale(1.03); }
+
+.genero__nombre {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 10px 18px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 1.2rem;
+}
+
+/* Colecciones: en el celular se deslizan de lado, como historias */
+.colecciones {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 62%;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+}
+
+.coleccion {
+  display: block;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.coleccion h3 { margin: 12px 0 2px; font-size: 1rem; }
+.coleccion p { margin: 0; }
+
+.drops {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.drops h3 { margin: 12px 0 2px; font-size: 1rem; }
+.drop p { margin: 0; }
+
+.etiqueta {
+  display: inline-block;
+  margin-top: 12px !important;
+  padding: 2px 8px;
+  border: 1px solid var(--gris-medio);
+  color: var(--gris-oscuro);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.etiqueta + h3 { margin-top: 6px; }
+
+.proximo-drop {
+  margin: 24px 0 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--gris-claro);
+  border-bottom: 1px solid var(--gris-claro);
+  text-align: center;
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+}
+
+.titulo-seccion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.titulo-seccion h2 { margin: 0; }
+
+.banner-evento {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.banner-evento h2 { max-width: 18em; margin: 0 auto 20px; }
+
+.banner-evento__logo {
+  width: min(70vw, 300px);
+  height: auto;
+  margin: 0 auto 8px;
+}
+
+.invitacion-quiz {
+  border: 1px solid var(--gris-claro);
+  padding: 28px 22px;
+  text-align: center;
+}
+
+.invitacion-quiz p { color: var(--gris-oscuro); }
+
+.invitacion-quiz__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- Catálogo: pestañas Todo / Hombre / Mujer ---------- */
+.pestanas {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--gris-claro);
+}
+
+.pestana {
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+  color: var(--gris-medio);
+  cursor: pointer;
+}
+
+.pestana[aria-pressed="true"] {
+  color: var(--negro);
+  border-bottom-color: var(--negro);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 4px 4px 4px 12px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-size: 0.9rem;
+}
+
+.chip button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: none;
+  color: var(--blanco);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* ---------- Catálogo: filtros ---------- */
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--gris-oscuro);
+}
+
+.campo select,
+.campo input {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--gris-claro);
+  background: var(--blanco);
+  color: var(--negro);
+  font-size: 1rem;
+  border-radius: 0;
+}
+
+.campo select:focus,
+.campo input:focus { border-color: var(--negro); outline: none; }
+
+.filtros__pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.vacio {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--gris-oscuro);
+}
+
+/* ---------- Modal (usa <dialog>, que ya trae Esc y fondo) ---------- */
+.modal {
+  width: min(92vw, 820px);
+  max-height: 90vh;
+  padding: 0;
+  border: 0;
+  background: var(--blanco);
+}
+
+.modal { overflow: auto; }
+
+.modal::backdrop { background: rgba(0, 0, 0, 0.55); }
+
+.modal__cerrar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: var(--blanco);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal__cuerpo { padding: 28px 22px 24px; }
+
+.modal--chico { width: min(92vw, 440px); }
+
+/* Detalle de producto dentro del modal */
+.detalle { display: grid; }
+
+.detalle .foto { aspect-ratio: 4 / 5; }
+
+.detalle__descripcion { color: var(--gris-oscuro); }
+
+.tallas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0 6px;
+  padding: 0;
+  border: 0;
+}
+
+.tallas legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  color: var(--gris-oscuro);
+}
+
+.talla {
+  min-width: 48px;
+  height: 44px;
+  border: 1px solid var(--gris-claro);
+  background: var(--blanco);
+  cursor: pointer;
+}
+
+.talla[aria-pressed="true"] {
+  background: var(--negro);
+  color: var(--blanco);
+  border-color: var(--negro);
+}
+
+.error {
+  color: var(--negro);
+  font-size: 0.85rem;
+  min-height: 1.3em;
+  margin: 4px 0 8px;
+}
+
+.guia-tallas {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--gris-medio);
+}
+
+.guia-tallas summary { cursor: pointer; }
+
+/* Formulario de registro */
+.formulario { display: grid; gap: 14px; }
+
+.formulario .boton { margin-top: 6px; }
+
+/* ---------- Carrito ---------- */
+.carrito {
+  display: grid;
+  gap: 32px;
+}
+
+.lista-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--gris-claro);
+}
+
+.item:first-child { border-top: 1px solid var(--gris-claro); }
+
+.item h3 { margin-bottom: 2px; font-size: 1rem; }
+
+.item__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.cantidad {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--gris-claro);
+}
+
+.cantidad button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.cantidad span { min-width: 28px; text-align: center; }
+
+.resumen {
+  background: var(--blanco);
+  border: 1px solid var(--gris-claro);
+  padding: 22px;
+  align-self: start;
+}
+
+.resumen__fila {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: var(--gris-oscuro);
+}
+
+.resumen__fila--total {
+  color: var(--negro);
+  font-size: 1.2rem;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid var(--gris-claro);
+}
+
+.resumen .texto-suave { margin: 14px 0 0; }
+
+/* Insignia dentro del resumen del carrito */
+.insignia {
+  margin: 16px 0 20px;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--gris-claro);
+}
+
+.insignia__nivel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+
+
+.insignia__descuento {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.insignia__texto { margin: 10px 0 0; font-size: 0.95rem; }
+
+.barra {
+  height: 6px;
+  background: var(--gris-claro);
+}
+
+.barra span {
+  display: block;
+  height: 100%;
+  background: var(--negro);
+}
+
+.confirmacion__gracias {
+  margin: 0 auto 28px;
+  max-width: 260px;
+}
+
+.confirmacion__gracias img { width: 100%; height: auto; }
+
+.confirmacion__gracias figcaption {
+  margin-top: 12px;
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+}
+
+.confirmacion__progreso {
+  border: 1px solid var(--gris-claro);
+  padding: 16px 18px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.confirmacion__progreso .barra { margin: 8px 0; }
+.confirmacion__progreso p { margin: 0; }
+
+.confirmacion {
+  text-align: center;
+  max-width: 34em;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.confirmacion__nivel {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 14px 18px;
+  margin: 20px 0;
+}
+
+.confirmacion__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+/* ---------- Avisos flotantes (toast) ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 50;
+  transform: translate(-50%, 20px);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 12px 18px;
+  background: var(--negro);
+  color: var(--blanco);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ============================================================
+   Pantallas medianas y grandes (tablet / computador de la demo)
+   ============================================================ */
+@media (min-width: 700px) {
+  h1 { font-size: 2.4rem; }
+  .grilla { grid-template-columns: repeat(3, 1fr); gap: 32px 20px; }
+  .filtros { grid-template-columns: repeat(4, 1fr); }
+  .portada__frase { font-size: 1.7rem; }
+  .bandera__pista img { width: 160px; height: 210px; }
+  .generos { grid-template-columns: repeat(3, 1fr); }
+  .genero,
+  .generos .genero:nth-child(3) { grid-column: auto; aspect-ratio: 3 / 4; }
+  .colecciones { grid-auto-columns: 38%; }
+  .generos { gap: 20px; }
+  .invitacion-quiz__acciones { flex-direction: row; justify-content: center; gap: 20px; }
+  .detalle { grid-template-columns: 1fr 1fr; }
+  .detalle .foto { aspect-ratio: auto; height: 100%; min-height: 420px; }
+  .modal__cuerpo { padding: 40px 32px 32px; }
+  .carrito { grid-template-columns: 1fr 340px; }
+  .item { grid-template-columns: 110px 1fr; }
+}
+
+@media (min-width: 960px) {
+  .grilla { grid-template-columns: repeat(4, 1fr); }
+  :root { --alto-header: 112px; }
+  .header__logo img { height: 110px; }
+  /* Los 6 destacados quedan parejos en 2 filas de 3 */
+  .grilla--destacados { grid-template-columns: repeat(3, 1fr); }
+  /* En el computador las 5 colecciones caben en una fila */
+  .colecciones { grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); overflow: visible; }
+  .drops { grid-template-columns: repeat(4, 1fr); }
+
+  /* En el computador el menú se ve siempre, sin hamburguesa */
+  .header__menu-btn { display: none; }
+  .header__interior { gap: 0 32px; }
+  .nav,
+  .nav.abierto {
+    display: flex;
+    order: 2;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+    padding: 0;
+  }
+  .nav a,
+  .nav button { border: 0; padding: 6px 0; }
+  .nav a.activo { font-weight: 400; border-bottom: 1px solid var(--negro); }
+  .nav .nav__registro { margin-top: 0; min-height: 40px; padding: 0 16px; }
+  .header__acciones { order: 3; margin-left: 0; }
+  .header .nav { margin-left: auto; }
+}
+
+/* ============================================================
+   FASE 2 — Quiz, perfil y "Para ti"
+   ============================================================ */
+
+/* ---------- "Para ti" en el catálogo ---------- */
+.para-ti { margin: 8px 0 32px; }
+.para-ti .texto-suave { margin: -8px 0 16px; }
+
+/* Fila que se desliza de lado (en celular y computador) */
+.fila-scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 44%;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+}
+
+.para-ti__item {
+  position: relative;
+  scroll-snap-align: start;
+}
+
+/* La etiqueta "Descubre algo distinto" va encima de la foto */
+.etiqueta--sobre {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  margin: 0 !important;
+  background: var(--blanco);
+  border-color: var(--negro);
+  color: var(--negro);
+}
+
+/* ---------- Quiz ---------- */
+.quiz {
+  max-width: 640px;
+  text-align: center;
+}
+
+.quiz__ch {
+  height: 56px;
+  width: auto;
+  margin: 0 auto 16px;
+}
+
+.quiz__intro {
+  color: var(--gris-oscuro);
+  max-width: 30em;
+  margin: 0 auto 24px;
+}
+
+.quiz__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.quiz__acciones--fila {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.quiz .barra { margin: 8px 0 28px; }
+.quiz .barra span { transition: width 0.3s; }
+
+.quiz__pregunta { margin-bottom: 24px; }
+
+.opciones {
+  display: grid;
+  gap: 10px;
+}
+
+.quiz__estilo {
+  font-size: 3rem;
+  margin: 4px 0 12px;
+}
+
+/* ---------- Perfil ---------- */
+.perfil-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.perfil-cabecera h1 { margin-bottom: 2px; }
+.perfil-cabecera p { margin: 0; }
+
+.avatar {
+  flex: none;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--gris-claro);
+}
+
+.avatar--inicial {
+  display: grid;
+  place-items: center;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 2.2rem;
+}
+
+.perfil-tarjetas {
+  display: grid;
+  gap: 16px;
+}
+
+.tarjeta-perfil {
+  border: 1px solid var(--gris-claro);
+  padding: 22px;
+}
+
+.tarjeta-perfil h2 {
+  font-size: 0.85rem;
+  font-family: var(--fuente-texto);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gris-medio);
+}
+
+.perfil-estilo {
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 0 0 8px;
+}
+
+.insignia-grande {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.insignia-grande p { margin: 0; }
+
+.tarjeta-perfil .barra { margin-bottom: 10px; }
+
+.pedidos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.pedido {
+  border: 1px solid var(--gris-claro);
+  padding: 16px 18px;
+}
+
+.pedido__cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pedido__items {
+  margin: 10px 0;
+  padding-left: 18px;
+  color: var(--gris-oscuro);
+  font-size: 0.95rem;
+}
+
+.closet {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.closet__prenda {
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.closet__prenda span { display: block; margin-top: 6px; }
+
+@media (min-width: 700px) {
+  .fila-scroll { grid-auto-columns: 30%; }
+  .perfil-tarjetas { grid-template-columns: 1fr 1fr; }
+  .closet { grid-template-columns: repeat(6, 1fr); }
+  .avatar { width: 110px; height: 110px; }
+}
+
+@media (min-width: 960px) {
+  .fila-scroll { grid-auto-columns: 23%; }
+}
+
+/* ============================================================
+   FASE 2 (ajustes) — Insignias, estilo con foto y quiz animado
+   ============================================================ */
+
+/* ---------- Botones extra ---------- */
+.boton:disabled {
+  background: var(--gris-claro);
+  border-color: var(--gris-claro);
+  color: var(--gris-medio);
+  cursor: not-allowed;
+}
+
+.boton-texto--claro { color: var(--blanco); }
+
+/* ---------- Icono de insignia: círculo negro con el icono ---------- */
+.icono-insignia {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--negro);
+}
+
+/* El icono (CH o custom) solo se escala por ancho: nunca se deforma */
+.icono-insignia img {
+  width: 62%;
+  height: auto;
+}
+
+.icono-insignia--chico { width: 40px; height: 40px; }
+.icono-insignia--grande { width: 88px; height: 88px; }
+
+/* Nivel sin ganar: círculo vacío punteado */
+.icono-insignia--vacia {
+  background: var(--blanco);
+  border: 1.5px dashed var(--gris-medio);
+}
+
+/* ---------- Barra por bloques (una cajita por prenda) ---------- */
+.bloques {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 0 6px;
+}
+
+.bloques span {
+  height: 16px;
+  background: var(--gris-claro);
+  transition: background 0.4s;
+}
+
+.bloques span.lleno { background: var(--negro); }
+
+.progreso-insignia__texto {
+  font-weight: 700;
+  margin: 6px 0 0;
+}
+
+/* ---------- Camino de niveles ---------- */
+.camino {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 18px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--gris-medio);
+}
+
+/* La línea que une las insignias, por detrás de los círculos */
+.camino::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 1.5px;
+  background: var(--gris-claro);
+}
+
+.camino li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.camino strong { font-weight: 400; margin-top: 4px; }
+.camino .alcanzado { color: var(--negro); }
+.camino .actual strong { font-weight: 700; }
+
+/* El nivel actual lleva un anillo para que se note dónde vas */
+.camino .actual .icono-insignia { box-shadow: 0 0 0 3px var(--blanco), 0 0 0 4.5px var(--negro); }
+
+.insignia-grande .perfil-estilo { margin: 0; }
+
+.confirmacion__nivel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirmacion__nivel .icono-insignia { border: 2px solid var(--blanco); }
+.confirmacion__nivel p { margin: 0; }
+
+/* ---------- Tarjeta de estilo con foto ---------- */
+.tarjeta-estilo {
+  position: relative;
+  min-height: 380px;
+  overflow: hidden;
+  background: var(--negro);
+  color: var(--blanco);
+  display: flex;
+  align-items: flex-end;
+}
+
+.tarjeta-estilo__fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* foto, no logo */
+  object-position: center 30%;
+}
+
+/* Franja negra sólida: el texto siempre se lee, sin degradados */
+.tarjeta-estilo__franja {
+  position: relative;
+  width: 100%;
+  background: var(--negro);
+  padding: 20px 22px 22px;
+}
+
+.tarjeta-estilo__icono {
+  width: 44px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.tarjeta-estilo__etiqueta {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gris-claro);
+}
+
+.tarjeta-estilo__nombre {
+  font-family: var(--fuente-titulos);
+  font-size: 2.4rem;
+  line-height: 1.1;
+  margin: 0 0 6px;
+}
+
+.tarjeta-estilo__descripcion { color: var(--gris-claro); }
+
+.tarjeta-estilo--grande { min-height: 560px; }
+.tarjeta-estilo--grande .tarjeta-estilo__nombre { font-size: 3.2rem; }
+
+.tarjeta-perfil--negra {
+  background: var(--negro);
+  color: var(--blanco);
+  border-color: var(--negro);
+}
+
+.tarjeta-perfil--negra h2 { color: var(--gris-claro); }
+
+/* ---------- Quiz: opciones, navegación y animación ---------- */
+.quiz__marco { overflow: hidden; } /* que el deslizamiento no cree scroll lateral */
+
+.barra--quiz { height: 8px; }
+.barra--quiz span { transition: width 0.45s ease; }
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--gris-claro);
+  background: var(--gris-claro); /* gris del manual: se separa del fondo blanco */
+  color: var(--negro);
+  text-align: left;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.opcion:hover { border-color: var(--negro); }
+
+.opcion__letra {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--negro);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 0.95rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.opcion[aria-pressed="true"] {
+  background: var(--negro);
+  border-color: var(--negro);
+  color: var(--blanco);
+}
+
+.opcion[aria-pressed="true"] .opcion__letra {
+  background: var(--blanco);
+  color: var(--negro);
+}
+
+.quiz__navegacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.quiz__navegacion .boton { min-width: 150px; }
+
+.quiz__saltar {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.quiz__acciones--izq {
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.quiz__guardado { margin-top: 14px; }
+
+/* Pasar de pregunta: la actual se va y la nueva entra del otro lado */
+.sale-izquierda { animation: salir-izquierda 0.22s ease-in forwards; }
+.sale-derecha { animation: salir-derecha 0.22s ease-in forwards; }
+.entra-derecha { animation: entrar-derecha 0.32s ease-out; }
+.entra-izquierda { animation: entrar-izquierda 0.32s ease-out; }
+
+@keyframes salir-izquierda { to { opacity: 0; transform: translateX(-48px); } }
+@keyframes salir-derecha { to { opacity: 0; transform: translateX(48px); } }
+@keyframes entrar-derecha { from { opacity: 0; transform: translateX(48px); } }
+@keyframes entrar-izquierda { from { opacity: 0; transform: translateX(-48px); } }
+
+@media (min-width: 700px) {
+  /* En pantallas grandes la franja va a un lado y deja ver la foto */
+  .tarjeta-estilo__franja { width: 72%; }
+  .tarjeta-estilo--grande .tarjeta-estilo__franja { width: 56%; padding: 32px; }
+  .quiz__acciones--izq { flex-direction: row; flex-wrap: wrap; align-items: center; }
+}
+
+/* ---------- Carga de mentiritas al terminar el quiz ---------- */
+.carga {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Grilla de 5x5 cuadritos que hace la "onda" con Anime.js */
+.carga__grilla {
+  display: grid;
+  grid-template-columns: repeat(5, 18px);
+  gap: 8px;
+  margin-bottom: 36px;
+}
+
+.carga__grilla span {
+  width: 18px;
+  height: 18px;
+  background: var(--negro);
+}
+
+.carga__grilla span.gris { background: var(--gris-medio); }
+
+.carga__frase {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: 1.35rem;
+  min-height: 3em; /* que el texto no haga saltar la página al cambiar */
+  max-width: 22em;
+  margin: 0 0 20px;
+}
+
+.barra--carga {
+  width: min(280px, 80%);
+  height: 4px;
+}
+
+.barra--carga span { width: 0; }
+
+/* ---------- Cupones de descuento ---------- */
+.descuentos {
+  margin: 18px 0 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gris-claro);
+}
+
+.descuentos__titulo {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gris-medio);
+}
+
+/* Cada cupón parece un ticket: borde punteado, como para recortar */
+.cupon {
+  border: 1.5px dashed var(--gris-medio);
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.cupon p { margin: 0 0 6px; }
+.cupon__titulo { font-weight: 700; }
+.cupon__vence { font-size: 0.85rem; color: var(--gris-oscuro); }
+.cupon--nuevo { border-style: solid; border-color: var(--negro); }
+.cupon--activo { border-style: solid; border-color: var(--negro); background: var(--gris-claro); }
+
+.boton--cupon {
+  min-height: 40px;
+  padding: 0 16px;
+  margin: 6px 12px 0 0;
+}
+
+/* En el perfil: lista de cupones con su estado */
+.cupones-perfil {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.cupon-perfil {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 14px 16px;
+  border: 1.5px dashed var(--gris-medio);
+}
+
+.cupon-perfil p { margin: 0; }
+.cupon-perfil__titulo { font-weight: 700; }
+
+.cupon-perfil__pct {
+  grid-row: span 2;
+  font-family: var(--fuente-titulos);
+  font-size: 1.8rem;
+}
+
+.cupon-perfil__estado {
+  grid-column: 2;
+  justify-self: start;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+/* Disponible: ticket negro, que salte a la vista */
+.cupon-perfil--disponible { border-style: solid; border-color: var(--negro); }
+
+/* Usado o vencido: en gris, como un ticket ya gastado */
+.cupon-perfil--usado,
+.cupon-perfil--vencido { color: var(--gris-medio); }
+.cupon-perfil--vencido .cupon-perfil__estado { background: var(--gris-claro); color: var(--gris-oscuro); }
+
+@media (min-width: 700px) {
+  .cupon-perfil { grid-template-columns: auto 1fr auto; }
+  .cupon-perfil__pct { grid-row: auto; }
+  .cupon-perfil__estado { grid-column: auto; justify-self: end; }
+}
+
+/* ---------- Panel "¡Quedó en tu carrito!" ---------- */
+.agregado { padding: 28px 20px 20px; }
+
+.agregado__producto {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.agregado__producto h2 { font-size: 1.2rem; margin-bottom: 2px; }
+.agregado__producto p { margin: 0; }
+
+.agregado__titulo {
+  margin-bottom: 6px !important;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gris-oscuro);
+}
+
+.agregado__acciones {
+  display: grid;
+  gap: 10px;
+}
+
+/* El botón principal más grande: es lo que queremos que toque */
+.boton--grande {
+  min-height: 56px;
+  font-size: 1.1rem;
+}
+
+/* En el celular el panel sale desde abajo, como una hoja */
+@media (max-width: 699px) {
+  .modal--hoja {
+    width: 100vw;
+    max-width: 100vw;
+    margin: auto 0 0;
+  }
+}
+
+/* ---------- Barra de "Deshacer" ---------- */
+/* Se centra con márgenes y no con transform, porque Anime.js usa el
+   transform para animar la entrada */
+.deshacer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  bottom: 20px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 10px 10px 18px;
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+.deshacer button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--blanco);
+  background: var(--blanco);
+  color: var(--negro);
+  font-weight: 700;
+  cursor: pointer;
+}
