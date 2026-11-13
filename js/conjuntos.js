@@ -94,30 +94,21 @@ const ZONAS = {
   piernas: "M54 204 L146 204 L141 404 L107 404 L100 262 L93 404 L59 404 Z",
 };
 
-function zonaConFoto(prefijo, nombre, d, producto) {
-  const id = `${prefijo}-${nombre}`;
-  return `
-    <clipPath id="${id}"><path d="${d}"/></clipPath>
-    <image href="${producto.imagen}" x="20" y="70" width="160" height="350"
-      preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/>
-    <path d="${d}" class="avatar__borde"/>`;
+// Por ahora el avatar NO muestra fotos: cada zona es gris claro si
+// está vacía y gris oscuro con borde blanco si tiene una prenda
+// puesta. data-zona sirve para iluminarla al pasar por una carta.
+function zona(nombre, d, puesta) {
+  return `<path d="${d}" class="avatar__zona ${puesta ? "avatar__zona--puesta" : ""}" data-zona="${nombre}"/>`;
 }
 
-export function htmlAvatar(outfit, prefijo = "av") {
-  const arriba = outfit.arriba && buscarProducto(outfit.arriba);
-  const abajo = outfit.abajo && buscarProducto(outfit.abajo);
-  const extra = outfit.extra && buscarProducto(outfit.extra);
+export function htmlAvatar(outfit) {
   return `
     <svg class="avatar-svg" viewBox="0 0 200 420" role="img" aria-label="${M.vestidor}">
-      <!-- La silueta base, en gris -->
-      <circle cx="100" cy="46" r="26" class="avatar__base"/>
-      <rect x="90" y="68" width="20" height="18" rx="6" class="avatar__base"/>
-      <path d="${ZONAS.torso} ${ZONAS.brazos}" class="avatar__base"/>
-      <path d="${ZONAS.piernas}" class="avatar__base"/>
-      <!-- Las prendas puestas encima -->
-      ${abajo ? zonaConFoto(prefijo, "piernas", ZONAS.piernas, abajo) : ""}
-      ${arriba ? zonaConFoto(prefijo, "torso", ZONAS.torso + " " + ZONAS.brazos, arriba) : ""}
-      ${extra ? zonaConFoto(prefijo, "capa", ZONAS.capa, extra) : ""}
+      <circle cx="100" cy="46" r="26" class="avatar__cabeza"/>
+      <rect x="90" y="68" width="20" height="18" rx="6" class="avatar__cabeza"/>
+      ${zona("abajo", ZONAS.piernas, outfit.abajo)}
+      ${zona("arriba", ZONAS.torso + " " + ZONAS.brazos, outfit.arriba)}
+      ${outfit.extra ? zona("extra", ZONAS.capa, true) : `<path d="${ZONAS.capa}" class="avatar__capa-vacia" data-zona="extra"/>`}
     </svg>`;
 }
 
@@ -177,24 +168,61 @@ export function sugerirNombre(outfit) {
 // Mis conjuntos (guardados y publicados)
 // ============================================================
 
-export function guardarConjunto(nombre, outfit) {
-  const conjunto = {
-    id: `cj-${Date.now()}`,
-    nombre: nombre || "",
-    prendas: { ...outfit },
-    publicado: false,
-    fecha: new Date().toISOString(),
-  };
-  guardarConjuntos([...getConjuntos(), conjunto]);
+// Un conjunto tiene DOS marcas independientes: "guardado" (en tu
+// closet) y "publicado" (en Comunidad). Si es la misma ropa, es UN
+// solo conjunto con las dos marcas, no dos tarjetas repetidas.
+// { id, nombre, prendas, guardado, publicado, outfitId, fecha }
+
+const huella = (prendas) => idsDelOutfit(prendas).sort().join("|");
+
+// Arregla datos viejos (antes no existía "guardado") y junta los
+// conjuntos repetidos con la misma ropa en uno solo
+export function misConjuntos() {
+  const unidos = [];
+  getConjuntos().forEach((c) => {
+    const conjunto = { guardado: true, publicado: false, outfitId: null, ...c };
+    const igual = unidos.find((u) => huella(u.prendas) === huella(conjunto.prendas));
+    if (!igual) return unidos.push(conjunto);
+    igual.guardado ||= conjunto.guardado;
+    igual.publicado ||= conjunto.publicado;
+    igual.outfitId ||= conjunto.outfitId;
+    igual.nombre ||= conjunto.nombre;
+  });
+  const vivos = unidos.filter((c) => c.guardado || c.publicado);
+  guardarConjuntos(vivos);
+  return vivos;
+}
+
+// Crea el conjunto o, si ya hay uno con la misma ropa, lo actualiza
+export function upsertConjunto(nombre, outfit, cambios = {}) {
+  const lista = misConjuntos();
+  let conjunto = lista.find((c) => huella(c.prendas) === huella(outfit));
+  if (conjunto) {
+    Object.assign(conjunto, cambios);
+    if (nombre) conjunto.nombre = nombre;
+  } else {
+    conjunto = {
+      id: `cj-${Date.now()}`,
+      nombre: nombre || "",
+      prendas: { ...outfit },
+      guardado: false,
+      publicado: false,
+      outfitId: null,
+      fecha: new Date().toISOString(),
+      ...cambios,
+    };
+    lista.push(conjunto);
+  }
+  guardarConjuntos(lista);
   return conjunto;
 }
 
-export function marcarPublicado(id) {
-  guardarConjuntos(getConjuntos().map((c) => (c.id === id ? { ...c, publicado: true } : c)));
-}
+export const guardarConjunto = (nombre, outfit) => upsertConjunto(nombre, outfit, { guardado: true });
 
-export function eliminarConjunto(id) {
-  guardarConjuntos(getConjuntos().filter((c) => c.id !== id));
+// Cambia una marca; si se queda sin ninguna de las dos, desaparece
+export function actualizarConjunto(id, cambios) {
+  const lista = misConjuntos().map((c) => (c.id === id ? { ...c, ...cambios } : c));
+  guardarConjuntos(lista.filter((c) => c.guardado || c.publicado));
 }
 
 // ============================================================

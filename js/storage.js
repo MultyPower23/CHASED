@@ -148,6 +148,11 @@ export function guardarOutfit(outfit) {
   escribir("outfits", [...getOutfits(), outfit]);
 }
 
+// Para "Quitar de Comunidad": se le pasa una función que dice cuáles quitar
+export function quitarOutfits(debeQuitarse) {
+  escribir("outfits", getOutfits().filter((o) => !debeQuitarse(o)));
+}
+
 // Votos: se guardan POR CORREO, así cada persona tiene su propio voto
 // aunque usen el mismo computador (útil en las pruebas con usuarios).
 // { "correo@x.com": { concurso: "p-ej-1", disenos: ["d-ej-2", ...] } }

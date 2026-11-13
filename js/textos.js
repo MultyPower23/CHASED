@@ -298,6 +298,7 @@ export const TEXTOS = {
     conDescuento: (pct) => `Con ${pct}% de descuento`,
     irCatalogo: "Ir al catálogo",
     closetVacio: "Aquí aparecerán las prendas que compres.",
+    probarAyuda: "Pruébala en tu vestidor y arma un conjunto con ella.",
     closetNota: "Pronto podrás armar outfits con ellas en Mi closet.",
   },
 
@@ -488,8 +489,12 @@ export const TEXTOS = {
     estadoGuardado: "Guardado",
     estadoPublicado: "Publicado",
     cargar: "Ponérmelo",
-    eliminar: "Eliminar",
-    eliminado: "Conjunto eliminado.",
+    guardarCorto: "Guardar",
+    quitarPublicacion: "Quitar de Comunidad",
+    quitarGuardado: "Quitar de guardados",
+    publicacionQuitada: "Lo quitamos de Comunidad.",
+    guardadoQuitado: "Lo quitamos de tus guardados.",
+    yaGuardado: "Ese conjunto ya estaba guardado: actualizamos su nombre.",
     // Palabras clave → estilo, para "Armar por mí" (BORRADOR)
     palabrasClave: {
       flow: ["bailar", "baile", "entrenar", "gym", "deporte", "ensayo"],

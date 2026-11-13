@@ -10,10 +10,20 @@
 // Lo de "IA" es simulado con reglas sencillas (estilos y colores).
 // ============================================================
 
-import { htmlFoto, buscarProducto, escaparHTML, capitalizar, mostrarAviso, pedirRegistro, abrirModal, formatoFecha } from "./app.js";
+import {
+  htmlFoto,
+  buscarProducto,
+  escaparHTML,
+  capitalizar,
+  mostrarAviso,
+  pedirRegistro,
+  abrirModal,
+  formatoFecha,
+  nocheMientrasSeVea,
+} from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS } from "./data/productos.js";
-import { getUsuario, getQuiz, guardarOutfit, getConjuntos } from "./storage.js";
+import { getUsuario, getQuiz, guardarOutfit, quitarOutfits } from "./storage.js";
 import { aparecer, rebotar } from "./animaciones.js";
 import {
   CASILLAS,
@@ -28,8 +38,9 @@ import {
   sugerenciaPara,
   sugerirNombre,
   guardarConjunto,
-  marcarPublicado,
-  eliminarConjunto,
+  misConjuntos,
+  upsertConjunto,
+  actualizarConjunto,
   getBorrador,
   guardarBorrador,
 } from "./conjuntos.js";
@@ -155,22 +166,36 @@ function guardar() {
 async function publicarConjunto(conjunto) {
   const usuario = getUsuario() ?? (await pedirRegistro(M.registroPublicar));
   if (!usuario) return false;
+  // Guardamos el id del outfit publicado para poder quitarlo después
+  const outfitId = `o-${Date.now()}`;
   guardarOutfit({
-    id: `o-${Date.now()}`,
+    id: outfitId,
     nombre: conjunto.nombre,
     autor: usuario.nombre,
     correo: usuario.correo,
     prendas: idsDelOutfit(conjunto.prendas),
   });
-  marcarPublicado(conjunto.id);
+  actualizarConjunto(conjunto.id, { publicado: true, outfitId });
   renderConjuntos();
   return true;
 }
 
+// Quita el outfit de Comunidad. Los publicados antes de este cambio
+// no tienen outfitId, así que también buscamos por la misma ropa.
+function quitarDeComunidad(conjunto) {
+  const ropa = idsDelOutfit(conjunto.prendas).sort().join("|");
+  const correo = getUsuario()?.correo;
+  quitarOutfits(
+    (o) => o.id === conjunto.outfitId || (o.correo === correo && [...o.prendas].sort().join("|") === ropa)
+  );
+  actualizarConjunto(conjunto.id, { publicado: false, outfitId: null });
+}
+
 async function publicarActual() {
   if (!outfitCompleto()) return mostrarAviso(M.errorIncompleto);
-  // Publicar también lo guarda en "Mis conjuntos"
-  const conjunto = guardarConjunto(nombreOutfit.trim(), outfit);
+  // Si ya existe ese conjunto (misma ropa), se publica ESE; no se duplica
+  const conjunto = upsertConjunto(nombreOutfit.trim(), outfit);
+  if (conjunto.publicado) return mostrarAviso(M.publicado);
   if (!(await publicarConjunto(conjunto))) return;
   const aviso = document.getElementById("publicado");
   aviso.innerHTML = `<p>${M.publicado}</p><a class="boton boton--invertido" href="comunidad.html#outfits">${M.verComunidad}</a>`;
@@ -263,28 +288,39 @@ function abrirEscaner() {
 // Mis conjuntos
 // ============================================================
 
+// Una sola tarjeta por conjunto, con sus dos marcas (Guardado /
+// Publicado) y los botones que tengan sentido según cada una
+function htmlConjunto(c) {
+  const prendas = idsDelOutfit(c.prendas).map(buscarProducto).filter(Boolean);
+  const marcas = [
+    c.guardado ? `<span class="etiqueta">${M.estadoGuardado}</span>` : "",
+    c.publicado ? `<span class="etiqueta etiqueta--negra">${M.estadoPublicado}</span>` : "",
+  ].join("");
+  const botones = [
+    `<button class="boton boton--chico" type="button" data-cargar="${c.id}">${M.cargar}</button>`,
+    c.publicado
+      ? `<button class="boton-texto" type="button" data-quitar-pub="${c.id}">${M.quitarPublicacion}</button>`
+      : `<button class="boton boton--claro boton--chico" type="button" data-publicar="${c.id}">${M.publicar}</button>`,
+    c.guardado
+      ? `<button class="boton-texto" type="button" data-quitar-guardado="${c.id}">${M.quitarGuardado}</button>`
+      : `<button class="boton boton--claro boton--chico" type="button" data-guardar-cj="${c.id}">${M.guardarCorto}</button>`,
+  ].join("");
+  return `
+    <article class="conjunto">
+      <div class="conjunto__fotos">${prendas.map(htmlFoto).join("")}</div>
+      <div class="conjunto__info">
+        <div class="conjunto__marcas">${marcas}</div>
+        <h3>${escaparHTML(c.nombre || M.sinNombre)}</h3>
+        <p class="texto-suave">${prendas.map((p) => escaparHTML(p.nombre)).join(" + ")} · ${formatoFecha(c.fecha)}</p>
+        <div class="conjunto__botones">${botones}</div>
+      </div>
+    </article>`;
+}
+
 function renderConjuntos() {
-  const conjuntos = [...getConjuntos()].reverse();
+  const conjuntos = [...misConjuntos()].reverse();
   document.getElementById("conjuntos").innerHTML = conjuntos.length
-    ? conjuntos
-        .map((c) => {
-          const prendas = idsDelOutfit(c.prendas).map(buscarProducto).filter(Boolean);
-          return `
-          <article class="conjunto">
-            <div class="conjunto__fotos">${prendas.map(htmlFoto).join("")}</div>
-            <div class="conjunto__info">
-              <span class="etiqueta ${c.publicado ? "etiqueta--negra" : ""}">${c.publicado ? M.estadoPublicado : M.estadoGuardado}</span>
-              <h3>${escaparHTML(c.nombre || M.sinNombre)}</h3>
-              <p class="texto-suave">${prendas.map((p) => escaparHTML(p.nombre)).join(" + ")} · ${formatoFecha(c.fecha)}</p>
-              <div class="conjunto__botones">
-                <button class="boton boton--chico" type="button" data-cargar="${c.id}">${M.cargar}</button>
-                ${c.publicado ? "" : `<button class="boton boton--claro boton--chico" type="button" data-publicar="${c.id}">${M.publicar}</button>`}
-                <button class="boton-texto" type="button" data-eliminar="${c.id}">${M.eliminar}</button>
-              </div>
-            </div>
-          </article>`;
-        })
-        .join("")
+    ? conjuntos.map(htmlConjunto).join("")
     : `<p class="aviso-borde">${M.misConjuntosVacio}</p>`;
 }
 
@@ -360,6 +396,16 @@ function render() {
   renderVestidor();
   renderCloset();
   renderConjuntos();
+  // Mientras se ve el vestidor, header y fondo negros (como el inicio)
+  nocheMientrasSeVea(document.querySelector(".vestidor-seccion"), 0.25);
+}
+
+// Al pasar por una carta, se ilumina en el avatar la zona donde caería
+function previsualizarZona(carta) {
+  document.querySelectorAll(".avatar__zona--previa").forEach((z) => z.classList.remove("avatar__zona--previa"));
+  if (!carta) return;
+  const casilla = ponerEn({ ...outfit }, carta.dataset.poner);
+  document.querySelector(`.avatar-svg [data-zona="${casilla}"]`)?.classList.add("avatar__zona--previa");
 }
 
 // ============================================================
@@ -394,22 +440,34 @@ contenido.addEventListener("click", async (e) => {
     cambioDeOutfit();
     return document.querySelector(".vestidor-seccion").scrollIntoView({ behavior: "smooth" });
   }
+  // Busca el conjunto de la tarjeta en la que se hizo clic
+  const conjuntoDe = (atributo) => misConjuntos().find((c) => c.id === el(`[${atributo}]`).getAttribute(atributo));
+
   if (el("[data-cargar]")) {
-    const conjunto = getConjuntos().find((c) => c.id === el("[data-cargar]").dataset.cargar);
+    const conjunto = conjuntoDe("data-cargar");
     Object.assign(outfit, conjunto.prendas);
     nombreOutfit = conjunto.nombre;
     cambioDeOutfit();
     return document.querySelector(".vestidor-seccion").scrollIntoView({ behavior: "smooth" });
   }
   if (el("[data-publicar]")) {
-    const conjunto = getConjuntos().find((c) => c.id === el("[data-publicar]").dataset.publicar);
-    if (await publicarConjunto(conjunto)) mostrarAviso(M.publicado);
+    if (await publicarConjunto(conjuntoDe("data-publicar"))) mostrarAviso(M.publicado);
     return;
   }
-  if (el("[data-eliminar]")) {
-    eliminarConjunto(el("[data-eliminar]").dataset.eliminar);
+  if (el("[data-quitar-pub]")) {
+    quitarDeComunidad(conjuntoDe("data-quitar-pub"));
     renderConjuntos();
-    return mostrarAviso(M.eliminado);
+    return mostrarAviso(M.publicacionQuitada);
+  }
+  if (el("[data-quitar-guardado]")) {
+    actualizarConjunto(conjuntoDe("data-quitar-guardado").id, { guardado: false });
+    renderConjuntos();
+    return mostrarAviso(M.guardadoQuitado);
+  }
+  if (el("[data-guardar-cj]")) {
+    actualizarConjunto(conjuntoDe("data-guardar-cj").id, { guardado: true });
+    renderConjuntos();
+    return mostrarAviso(M.guardado);
   }
 
   const accion = el("[data-accion]")?.dataset.accion;
@@ -428,6 +486,8 @@ contenido.addEventListener("click", async (e) => {
     cambioDeOutfit();
   }
 });
+
+contenido.addEventListener("mouseover", (e) => previsualizarZona(e.target.closest(".carta")));
 
 contenido.addEventListener("input", (e) => {
   if (e.target.id === "nombre-outfit") nombreOutfit = e.target.value;

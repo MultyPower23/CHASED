@@ -2926,3 +2926,73 @@ body.noche {
   .conjuntos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .panel-conjunto__layout { grid-template-columns: 220px 1fr; }
 }
+
+/* ============================================================
+   Ajustes del vestidor: avatar sin fotos, grises del manual y
+   cartas que crecen al pasar el mouse o tocarlas
+   ============================================================ */
+
+/* Avatar: gris claro = vacío, gris oscuro + borde blanco = puesta,
+   gris medio = vista previa al pasar por una carta */
+.avatar__cabeza { fill: var(--gris-claro); }
+
+.avatar__zona {
+  fill: var(--gris-claro);
+  stroke: var(--gris-medio);
+  stroke-width: 1.2;
+  transition: fill 0.3s, stroke 0.3s;
+}
+
+.avatar__zona--puesta { fill: var(--gris-oscuro); stroke: var(--blanco); stroke-width: 2; }
+.avatar__zona--previa { fill: var(--gris-medio); stroke: var(--blanco); }
+
+/* La capa extra vacía casi no se nota (solo se intuye) */
+.avatar__capa-vacia { fill: none; stroke: none; }
+.avatar__capa-vacia.avatar__zona--previa { fill: var(--gris-medio); stroke: var(--blanco); opacity: 0.85; }
+
+/* Casillas con más grises del manual */
+.slot { background: var(--negro); }
+.slot--lleno { background: var(--gris-oscuro); border-color: var(--gris-claro); }
+.slot--lleno .slot__casilla { color: var(--gris-claro); }
+
+/* Cartas: fondo gris oscuro, sello gris medio y crecen al pasar */
+.cartas { padding: 12px 6px; }
+
+.carta {
+  background: var(--gris-oscuro);
+  border-color: var(--gris-oscuro);
+  transition: transform 0.25s ease, border-color 0.2s, background 0.2s;
+}
+
+.carta__sello { background: var(--gris-medio); }
+.carta__color { color: var(--gris-claro); }
+.carta__stats i { border-color: var(--gris-medio); }
+
+.carta:hover,
+.carta:focus-visible,
+.carta:active {
+  transform: scale(1.08);
+  z-index: 2;
+  border-color: var(--blanco);
+  background: var(--gris-medio);
+}
+
+.carta--puesta { border-color: var(--blanco); background: var(--negro); }
+
+/* Mis conjuntos: las dos marcas juntas */
+.conjunto__marcas { display: flex; gap: 6px; flex-wrap: wrap; }
+.conjunto__marcas .etiqueta { margin-top: 0 !important; }
+
+/* Ropa del perfil: ahora son botones (abren una ventanita) */
+.closet__prenda {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+
+.closet__prenda:hover,
+.closet__prenda:active { transform: scale(1.05); }

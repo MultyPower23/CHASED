@@ -7,7 +7,7 @@
 // con calma. Nada de registro aquí: primero que se enamore de la ropa.
 // ============================================================
 
-import { htmlTarjeta, buscarProducto, productosDeColeccion } from "./app.js";
+import { htmlTarjeta, buscarProducto, productosDeColeccion, nocheMientrasSeVea } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, COLECCIONES } from "./data/productos.js";
 import { getPreferencia, guardarPreferencia, getQuiz } from "./storage.js";
@@ -217,13 +217,9 @@ function htmlInvitacionQuiz() {
 // Un "vigilante" (IntersectionObserver) mira la portada. Mientras
 // se vea buena parte de ella, la página está en modo noche; cuando
 // la persona baja, se quita la clase y el CSS hace la transición.
+// (La lógica vive en app.js porque el vestidor de Mi closet también la usa)
 function activarCambioDeFondo() {
-  const portada = document.getElementById("portada");
-  const vigilante = new IntersectionObserver(
-    ([entrada]) => document.body.classList.toggle("noche", entrada.intersectionRatio > 0.35),
-    { threshold: [0, 0.35, 1] }
-  );
-  vigilante.observe(portada);
+  nocheMientrasSeVea(document.getElementById("portada"));
 }
 
 function renderInicio() {

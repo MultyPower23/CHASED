@@ -278,6 +278,21 @@ export function htmlCaminoInsignias(indiceActual) {
   return `<ol class="camino">${pasos}</ol>`;
 }
 
+// ---------- Modo noche mientras se ve una sección ----------
+// Un "vigilante" (IntersectionObserver) mira la sección. Mientras se
+// vea buena parte de ella, la página está en modo noche (header y
+// fondo negros); al bajar se quita la clase y el CSS hace la
+// transición a blanco. Lo usan la portada del inicio y el vestidor.
+export function nocheMientrasSeVea(seccion, umbral = 0.35) {
+  if (!seccion) return;
+  document.body.classList.add("noche");
+  const vigilante = new IntersectionObserver(
+    ([entrada]) => document.body.classList.toggle("noche", entrada.intersectionRatio > umbral),
+    { threshold: [0, umbral, 1] }
+  );
+  vigilante.observe(seccion);
+}
+
 // ---------- Avisos (toast) ----------
 let temporizadorAviso;
 
