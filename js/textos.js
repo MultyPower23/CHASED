@@ -98,7 +98,7 @@ export const TEXTOS = {
     bienvenida: (nombre) => `¡Bienvenid@, ${nombre}! Ya haces parte de Chased.`,
     errorNombre: "Escribe tu nombre para seguir.",
     errorCorreo: "Revisa el correo, parece que le falta algo.",
-    nota: "Prototipo: tus datos solo se guardan en este navegador.",
+    nota: "Versión beta · Registro básico: por ahora solo pedimos tu nombre y tu correo, y se guardan únicamente en este navegador.",
   },
 
   catalogo: {
@@ -145,6 +145,7 @@ export const TEXTOS = {
     numeroPedido: (id) => `Pedido #${id}`,
     registroAntes: "Antes de confirmar, cuéntanos quién eres.",
     simulado: "Pedido simulado: no se hace ningún cobro. Precios y descuento son referenciales.",
+    beta: "Versión beta · Registro básico: en la versión completa aquí eliges cómo recibir y cómo pagar tu pedido.",
     prendas: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
     gracias: "Gracias por formar parte de la familia Chased.",
     // Carga al confirmar la compra — BORRADOR (misma animación del quiz)

@@ -238,6 +238,7 @@ function htmlResumen(totales, items) {
       ${htmlInsigniaCarrito(totales)}
       <button class="boton boton--ancho" type="button" data-accion="confirmar">${T.carrito.confirmar}</button>
       <p class="texto-suave">${T.carrito.simulado}</p>
+      <p class="texto-suave">${T.carrito.beta}</p>
     </aside>`;
 }
 
@@ -298,6 +299,7 @@ function renderConfirmacion(pedido) {
         </figure>
         <h1>${T.carrito.numeroPedido(pedido.id)}</h1>
         <p>${T.carrito.confirmado}</p>
+        <p class="texto-suave">${T.carrito.beta}</p>
         <p class="texto-suave">${T.carrito.prendas(pedido.prendas)} · ${T.carrito.total} ${formatearPrecio(pedido.total)}</p>
         ${mensajeNivel}
         <div class="confirmacion__acciones">

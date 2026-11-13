@@ -7,6 +7,40 @@
    (la gente llega desde Instagram) y luego se agranda.
    ============================================================ */
 
+/* ---------- Libre Baskerville sin internet ----------
+   Hoy la fuente llega de Google Fonts: si en la expo no hay wifi, los
+   títulos caen en Georgia. Con los .woff2 dentro de assets/fonts/ la
+   fuente viaja con la página (como llevar la comida de la casa en vez
+   de depender del restaurante).
+   ⚠️ APAGADO hasta que estén los 3 archivos en assets/fonts/. Para
+   activarlo: quitar el comentario de abajo y borrar los <link> de
+   Google Fonts de los 8 .html.
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: local("Libre Baskerville"), url("../assets/fonts/LibreBaskerville-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: local("Libre Baskerville Bold"), url("../assets/fonts/LibreBaskerville-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: local("Libre Baskerville Italic"), url("../assets/fonts/LibreBaskerville-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+*/
+
 /* Los colores viven aquí y en ningún otro lado. Si Chased cambia
    un gris, se cambia una línea y listo. */
 :root {
@@ -404,11 +438,12 @@ body.noche {
 
 .portada__titulo { margin: 0; }
 
-/* Logo stencil protagonista: solo se fija el ancho (el alto se
-   acomoda solo). Como es más ancho que alto, aguanta más ancho
-   sin empujar la banderita fuera de la pantalla. */
+/* Logo principal (serif con CH) protagonista: solo se fija el ancho
+   (el alto se acomoda solo). Es más "cuadradito" que el stencil, así
+   que va un poco más angosto para no empujar la banderita fuera de
+   la pantalla en celulares bajitos. */
 .portada__titulo img {
-  width: min(88vw, 640px, 80svh);
+  width: min(72vw, 440px, 70svh);
   height: auto;
 }
 
@@ -482,9 +517,6 @@ body.noche {
   height: 26px;
   width: auto;
 }
-
-/* El stencil es más ancho y bajito: un poco más de alto para que se lea */
-.cinta__pista .cinta__stencil { height: 34px; }
 
 @keyframes correr-derecha {
   from { transform: translateX(-50%); }
@@ -628,7 +660,7 @@ body.noche {
 .banner-evento h2 { max-width: 18em; margin: 0 auto 20px; }
 
 .banner-evento__logo {
-  width: min(70vw, 300px);
+  width: min(56vw, 220px);
   height: auto;
   margin: 0 auto 8px;
 }
@@ -712,6 +744,10 @@ body.noche {
 
 .campo select,
 .campo input {
+  /* width 100% + min-width 0: sin esto, el select se estira según su
+     opción más larga y empuja el modal fuera de la pantalla del celular */
+  width: 100%;
+  min-width: 0;
   min-height: 44px;
   padding: 0 10px;
   border: 1px solid var(--gris-claro);
@@ -821,7 +857,13 @@ body.noche {
 .guia-tallas summary { cursor: pointer; }
 
 /* Formulario de registro */
-.formulario { display: grid; gap: 14px; }
+/* minmax(0, 1fr): la columna no puede crecer más que la caja,
+   así ningún campo largo abre scroll horizontal en celulares de 320 px */
+.formulario {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
 
 .formulario .boton { margin-top: 6px; }
 
@@ -1769,7 +1811,7 @@ body.noche {
 }
 
 .portada-comunidad__logo {
-  width: min(70vw, 380px);
+  width: min(60vw, 280px);
   height: auto;
   margin: 0 auto 8px;
 }

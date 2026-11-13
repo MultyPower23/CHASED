@@ -29,11 +29,13 @@ const PORTADAS_GENERO = {
   unisex: "assets/img/comunidad/familia-01.jpg",
 };
 
-// El serif es el logo principal y vive en el header y el footer.
-// El stencil (más urbano) es el protagonista de la portada negra,
-// de la cinta y del banner del concurso.
+// El serif con el CH es el logo oficial del manual (sus reglas de
+// espacio de respeto están hechas para él), así que es el que va en
+// la portada negra y en el banner del concurso. Versión blanca porque
+// los dos fondos son negros.
 const LOGOS_BLANCOS = {
-  stencil: "assets/logo/logo-stencil-blanco.png",
+  principal: "assets/logo/logo-chased-blanco.png",
+  simbolo: "assets/logo/simbolo-ch-blanco.png",
 };
 
 // Una frase distinta cada vez que entras: así la portada se siente viva
@@ -75,13 +77,10 @@ function htmlBandera() {
   const fotos = fotosBandera()
     .map((src) => `<img src="${src}" alt="" loading="lazy" onerror="this.remove()">`)
     .join("");
-  // Separadores intercalados: CH, stencil, CH, stencil…
+  // Entre frase y frase va solo el símbolo CH: es pequeño y se lee
+  // bien a la altura de la cinta (el logo completo quedaría diminuto)
   const frases = T.inicio.cinta
-    .map((frase, i) =>
-      i % 2 === 0
-        ? `<span>${frase}</span><img src="assets/logo/simbolo-ch-blanco.png" alt="">`
-        : `<span>${frase}</span><img class="cinta__stencil" src="${LOGOS_BLANCOS.stencil}" alt="">`
-    )
+    .map((frase) => `<span>${frase}</span><img src="${LOGOS_BLANCOS.simbolo}" alt="">`)
     .join("");
   return `
     <div class="bandera" aria-hidden="true">
@@ -97,7 +96,7 @@ function htmlPortada() {
     <section class="portada" id="portada">
       <div class="contenedor portada__centro">
         <h1 class="portada__titulo">
-          <img src="${LOGOS_BLANCOS.stencil}" alt="${T.marca.nombre}">
+          <img src="${LOGOS_BLANCOS.principal}" alt="${T.marca.nombre}">
         </h1>
         <p class="portada__frase">${fraseAleatoria()}</p>
         <div class="portada__botones">
@@ -165,7 +164,7 @@ function htmlBannerEvento() {
   return `
     <section class="contenedor">
       <div class="banner-evento">
-        <img class="banner-evento__logo" src="${LOGOS_BLANCOS.stencil}" alt="">
+        <img class="banner-evento__logo" src="${LOGOS_BLANCOS.principal}" alt="">
         <h2>${T.inicio.eventoBanner}</h2>
         <a class="boton boton--invertido" href="comunidad.html#concurso">${T.inicio.eventoBoton}</a>
       </div>

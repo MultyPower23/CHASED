@@ -123,7 +123,7 @@ function htmlPortada() {
   return `
     <section class="portada-comunidad">
       <div class="contenedor">
-        <img class="portada-comunidad__logo" src="assets/logo/logo-stencil-blanco.png" alt="${T.marca.nombre}">
+        <img class="portada-comunidad__logo" src="assets/logo/logo-chased-blanco.png" alt="${T.marca.nombre}">
         <h1>${C.titulo}</h1>
         <p class="portada-comunidad__intro">${C.intro}</p>
         <div class="stats" id="stats"></div>
