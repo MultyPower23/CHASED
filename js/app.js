@@ -212,14 +212,16 @@ export function nivelesConPremioEntre(prendasAntes, prendasDespues) {
 // Las usan el carrito, la confirmación y el perfil, para que se
 // vean igual en todos lados.
 
-// Círculo con el icono del nivel. Si no hay icono custom en
-// assets/img/insignias/, el onerror pone el CH oficial.
+// Icono del nivel. Si hay escudo propio en assets/img/insignias/,
+// se muestra tal cual (sin círculo negro, porque el escudo de
+// Leyenda es negro y se perdería). Si no carga, el onerror pone el
+// CH oficial y le quita la clase --custom para que vuelva el círculo.
 export function htmlIconoInsignia(indice, clase = "") {
   if (indice < 0) return `<span class="icono-insignia icono-insignia--vacia ${clase}"></span>`;
   return `
-    <span class="icono-insignia ${clase}">
+    <span class="icono-insignia ${ICONOS_INSIGNIAS[indice] ? "icono-insignia--custom" : ""} ${clase}">
       <img src="${ICONOS_INSIGNIAS[indice] ?? ICONO_RESPALDO}" alt=""
-        onerror="this.onerror=null;this.src='${ICONO_RESPALDO}'">
+        onerror="this.onerror=null;this.src='${ICONO_RESPALDO}';this.parentElement.classList.remove('icono-insignia--custom')">
     </span>`;
 }
 
