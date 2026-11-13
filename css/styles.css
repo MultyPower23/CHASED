@@ -1330,8 +1330,8 @@ body.fondo-quieto {
 
 .pasos-pedido li {
   position: relative;
-  padding: 20px 3px 0; /* los 3px laterales evitan que dos nombres se peguen */
-  font-size: 0.72rem;
+  padding: 20px 4px 0; /* el aire lateral evita que dos nombres se peguen */
+  font-size: 0.68rem;
   line-height: 1.2;
   text-align: center;
   color: var(--gris-medio);
