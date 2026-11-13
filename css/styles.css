@@ -1283,6 +1283,15 @@ body.noche {
   height: auto;
 }
 
+
+/* Escudo propio del nivel: va sin círculo negro y ocupa todo el
+   espacio (el escudo ya trae su propio fondo y borde) */
+.icono-insignia--custom {
+  background: transparent;
+  border-radius: 0;
+}
+.icono-insignia--custom img { width: 100%; }
+
 .icono-insignia--chico { width: 40px; height: 40px; }
 .icono-insignia--grande { width: 88px; height: 88px; }
 
@@ -1351,6 +1360,8 @@ body.noche {
 
 /* El nivel actual lleva un anillo para que se note dónde vas */
 .camino .actual .icono-insignia { box-shadow: 0 0 0 3px var(--blanco), 0 0 0 4.5px var(--negro); }
+/* Con escudo propio el anillo redondo se ve raro: mejor lo agrandamos un poquito */
+.camino .actual .icono-insignia--custom { box-shadow: none; transform: scale(1.2); }
 
 .insignia-grande .perfil-estilo { margin: 0; }
 
@@ -1362,6 +1373,7 @@ body.noche {
 }
 
 .confirmacion__nivel .icono-insignia { border: 2px solid var(--blanco); }
+.confirmacion__nivel .icono-insignia--custom { border: none; }
 .confirmacion__nivel p { margin: 0; }
 
 /* ---------- Tarjeta de estilo con foto ---------- */

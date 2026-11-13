@@ -10,7 +10,7 @@ Si el equipo diseña iconos propios para cada nivel, guárdalos aquí con **esto
 | `leyenda.png` | Leyenda Chased | 12 prendas compradas |
 
 - Formato: **PNG cuadrado con fondo transparente**, de unos 256×256 px.
-- Se muestran **en blanco sobre un círculo negro**, así que lo ideal es que el icono sea blanco (o claro).
+- Ya están los 4 escudos oficiales (con el CH en el centro). Se muestran **tal cual, sin círculo negro** (clase `icono-insignia--custom`). Si una imagen no carga, vuelve el círculo negro con el CH blanco.
 - Usa solo los colores del manual (negro, blanco y grises).
 - Mientras no exista el archivo, la página muestra el símbolo **CH** oficial, así que no se rompe nada.
 - Las rutas se cambian en `js/data/apariencia.js` (`ICONOS_INSIGNIAS`).
