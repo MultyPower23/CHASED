@@ -16,8 +16,10 @@ export const USUARIA_DEMO = {
 // Resultado de quiz de ejemplo
 export const QUIZ_DEMO = { estilo: "urbano", puntajes: { minimal: 1, urbano: 4, comfy: 1, flow: 2 }, respuestas: [1, 0, 1, 0, 1] };
 
-// Dos pedidos: el primero da Rookie (1 prenda) y el segundo sube a
-// Runner (4 en total), lo que deja un cupón de descuento sin usar.
+// Tres pedidos: el primero da Rookie (1 prenda), el segundo sube a
+// Runner (4 en total, deja un cupón sin usar) y el tercero la deja en
+// 7 prendas. Así, UNA sola compra en vivo durante la demo la sube a
+// Chaser (8) y se ve la animación de subir de nivel.
 // diasAtras = hace cuántos días fue el pedido
 export const PEDIDOS_DEMO = [
   { diasAtras: 12, items: [{ id: "cam-owg-negra", talla: "M", cantidad: 1 }] },
@@ -27,6 +29,14 @@ export const PEDIDOS_DEMO = [
       { id: "jogger-negro", talla: "M", cantidad: 1 },
       { id: "hoodie-time-negro", talla: "L", cantidad: 1 },
       { id: "cam-ch-negra", talla: "M", cantidad: 1 },
+    ],
+  },
+  {
+    diasAtras: 1,
+    items: [
+      { id: "cam-angel-negra", talla: "M", cantidad: 1 },
+      { id: "short-negro", talla: "M", cantidad: 1 },
+      { id: "jogger-gris", talla: "M", cantidad: 1 },
     ],
   },
 ];

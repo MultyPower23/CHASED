@@ -289,6 +289,14 @@ export const TEXTOS = {
     vencioEl: (fecha) => `Venció el ${fecha}`,
     ganadoEl: (fecha) => `Ganado el ${fecha}`,
     pedidos: "Tus pedidos",
+    // Línea de pasos de cada pedido (en el prototipo todos quedan en "Confirmado")
+    estadoPedido: "Estado del pedido",
+    estadosPedido: {
+      confirmado: "Confirmado",
+      preparacion: "En preparación",
+      camino: "En camino",
+      entregado: "Entregado",
+    },
     sinPedidos: "Todavía no has hecho pedidos.",
     closet: "Tu closet",
     sinRegistro: "Tu perfil guarda tu estilo, tu insignia y tus pedidos. Para verlo, únete a la familia Chased.",
@@ -536,7 +544,7 @@ export const TEXTOS = {
     intro: "Herramientas para preparar la presentación. Todo pasa solo en este navegador.",
     cargarTitulo: "Cargar datos de ejemplo",
     cargarTexto:
-      "Crea una usuaria de ejemplo con su quiz, dos pedidos (insignia Runner), un descuento disponible, una caja escaneada, un conjunto publicado y un voto en el concurso.",
+      "Crea una usuaria de ejemplo con su quiz, tres pedidos (7 prendas, insignia Runner: con una compra más sube a Chaser), un descuento disponible, una caja escaneada, un conjunto publicado y un voto en el concurso.",
     cargar: "Cargar datos de ejemplo",
     cargado: "¡Listo! Ya hay datos de ejemplo. Date una vuelta por el perfil.",
     reiniciarTitulo: "Reiniciar todo",

@@ -222,15 +222,18 @@ function activarCambioDeFondo() {
   nocheMientrasSeVea(document.getElementById("portada"));
 }
 
+// Orden pensado para el que llega desde Instagram: ve ropa (destacados)
+// y enseguida las dos invitaciones a quedarse (quiz y concurso), antes
+// de que se canse de bajar. Colecciones y drops quedan para el curioso.
 function renderInicio() {
   contenido.innerHTML =
     htmlPortada() +
     htmlGeneros() +
     htmlDestacados() +
-    htmlColecciones() +
+    htmlInvitacionQuiz() +
     htmlBannerEvento() +
-    htmlDrops() +
-    htmlInvitacionQuiz();
+    htmlColecciones() +
+    htmlDrops();
 
   contenido.querySelector('[data-accion="ocultar-quiz"]')?.addEventListener("click", () => {
     guardarPreferencia("quizOculto", true);

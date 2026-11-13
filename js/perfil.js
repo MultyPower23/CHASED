@@ -143,6 +143,21 @@ function htmlDescuentos() {
   return `<section class="seccion contenedor">${titulo(P.descuentosTitulo)}${cuerpo}</section>`;
 }
 
+// Línea de pasos del pedido, como el seguimiento de un domicilio:
+// lo que ya pasó va lleno, el paso actual resaltado y lo que falta
+// en gris. Los pedidos viejos que no traen estado arrancan en
+// "confirmado".
+const PASOS_PEDIDO = Object.keys(P.estadosPedido);
+
+function htmlPasosPedido(estado = "confirmado") {
+  const actual = Math.max(0, PASOS_PEDIDO.indexOf(estado));
+  const pasos = PASOS_PEDIDO.map((clave, i) => {
+    const clase = i < actual ? "hecho" : i === actual ? "actual" : "";
+    return `<li class="${clase}" ${i === actual ? 'aria-current="step"' : ""}>${P.estadosPedido[clave]}</li>`;
+  }).join("");
+  return `<ol class="pasos-pedido" aria-label="${P.estadoPedido}">${pasos}</ol>`;
+}
+
 function htmlPedido(pedido) {
   const items = pedido.items
     .map((i) => `<li>${escaparHTML(i.nombre)} · ${T.carrito.talla} ${i.talla} × ${i.cantidad}</li>`)
@@ -153,6 +168,7 @@ function htmlPedido(pedido) {
         <strong>${T.carrito.numeroPedido(pedido.id)}</strong>
         <span class="texto-suave">${formatoFecha(pedido.fecha)}</span>
       </div>
+      ${htmlPasosPedido(pedido.estado)}
       <ul class="pedido__items">${items}</ul>
       <div class="pedido__cabecera">
         <span class="texto-suave">${pedido.descuentoPct ? P.conDescuento(pedido.descuentoPct) : T.carrito.prendas(pedido.prendas)}</span>
