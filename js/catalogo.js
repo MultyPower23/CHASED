@@ -23,7 +23,7 @@ import {
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, CONFIG, GENEROS } from "./data/productos.js";
 import { agregarAlCarrito, contarPrendasCarrito } from "./storage.js";
-import { aparecer, rebotar } from "./animaciones.js";
+import { aparecer } from "./animaciones.js";
 import {
   htmlAvatar,
   ponerEn,
@@ -275,15 +275,14 @@ function abrirDetalle(id) {
     mostrarAgregado(producto, tallaElegida);
   });
 
-  // "Probar en conjunto": no compra nada, solo lo pone en el panel
+  // "Probar en conjunto": no compra nada; pone la prenda en el
+  // borrador y lleva directo a Mi closet para verla en el avatar
+  // (igual que desde el perfil). El vestidor lee ese borrador al abrir.
   modal.querySelector('[data-accion="probar"]').addEventListener("click", () => {
     const borrador = getBorrador();
     ponerEn(borrador, producto.id);
     guardarBorrador(borrador);
-    modal.close();
-    renderBarraConjunto();
-    rebotar(document.querySelector(".barra-conjunto"));
-    mostrarAviso(T.conjunto.agregado(producto.nombre));
+    location.href = "maniqui.html";
   });
 
   // Mientras el detalle está abierto, el producto queda en la URL;

@@ -560,7 +560,6 @@ export const TEXTOS = {
     titulo: "Arma tu conjunto",
     ayuda: "Prueba cómo se ven juntas antes de comprarlas. Puedes comprar todo o solo una.",
     probar: "Probar en conjunto",
-    agregado: (nombre) => `${nombre} está en tu conjunto`,
     vacio: "Toca \"Probar en conjunto\" en cualquier prenda para empezar.",
     total: "Todo el conjunto",
     agregarTodo: "Agregar todo al carrito",
