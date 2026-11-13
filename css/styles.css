@@ -3092,3 +3092,64 @@ body.noche {
   background: var(--blanco);
   color: var(--negro);
 }
+
+/* ---------- Compra rápida plegada, al lado del avatar ---------- */
+.vestidor__lado { display: grid; gap: 12px; align-content: start; min-width: 0; }
+
+.faltantes {
+  padding: 0;
+  border: 1px solid var(--gris-oscuro);
+  border-radius: var(--radio);
+  background: none;
+}
+
+.faltantes summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  list-style: none;
+  font-size: 0.85rem;
+  color: var(--gris-claro);
+  cursor: pointer;
+}
+
+.faltantes summary::-webkit-details-marker { display: none; }
+
+.faltantes__abrir {
+  flex: none;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--blanco);
+  color: var(--negro);
+  font-size: 0.8rem;
+}
+
+.faltantes[open] .faltantes__abrir { background: var(--gris-medio); color: var(--blanco); }
+
+.faltantes[open] { background: var(--gris-oscuro); border-color: var(--gris-medio); }
+.faltantes[open] > :not(summary) { margin-left: 14px; margin-right: 14px; }
+.faltantes[open] .faltantes__botones { margin-bottom: 14px; }
+
+.faltantes__ayuda { font-size: 0.8rem; margin: 0 0 10px; }
+
+/* Filas más compactas: foto chiquita, nombre y talla */
+.faltante { grid-template-columns: 40px 1fr 64px; gap: 8px; }
+.faltante__nombre { font-size: 0.8rem; line-height: 1.2; }
+.faltante .precio { font-size: 0.78rem; }
+.faltante select { min-height: 32px; padding: 0 4px; font-size: 0.85rem; }
+.faltantes__botones .boton { flex: 1; }
+
+/* La columna de al lado es angosta: la talla va debajo del nombre */
+.faltante {
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: start;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gris-medio);
+}
+
+.faltante select { grid-column: 2; width: 100%; }
+.faltante .precio__nota { display: none; } /* el "referencial" ya va en el resumen */
+.faltantes summary span:first-child { min-width: 0; }
+.faltantes__botones { flex-direction: column; }

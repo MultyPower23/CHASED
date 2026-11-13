@@ -488,6 +488,8 @@ export const TEXTOS = {
     faltanTitulo: (n) =>
       n === 1 ? "1 prenda de este outfit aún no es tuya" : `${n} prendas de este outfit aún no son tuyas`,
     faltanAyuda: "Elige la talla y llévatelas sin salir de tu closet.",
+    faltanCorto: (n) => (n === 1 ? "1 prenda no es tuya" : `${n} prendas no son tuyas`),
+    comprarCorto: "Comprar",
     agregarFaltantes: "Agregar al carrito",
     comprarYa: "Comprar ahora",
     // Mis conjuntos

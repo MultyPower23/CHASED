@@ -21,6 +21,7 @@ import {
   formatoFecha,
   nocheMientrasSeVea,
   htmlPrecio,
+  formatearPrecio,
 } from "./app.js";
 import { CONFIG } from "./data/productos.js";
 import { TEXTOS } from "./textos.js";
@@ -141,6 +142,7 @@ function htmlCarta(producto, mias) {
 }
 
 // ---------- Comprar rápido lo que no tiene ----------
+let faltantesAbierto = false;
 // Si se puso prendas que no son suyas, se las ofrecemos ahí mismo,
 // con su talla, para agregarlas al carrito o comprarlas de una.
 const prendasQueFaltan = () => {
@@ -171,9 +173,15 @@ function renderFaltantes() {
         </li>`;
     })
     .join("");
+  const total = faltan.reduce((suma, p) => suma + p.precio, 0);
+  // Plegado en una sola línea: solo se abre si la persona quiere
+  // comprar. Así el vestidor sigue limpio (minimalismo ante todo).
   lugar.innerHTML = `
-    <div class="faltantes">
-      <p class="faltantes__titulo">${M.faltanTitulo(faltan.length)}</p>
+    <details class="faltantes" ${faltantesAbierto ? "open" : ""}>
+      <summary>
+        <span>${M.faltanCorto(faltan.length)} · ${formatearPrecio(total)}</span>
+        <span class="faltantes__abrir">${M.comprarCorto}</span>
+      </summary>
       <p class="faltantes__ayuda">${M.faltanAyuda}</p>
       <ul class="faltantes__lista">${filas}</ul>
       <p class="error" aria-live="polite"></p>
@@ -181,7 +189,9 @@ function renderFaltantes() {
         <button class="boton boton--invertido boton--chico" type="button" data-comprar="carrito">${M.agregarFaltantes}</button>
         <button class="boton boton--borde boton--chico" type="button" data-comprar="ya">${M.comprarYa}</button>
       </div>
-    </div>`;
+    </details>`;
+  // Recordamos si lo dejó abierto, para que no se cierre al cambiar de prenda
+  lugar.querySelector("details").addEventListener("toggle", (e) => (faltantesAbierto = e.target.open));
 }
 
 // Agrega las que faltan al carrito. "ya" = y de una al carrito a pagar.
@@ -417,10 +427,12 @@ function render() {
         </div>
 
         <div class="vestidor">
-          <aside class="vestidor__slots" id="slots"></aside>
+          <aside class="vestidor__lado">
+            <div class="vestidor__slots" id="slots"></div>
+            <div id="faltantes"></div>
+          </aside>
           <div class="vestidor__centro">
             <div class="vestidor__avatar" id="avatar"></div>
-            <div id="faltantes"></div>
             <label class="campo campo--oscuro">${M.nombreOutfit}
               <span class="nombre-fila">
                 <input id="nombre-outfit" type="text" maxlength="40">
@@ -476,11 +488,12 @@ function render() {
   nocheMientrasSeVea(document.querySelector(".vestidor-seccion"), 0.25);
 }
 
-// Al pasar por una carta, se ilumina en el avatar la zona donde caería
-function previsualizarZona(carta) {
+// Al pasar por una carta, se ilumina en el avatar la zona donde
+// caería; al pasar por una casilla puesta, se ilumina su zona.
+function previsualizarZona(elemento) {
   document.querySelectorAll(".avatar__zona--previa").forEach((z) => z.classList.remove("avatar__zona--previa"));
-  if (!carta) return;
-  const casilla = ponerEn({ ...outfit }, carta.dataset.poner);
+  if (!elemento) return;
+  const casilla = elemento.dataset.slot ?? ponerEn({ ...outfit }, elemento.dataset.poner);
   // querySelectorAll: la camiseta tiene dos piezas (brazos y torso)
   document
     .querySelectorAll(`.avatar-svg [data-zona="${casilla}"]`)
@@ -567,7 +580,7 @@ contenido.addEventListener("click", async (e) => {
   }
 });
 
-contenido.addEventListener("mouseover", (e) => previsualizarZona(e.target.closest(".carta")));
+contenido.addEventListener("mouseover", (e) => previsualizarZona(e.target.closest(".carta, .slot--lleno")));
 
 contenido.addEventListener("input", (e) => {
   if (e.target.id === "nombre-outfit") nombreOutfit = e.target.value;
