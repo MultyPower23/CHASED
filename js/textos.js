@@ -483,6 +483,13 @@ export const TEXTOS = {
     errorIncompleto: "Pon una camiseta o un hoodie, y una prenda abajo.",
     registroPublicar: "Para publicar tu outfit en la comunidad necesitamos saber quién eres.",
     sinNombre: "Outfit sin nombre",
+    // Prendas puestas que aún no son suyas: comprarlas rápido
+    noLaTienes: "No la tienes",
+    faltanTitulo: (n) =>
+      n === 1 ? "1 prenda de este outfit aún no es tuya" : `${n} prendas de este outfit aún no son tuyas`,
+    faltanAyuda: "Elige la talla y llévatelas sin salir de tu closet.",
+    agregarFaltantes: "Agregar al carrito",
+    comprarYa: "Comprar ahora",
     // Mis conjuntos
     misConjuntos: "Mis conjuntos",
     misConjuntosVacio: "Todavía no has guardado conjuntos. Arma uno arriba y dale \"Guardar\".",

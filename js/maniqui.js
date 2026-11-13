@@ -20,10 +20,12 @@ import {
   abrirModal,
   formatoFecha,
   nocheMientrasSeVea,
+  htmlPrecio,
 } from "./app.js";
+import { CONFIG } from "./data/productos.js";
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS } from "./data/productos.js";
-import { getUsuario, getQuiz, guardarOutfit, quitarOutfits } from "./storage.js";
+import { getUsuario, getQuiz, guardarOutfit, quitarOutfits, agregarAlCarrito, contarPrendasCarrito } from "./storage.js";
 import { aparecer, rebotar } from "./animaciones.js";
 import {
   CASILLAS,
@@ -111,11 +113,13 @@ function armarPorMi(plan) {
 
 function htmlSlot(casilla) {
   const producto = outfit[casilla] && buscarProducto(outfit[casilla]);
+  const noEsSuya = producto && !idsDelCloset().includes(producto.id);
   return `
     <div class="slot ${producto ? "slot--lleno" : ""}" data-slot="${casilla}">
       <div class="slot__foto">${producto ? htmlFoto(producto) : ""}</div>
       <div class="slot__texto">
         <span class="slot__casilla">${M.casillas[casilla]}</span>
+        ${noEsSuya ? `<span class="slot__falta">${M.noLaTienes}</span>` : ""}
         <span class="slot__nombre">${producto ? escaparHTML(producto.nombre) : M.casillaVacia}</span>
         ${producto ? `<button class="slot__quitar" type="button" data-quitar="${casilla}">${M.quitar}</button>` : ""}
       </div>
@@ -136,9 +140,73 @@ function htmlCarta(producto, mias) {
     </button>`;
 }
 
+// ---------- Comprar rápido lo que no tiene ----------
+// Si se puso prendas que no son suyas, se las ofrecemos ahí mismo,
+// con su talla, para agregarlas al carrito o comprarlas de una.
+const prendasQueFaltan = () => {
+  const mias = idsDelCloset();
+  return idsDelOutfit(outfit).filter((id) => !mias.includes(id)).map(buscarProducto);
+};
+
+function renderFaltantes() {
+  const lugar = document.getElementById("faltantes");
+  const faltan = prendasQueFaltan();
+  if (!faltan.length) {
+    lugar.innerHTML = "";
+    return;
+  }
+  const filas = faltan
+    .map((p) => {
+      const tallas = (p.tallas ?? CONFIG.tallas).map((t) => `<option>${t}</option>`).join("");
+      return `
+        <li class="faltante">
+          ${htmlFoto(p)}
+          <div>
+            <span class="faltante__nombre">${escaparHTML(p.nombre)}</span>
+            ${htmlPrecio(p)}
+          </div>
+          <select data-talla-de="${p.id}" aria-label="${T.catalogo.elegirTalla}">
+            <option value="">${T.catalogo.filtros.talla}</option>${tallas}
+          </select>
+        </li>`;
+    })
+    .join("");
+  lugar.innerHTML = `
+    <div class="faltantes">
+      <p class="faltantes__titulo">${M.faltanTitulo(faltan.length)}</p>
+      <p class="faltantes__ayuda">${M.faltanAyuda}</p>
+      <ul class="faltantes__lista">${filas}</ul>
+      <p class="error" aria-live="polite"></p>
+      <div class="faltantes__botones">
+        <button class="boton boton--invertido boton--chico" type="button" data-comprar="carrito">${M.agregarFaltantes}</button>
+        <button class="boton boton--borde boton--chico" type="button" data-comprar="ya">${M.comprarYa}</button>
+      </div>
+    </div>`;
+}
+
+// Agrega las que faltan al carrito. "ya" = y de una al carrito a pagar.
+function comprarFaltantes(modoCompra) {
+  const lugar = document.getElementById("faltantes");
+  const selects = [...lugar.querySelectorAll("[data-talla-de]")];
+  if (selects.some((s) => !s.value)) {
+    lugar.querySelector(".error").textContent = T.conjunto.faltanTallas;
+    return;
+  }
+  selects.forEach((s) => agregarAlCarrito(s.dataset.tallaDe, s.value));
+  if (modoCompra === "ya") {
+    location.href = "carrito.html";
+    return;
+  }
+  mostrarAviso(T.conjunto.agregadoTodo(selects.length));
+  lugar.querySelector(".faltantes__botones").innerHTML = `
+    <a class="boton boton--invertido boton--chico" href="carrito.html">${T.carrito.irAlCarrito(contarPrendasCarrito())}</a>`;
+  rebotar(lugar.querySelector(".faltantes__botones a"));
+}
+
 function renderVestidor() {
   document.getElementById("slots").innerHTML = CASILLAS.map(htmlSlot).join("");
   document.getElementById("avatar").innerHTML = htmlAvatar(outfit, "vestidor");
+  renderFaltantes();
   const mias = idsDelCloset();
   const prendas = prendasDisponibles();
   document.getElementById("cartas").innerHTML = prendas.length
@@ -352,6 +420,7 @@ function render() {
           <aside class="vestidor__slots" id="slots"></aside>
           <div class="vestidor__centro">
             <div class="vestidor__avatar" id="avatar"></div>
+            <div id="faltantes"></div>
             <label class="campo campo--oscuro">${M.nombreOutfit}
               <span class="nombre-fila">
                 <input id="nombre-outfit" type="text" maxlength="40">
@@ -440,6 +509,7 @@ contenido.addEventListener("click", async (e) => {
     return renderVestidor();
   }
   if (el("[data-combinar]")) return mostrarCombinacion(el("[data-combinar]").dataset.combinar);
+  if (el("[data-comprar]")) return comprarFaltantes(el("[data-comprar]").dataset.comprar);
   if (el("[data-probar]")) {
     // Pone la prenda suya + el ejemplo en el avatar y sube a verlo
     const [suya, ejemplo] = el("[data-probar]").dataset.probar.split("|");

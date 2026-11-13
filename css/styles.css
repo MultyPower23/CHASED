@@ -3036,3 +3036,59 @@ body.noche {
 .slot--lleno:hover .slot__nombre,
 .slot--lleno:active .slot__nombre,
 .slot--lleno:focus-within .slot__nombre { white-space: normal; overflow: visible; }
+
+/* ---------- Prendas puestas que aún no son suyas ---------- */
+.slot__falta {
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--gris-claro);
+  color: var(--negro);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.faltantes {
+  padding: 16px;
+  border: 1.5px solid var(--gris-medio);
+  border-radius: var(--radio);
+  background: var(--gris-oscuro);
+}
+
+.faltantes__titulo { margin: 0; font-family: var(--fuente-titulos); font-size: 1.05rem; }
+.faltantes__ayuda { margin: 2px 0 12px; color: var(--gris-claro); font-size: 0.9rem; }
+
+.faltantes__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.faltante {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.faltante .foto { border-radius: var(--radio-chico); overflow: hidden; }
+.faltante__nombre { display: block; font-size: 0.9rem; }
+.faltante .precio { margin: 0; font-size: 0.9rem; }
+.faltante .precio__nota { color: var(--gris-claro); }
+
+.faltante select {
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--gris-medio);
+  border-radius: var(--radio-chico);
+  background: var(--negro);
+  color: var(--blanco);
+  font: inherit;
+}
+
+.faltantes .error { color: var(--blanco); margin: 8px 0 4px; }
+.faltantes__botones { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Debajo del vestidor todo es blanco siempre: el modo noche solo
+   oscurece el header, así "Tu closet" nunca queda negro sobre negro */
+.vestidor-seccion ~ .seccion {
+  background: var(--blanco);
+  color: var(--negro);
+}
