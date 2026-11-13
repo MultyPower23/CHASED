@@ -412,7 +412,10 @@ function previsualizarZona(carta) {
   document.querySelectorAll(".avatar__zona--previa").forEach((z) => z.classList.remove("avatar__zona--previa"));
   if (!carta) return;
   const casilla = ponerEn({ ...outfit }, carta.dataset.poner);
-  document.querySelector(`.avatar-svg [data-zona="${casilla}"]`)?.classList.add("avatar__zona--previa");
+  // querySelectorAll: la camiseta tiene dos piezas (brazos y torso)
+  document
+    .querySelectorAll(`.avatar-svg [data-zona="${casilla}"]`)
+    .forEach((z) => z.classList.add("avatar__zona--previa"));
 }
 
 // ============================================================

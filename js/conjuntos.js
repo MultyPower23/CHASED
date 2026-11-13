@@ -126,7 +126,10 @@ export function htmlAvatar(outfit) {
       <circle cx="24" cy="115" r="10" class="avatar__cabeza"/>
       <circle cx="276" cy="115" r="10" class="avatar__cabeza"/>
       ${zona("abajo", ZONAS.piernas, outfit.abajo)}
-      ${zona("arriba", ZONAS.torso + " " + ZONAS.brazos, outfit.arriba)}
+      <!-- Brazos primero y torso ENCIMA: así el torso tapa la unión del
+           hombro y no se cruzan los bordes (antes eran un solo trazo) -->
+      ${zona("arriba", ZONAS.brazos, outfit.arriba)}
+      ${zona("arriba", ZONAS.torso, outfit.arriba)}
       ${outfit.extra ? zona("extra", ZONAS.capa, true) : `<path d="${ZONAS.capa}" class="avatar__capa-vacia" data-zona="extra"/>`}
     </svg>`;
 }

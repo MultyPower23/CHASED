@@ -3001,3 +3001,38 @@ body.noche {
 .avatar-svg { width: min(78vw, 300px); }
 .panel-conjunto__avatar .avatar-svg { width: min(60vw, 230px); }
 @media (min-width: 900px) { .avatar-svg { width: 320px; } }
+
+/* Casillas de la izquierda (prendas puestas): al pasar el mouse o
+   tocarlas crecen MÁS que las cartas, para ver bien qué tienes puesto.
+   Crecen hacia la derecha (hacia el avatar) para no salirse de la pantalla. */
+.slot {
+  position: relative;
+  transform-origin: left center;
+  transition: transform 0.25s ease, background 0.2s, border-color 0.2s;
+}
+
+.slot--lleno { cursor: zoom-in; }
+
+.slot--lleno:hover,
+.slot--lleno:active,
+.slot--lleno:focus-within {
+  transform: scale(1.35);
+  z-index: 5;
+  background: var(--gris-medio);
+  border-color: var(--blanco);
+}
+
+/* En el celular las casillas van en fila: crecen desde el centro */
+@media (max-width: 899px) {
+  .slot { transform-origin: center top; }
+  .slot--lleno:hover,
+  .slot--lleno:active,
+  .slot--lleno:focus-within { transform: scale(1.25); }
+  .vestidor__slots .slot:first-child { transform-origin: left top; }
+  .vestidor__slots .slot:last-child { transform-origin: right top; }
+}
+
+/* Al crecer, que se lea el nombre completo (sin los "…") */
+.slot--lleno:hover .slot__nombre,
+.slot--lleno:active .slot__nombre,
+.slot--lleno:focus-within .slot__nombre { white-space: normal; overflow: visible; }
