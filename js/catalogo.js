@@ -64,11 +64,8 @@ const OPCIONES = {
   talla: CONFIG.tallas,
 };
 
-// Filtros que se ven. La talla está apagada porque hoy todas las
-// prendas tienen las mismas tallas (no filtraba nada). Cuando Chased
-// pase tallas reales por prenda en productos.js, se agrega "talla"
-// aquí y vuelve a salir: la lógica de filtrar ya está lista.
-const FILTROS_VISIBLES = ["tipo", "color"];
+// Filtros que se ven en el catálogo (en este orden)
+const FILTROS_VISIBLES = ["tipo", "color", "talla"];
 
 // Guardamos los filtros de género y colección en la URL: así, si
 // recargas o compartes el link, ves lo mismo.
@@ -170,9 +167,9 @@ function htmlSelectOrden() {
     </label>`;
 }
 
-// Pestañas grandes de Todo / Mujer / Unisex: es lo primero que la
-// gente busca, por eso no va escondido en un select. Salen de GENEROS
-// (productos.js), así que si vuelve "hombre" allá, aparece solita.
+// Pestañas grandes de Todo / Hombre / Mujer / Unisex: es lo primero
+// que la gente busca, por eso no va escondido en un select. Salen de
+// GENEROS (productos.js).
 function htmlPestanas() {
   const opciones = ["", ...Object.keys(GENEROS)];
   return `

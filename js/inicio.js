@@ -22,9 +22,10 @@ const FOTOS_FAMILIA = [
   "assets/img/comunidad/familia-05.jpg",
 ];
 
-// Portadas de Mujer y Unisex (fotos de sesión de la familia Chased).
-// Salen de GENEROS: si vuelve "hombre", se agrega su foto aquí.
+// Portadas de Hombre, Mujer y Unisex (fotos de sesión de la familia
+// Chased). Los botones salen de GENEROS, así que van en el mismo orden.
 const PORTADAS_GENERO = {
+  hombre: "assets/img/comunidad/familia-04.jpg",
   mujer: "assets/img/comunidad/familia-02.jpg",
   unisex: "assets/img/comunidad/familia-01.jpg",
 };

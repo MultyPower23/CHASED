@@ -586,8 +586,8 @@ body.noche {
   min-height: 40px;
 }
 
-/* Mujer / Unisex: dos fotos grandes lado a lado con su nombre en una
-   franja negra. (Si vuelve una tercera, va a lo ancho debajo) */
+/* Hombre / Mujer: dos fotos grandes con su nombre en una franja negra */
+/* En el celular: Hombre y Mujer lado a lado, Unisex a lo ancho debajo */
 .generos {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1111,13 +1111,12 @@ body.fondo-quieto {
 @media (min-width: 700px) {
   h1 { font-size: 2.4rem; }
   .grilla { grid-template-columns: repeat(3, 1fr); gap: 32px 20px; }
-  .filtros { grid-template-columns: repeat(3, 1fr); }
+  .filtros { grid-template-columns: repeat(4, 1fr); }
   .portada__frase { font-size: 1.7rem; }
   .bandera__pista img { width: 160px; height: 210px; }
-  /* Dos portadas: más anchas que altas para que no ocupen media página */
-  .generos { grid-template-columns: repeat(2, 1fr); }
+  .generos { grid-template-columns: repeat(3, 1fr); }
   .genero,
-  .generos .genero:nth-child(3) { grid-column: auto; aspect-ratio: 4 / 3; }
+  .generos .genero:nth-child(3) { grid-column: auto; aspect-ratio: 3 / 4; }
   .colecciones { grid-auto-columns: 38%; }
   .generos { gap: 20px; }
   .invitacion-quiz__acciones { flex-direction: row; justify-content: center; gap: 20px; }
