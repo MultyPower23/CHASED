@@ -2602,6 +2602,12 @@ body.fondo-quieto {
 .bandera__pista img,
 .para-ti__item .foto { border-radius: var(--radio); overflow: hidden; }
 
+/* OJO: la regla de arriba le ponía overflow: hidden también al modal,
+   y por eso en el celular la ventana del producto no deslizaba y no se
+   alcanzaba "Agregar al carrito". El modal sí redondea sus esquinas,
+   pero tiene que poder hacer scroll por dentro. */
+.modal { overflow-y: auto; overflow-x: hidden; }
+
 .cantidad { overflow: hidden; }
 .bloques span { border-radius: 4px; }
 .barra,
