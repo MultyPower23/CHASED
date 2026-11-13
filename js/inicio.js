@@ -9,7 +9,7 @@
 
 import { htmlTarjeta, buscarProducto, productosDeColeccion, nocheMientrasSeVea } from "./app.js";
 import { TEXTOS } from "./textos.js";
-import { PRODUCTOS, COLECCIONES } from "./data/productos.js";
+import { PRODUCTOS, COLECCIONES, GENEROS } from "./data/productos.js";
 import { getPreferencia, guardarPreferencia, getQuiz } from "./storage.js";
 
 const T = TEXTOS;
@@ -22,18 +22,21 @@ const FOTOS_FAMILIA = [
   "assets/img/comunidad/familia-05.jpg",
 ];
 
-// Portadas de Hombre, Mujer y Unisex (fotos de sesión de la familia Chased)
+// Portadas de Hombre, Mujer y Unisex (fotos de sesión de la familia
+// Chased). Los botones salen de GENEROS, así que van en el mismo orden.
 const PORTADAS_GENERO = {
   hombre: "assets/img/comunidad/familia-04.jpg",
   mujer: "assets/img/comunidad/familia-02.jpg",
   unisex: "assets/img/comunidad/familia-01.jpg",
 };
 
-// El serif es el logo principal y vive en el header y el footer.
-// El stencil (más urbano) es el protagonista de la portada negra,
-// de la cinta y del banner del concurso.
+// El serif con el CH es el logo oficial del manual (sus reglas de
+// espacio de respeto están hechas para él), así que es el que va en
+// la portada negra y en el banner del concurso. Versión blanca porque
+// los dos fondos son negros.
 const LOGOS_BLANCOS = {
-  stencil: "assets/logo/logo-stencil-blanco.png",
+  principal: "assets/logo/logo-chased-blanco.png",
+  simbolo: "assets/logo/simbolo-ch-blanco.png",
 };
 
 // Una frase distinta cada vez que entras: así la portada se siente viva
@@ -75,13 +78,10 @@ function htmlBandera() {
   const fotos = fotosBandera()
     .map((src) => `<img src="${src}" alt="" loading="lazy" onerror="this.remove()">`)
     .join("");
-  // Separadores intercalados: CH, stencil, CH, stencil…
+  // Entre frase y frase va solo el símbolo CH: es pequeño y se lee
+  // bien a la altura de la cinta (el logo completo quedaría diminuto)
   const frases = T.inicio.cinta
-    .map((frase, i) =>
-      i % 2 === 0
-        ? `<span>${frase}</span><img src="assets/logo/simbolo-ch-blanco.png" alt="">`
-        : `<span>${frase}</span><img class="cinta__stencil" src="${LOGOS_BLANCOS.stencil}" alt="">`
-    )
+    .map((frase) => `<span>${frase}</span><img src="${LOGOS_BLANCOS.simbolo}" alt="">`)
     .join("");
   return `
     <div class="bandera" aria-hidden="true">
@@ -97,14 +97,14 @@ function htmlPortada() {
     <section class="portada" id="portada">
       <div class="contenedor portada__centro">
         <h1 class="portada__titulo">
-          <img src="${LOGOS_BLANCOS.stencil}" alt="${T.marca.nombre}">
+          <img src="${LOGOS_BLANCOS.principal}" alt="${T.marca.nombre}">
         </h1>
         <p class="portada__frase">${fraseAleatoria()}</p>
         <div class="portada__botones">
           <a class="boton boton--invertido" href="catalogo.html">${T.inicio.verCatalogo}</a>
-          <a class="boton boton--borde" href="catalogo.html?genero=hombre">${T.generos.hombre}</a>
-          <a class="boton boton--borde" href="catalogo.html?genero=mujer">${T.generos.mujer}</a>
-          <a class="boton boton--borde" href="catalogo.html?genero=unisex">${T.generos.unisex}</a>
+          ${Object.keys(GENEROS)
+            .map((g) => `<a class="boton boton--borde" href="catalogo.html?genero=${g}">${T.generos[g]}</a>`)
+            .join("")}
         </div>
       </div>
       ${htmlBandera()}
@@ -122,7 +122,7 @@ function htmlGeneros() {
   return `
     <section class="seccion contenedor">
       ${htmlTitulo(T.inicio.paraQuienTitulo)}
-      <div class="generos">${tile("hombre")}${tile("mujer")}${tile("unisex")}</div>
+      <div class="generos">${Object.keys(GENEROS).map(tile).join("")}</div>
     </section>`;
 }
 
@@ -130,7 +130,7 @@ function htmlDestacados() {
   const destacados = PRODUCTOS.filter((p) => p.destacado);
   return `
     <section class="seccion contenedor">
-      ${htmlTitulo(T.inicio.destacadosTitulo, `<a href="catalogo.html" class="texto-suave">${T.inicio.verCatalogo}</a>`)}
+      ${htmlTitulo(T.inicio.destacadosTitulo, `<a href="catalogo.html" class="texto-suave enlace-tactil">${T.inicio.verCatalogo}</a>`)}
       <div class="grilla grilla--destacados">${destacados.map(htmlTarjeta).join("")}</div>
     </section>`;
 }
@@ -165,7 +165,7 @@ function htmlBannerEvento() {
   return `
     <section class="contenedor">
       <div class="banner-evento">
-        <img class="banner-evento__logo" src="${LOGOS_BLANCOS.stencil}" alt="">
+        <img class="banner-evento__logo" src="${LOGOS_BLANCOS.principal}" alt="">
         <h2>${T.inicio.eventoBanner}</h2>
         <a class="boton boton--invertido" href="comunidad.html#concurso">${T.inicio.eventoBoton}</a>
       </div>
@@ -222,15 +222,18 @@ function activarCambioDeFondo() {
   nocheMientrasSeVea(document.getElementById("portada"));
 }
 
+// Orden pensado para el que llega desde Instagram: ve ropa (destacados)
+// y enseguida las dos invitaciones a quedarse (quiz y concurso), antes
+// de que se canse de bajar. Colecciones y drops quedan para el curioso.
 function renderInicio() {
   contenido.innerHTML =
     htmlPortada() +
     htmlGeneros() +
     htmlDestacados() +
-    htmlColecciones() +
+    htmlInvitacionQuiz() +
     htmlBannerEvento() +
-    htmlDrops() +
-    htmlInvitacionQuiz();
+    htmlColecciones() +
+    htmlDrops();
 
   contenido.querySelector('[data-accion="ocultar-quiz"]')?.addEventListener("click", () => {
     guardarPreferencia("quizOculto", true);

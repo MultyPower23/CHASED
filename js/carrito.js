@@ -141,10 +141,18 @@ function htmlInsigniaCarrito(totales) {
         ${htmlIconoInsignia(ahora.indice, "icono-insignia--chico")}
         <span>${T.carrito.tuInsignia}: <strong>${ahora.nombre ?? T.insignias.sinInsignia}</strong></span>
       </p>
-      <div class="bloques" aria-hidden="true">${htmlBloques(despues, despues.indice > ahora.indice)}</div>
+      <div class="bloques" aria-hidden="true">${htmlBloques(despues, llenaUnNivel(ahora, despues))}</div>
       <p class="insignia__texto">${mensaje}</p>
       <p class="texto-suave">${T.carrito.reglaInsignia(CONFIG.prendasPorNivel, pct)}</p>
     </div>`;
+}
+
+// ¿Este pedido llena un nivel completo? Rookie NO cuenta: es la
+// insignia de bienvenida y se gana con 1 sola prenda, así que si
+// pintábamos los 4 bloques llenos, después de confirmar "bajaba" a
+// 1 de 4 y parecía un error. Ahí mostramos los bloques reales.
+function llenaUnNivel(ahora, despues) {
+  return despues.indice > ahora.indice && nivelDaDescuento(despues.indice);
 }
 
 // Solo los cuadritos de la barra (para el carrito, donde el texto es otro)
@@ -238,6 +246,7 @@ function htmlResumen(totales, items) {
       ${htmlInsigniaCarrito(totales)}
       <button class="boton boton--ancho" type="button" data-accion="confirmar">${T.carrito.confirmar}</button>
       <p class="texto-suave">${T.carrito.simulado}</p>
+      <p class="texto-suave">${T.carrito.beta}</p>
     </aside>`;
 }
 
@@ -298,6 +307,7 @@ function renderConfirmacion(pedido) {
         </figure>
         <h1>${T.carrito.numeroPedido(pedido.id)}</h1>
         <p>${T.carrito.confirmado}</p>
+        <p class="texto-suave">${T.carrito.beta}</p>
         <p class="texto-suave">${T.carrito.prendas(pedido.prendas)} · ${T.carrito.total} ${formatearPrecio(pedido.total)}</p>
         ${mensajeNivel}
         <div class="confirmacion__acciones">

@@ -7,6 +7,36 @@
    (la gente llega desde Instagram) y luego se agranda.
    ============================================================ */
 
+/* ---------- Libre Baskerville sin internet ----------
+   Antes la fuente llegaba de Google Fonts: si en la expo no había
+   wifi, los títulos caían en Georgia. Ahora los .woff2 viven en
+   assets/fonts/ y la fuente viaja con la página (como llevar la
+   comida de la casa en vez de depender del restaurante). */
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: local("Libre Baskerville"), url("../assets/fonts/LibreBaskerville-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: local("Libre Baskerville Bold"), url("../assets/fonts/LibreBaskerville-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: local("Libre Baskerville Italic"), url("../assets/fonts/LibreBaskerville-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* Los colores viven aquí y en ningún otro lado. Si Chased cambia
    un gris, se cambia una línea y listo. */
 :root {
@@ -282,6 +312,39 @@ select {
 
 .footer a { color: var(--blanco); }
 
+/* Instagram como botón de borde: se nota sin romper lo minimalista */
+.footer__red {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  margin: 8px 0 4px;
+  padding: 10px 22px;
+  border: 1px solid var(--blanco);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.footer__red span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 0.8rem;
+  color: var(--gris-claro);
+  line-height: 1.2;
+}
+
+.footer__red strong {
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+  color: var(--blanco);
+}
+
+.footer__red:hover { background: var(--blanco); color: var(--negro); }
+.footer__red:hover span,
+.footer__red:hover strong { color: var(--negro); }
+
 .footer__prototipo {
   color: var(--gris-claro);
   font-size: 0.8rem;
@@ -380,6 +443,12 @@ body.noche {
 .noche .contador--vacio { background: var(--gris-oscuro); color: var(--blanco); }
 .noche .texto-suave { color: var(--gris-claro); }
 
+/* En Mi closet el body sigue en "noche" mientras se ve el vestidor,
+   pero las secciones de abajo son blancas: ahí el gris claro se
+   perdía sobre el blanco. Les devolvemos un gris oscuro del manual. */
+.noche #tu-closet .texto-suave,
+.noche #mis-conjuntos .texto-suave { color: var(--gris-oscuro); }
+
 /* ---------- Portada negra ---------- */
 .portada {
   min-height: calc(100svh - var(--alto-header));
@@ -404,11 +473,12 @@ body.noche {
 
 .portada__titulo { margin: 0; }
 
-/* Logo stencil protagonista: solo se fija el ancho (el alto se
-   acomoda solo). Como es más ancho que alto, aguanta más ancho
-   sin empujar la banderita fuera de la pantalla. */
+/* Logo principal (serif con CH) protagonista: solo se fija el ancho
+   (el alto se acomoda solo). Es más "cuadradito" que el stencil, así
+   que va un poco más angosto para no empujar la banderita fuera de
+   la pantalla en celulares bajitos. */
 .portada__titulo img {
-  width: min(88vw, 640px, 80svh);
+  width: min(72vw, 440px, 70svh);
   height: auto;
 }
 
@@ -483,9 +553,6 @@ body.noche {
   width: auto;
 }
 
-/* El stencil es más ancho y bajito: un poco más de alto para que se lea */
-.cinta__pista .cinta__stencil { height: 34px; }
-
 @keyframes correr-derecha {
   from { transform: translateX(-50%); }
   to { transform: translateX(0); }
@@ -510,6 +577,14 @@ body.noche {
 }
 
 .subtitulo { margin: -12px 0 20px; }
+
+/* Links de texto que se tocan con el dedo: al menos 40 px de alto
+   para no tener que "apuntar" (el texto se ve igual de pequeño) */
+.enlace-tactil {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+}
 
 /* Hombre / Mujer: dos fotos grandes con su nombre en una franja negra */
 /* En el celular: Hombre y Mujer lado a lado, Unisex a lo ancho debajo */
@@ -628,7 +703,7 @@ body.noche {
 .banner-evento h2 { max-width: 18em; margin: 0 auto 20px; }
 
 .banner-evento__logo {
-  width: min(70vw, 300px);
+  width: min(56vw, 220px);
   height: auto;
   margin: 0 auto 8px;
 }
@@ -712,6 +787,10 @@ body.noche {
 
 .campo select,
 .campo input {
+  /* width 100% + min-width 0: sin esto, el select se estira según su
+     opción más larga y empuja el modal fuera de la pantalla del celular */
+  width: 100%;
+  min-width: 0;
   min-height: 44px;
   padding: 0 10px;
   border: 1px solid var(--gris-claro);
@@ -746,7 +825,26 @@ body.noche {
   background: var(--blanco);
 }
 
-.modal { overflow: auto; }
+/* overscroll-behavior: contain → cuando el scroll de la tarjeta llega
+   al final, el gesto se queda ahí y no se "pasa" a la página de atrás.
+   90dvh = 90% de lo que de verdad se ve en el celular (sin la barra
+   del navegador); con 90vh el botón de agregar podía quedar escondido. */
+.modal {
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  max-height: 90dvh;
+}
+
+/* Mientras hay un modal abierto, la página de atrás queda congelada.
+   El "top" negativo lo pone app.js para que no salte al inicio. */
+body.fondo-quieto {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+}
 
 .modal::backdrop { background: rgba(0, 0, 0, 0.55); }
 
@@ -821,7 +919,13 @@ body.noche {
 .guia-tallas summary { cursor: pointer; }
 
 /* Formulario de registro */
-.formulario { display: grid; gap: 14px; }
+/* minmax(0, 1fr): la columna no puede crecer más que la caja,
+   así ningún campo largo abre scroll horizontal en celulares de 320 px */
+.formulario {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
 
 .formulario .boton { margin-top: 6px; }
 
@@ -1212,6 +1316,72 @@ body.noche {
 .pedido {
   border: 1px solid var(--gris-claro);
   padding: 16px 18px;
+}
+
+/* Pasos del pedido: puntos unidos por una línea. Lleno = ya pasó,
+   punto grande = donde va ahora, gris = lo que falta. */
+.pasos-pedido {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 14px 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.pasos-pedido li {
+  position: relative;
+  padding: 20px 4px 0; /* el aire lateral evita que dos nombres se peguen */
+  font-size: 0.68rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--gris-medio);
+}
+
+/* El punto */
+.pasos-pedido li::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--gris-claro);
+}
+
+/* La línea que une cada punto con el anterior */
+.pasos-pedido li + li::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--gris-claro);
+}
+
+.pasos-pedido li.hecho::before,
+.pasos-pedido li.actual::before,
+.pasos-pedido li.hecho::after,
+.pasos-pedido li.actual::after { background: var(--negro); }
+
+.pasos-pedido li.hecho { color: var(--gris-oscuro); }
+
+.pasos-pedido li.actual {
+  color: var(--negro);
+  font-weight: 700;
+}
+
+/* El paso actual un poco más grande, con un aro para que resalte */
+.pasos-pedido li.actual::before {
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border: 3px solid var(--blanco);
+  box-shadow: 0 0 0 1px var(--negro);
 }
 
 .pedido__cabecera {
@@ -1769,12 +1939,18 @@ body.noche {
 }
 
 .portada-comunidad__logo {
-  width: min(70vw, 380px);
+  width: min(60vw, 280px);
   height: auto;
   margin: 0 auto 8px;
 }
 
 .portada-comunidad h1 { font-size: 2.2rem; margin-bottom: 8px; }
+
+.portada-comunidad__nota {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--gris-claro);
+}
 
 .portada-comunidad__intro {
   font-family: var(--fuente-titulos);
@@ -2511,6 +2687,12 @@ body.noche {
 .confirmacion__gracias img,
 .bandera__pista img,
 .para-ti__item .foto { border-radius: var(--radio); overflow: hidden; }
+
+/* OJO: la regla de arriba le ponía overflow: hidden también al modal,
+   y por eso en el celular la ventana del producto no deslizaba y no se
+   alcanzaba "Agregar al carrito". El modal sí redondea sus esquinas,
+   pero tiene que poder hacer scroll por dentro. */
+.modal { overflow-y: auto; overflow-x: hidden; }
 
 .cantidad { overflow: hidden; }
 .bloques span { border-radius: 4px; }

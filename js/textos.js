@@ -98,7 +98,7 @@ export const TEXTOS = {
     bienvenida: (nombre) => `¡Bienvenid@, ${nombre}! Ya haces parte de Chased.`,
     errorNombre: "Escribe tu nombre para seguir.",
     errorCorreo: "Revisa el correo, parece que le falta algo.",
-    nota: "Prototipo: tus datos solo se guardan en este navegador.",
+    nota: "Versión beta · Registro básico: por ahora solo pedimos tu nombre y tu correo, y se guardan únicamente en este navegador.",
   },
 
   catalogo: {
@@ -145,6 +145,7 @@ export const TEXTOS = {
     numeroPedido: (id) => `Pedido #${id}`,
     registroAntes: "Antes de confirmar, cuéntanos quién eres.",
     simulado: "Pedido simulado: no se hace ningún cobro. Precios y descuento son referenciales.",
+    beta: "Versión beta · Registro básico: en la versión completa aquí eliges cómo recibir y cómo pagar tu pedido.",
     prendas: (n) => (n === 1 ? "1 prenda" : `${n} prendas`),
     gracias: "Gracias por formar parte de la familia Chased.",
     // Carga al confirmar la compra — BORRADOR (misma animación del quiz)
@@ -288,6 +289,14 @@ export const TEXTOS = {
     vencioEl: (fecha) => `Venció el ${fecha}`,
     ganadoEl: (fecha) => `Ganado el ${fecha}`,
     pedidos: "Tus pedidos",
+    // Línea de pasos de cada pedido (en el prototipo todos quedan en "Confirmado")
+    estadoPedido: "Estado del pedido",
+    estadosPedido: {
+      confirmado: "Confirmado",
+      preparacion: "En preparación",
+      camino: "En camino",
+      entregado: "Entregado",
+    },
     sinPedidos: "Todavía no has hecho pedidos.",
     closet: "Tu closet",
     sinRegistro: "Tu perfil guarda tu estilo, tu insignia y tus pedidos. Para verlo, únete a la familia Chased.",
@@ -299,7 +308,7 @@ export const TEXTOS = {
     irCatalogo: "Ir al catálogo",
     closetVacio: "Aquí aparecerán las prendas que compres.",
     probarAyuda: "Pruébala en tu vestidor y arma un conjunto con ella.",
-    closetNota: "Pronto podrás armar outfits con ellas en Mi closet.",
+    closetNota: "Toca una prenda para probarla en tu vestidor.",
   },
 
   // Insignias — nombres BORRADOR (TODO confirmar con el equipo)
@@ -318,12 +327,13 @@ export const TEXTOS = {
     intro: "Aquí no solo compras: participas, votas y te ven.",
     // Contadores de la portada
     stats: { participantes: "participantes", votos: "votos", disenos: "diseños" },
+    statsNota: "Incluye datos de ejemplo",
     ir: { concurso: "Concurso", disenos: "Diseños", outfits: "Outfits", familia: "Familia" },
     ejemplo: "Ejemplo",
     tu: "Tú",
     evento: {
       titulo: "Concurso de baile Chased",
-      descripcion: "Baila con tu outfit Chased, sube tu video aquí o publícalo en redes etiquetando a @chased_med. La comunidad vota.",
+      descripcion: "Baila con tu outfit Chased, pega aquí el link de tu video o publícalo en redes etiquetando a @chased_med. La comunidad vota.",
       premio: "Premio: prendas exclusivas Chased",
       inscribirse: "Inscribirme",
       yaInscrito: "Ya estás inscrit@ ✓",
@@ -334,7 +344,7 @@ export const TEXTOS = {
       etiquetar: "Publícalo en Instagram",
       pasos: [
         { titulo: "Inscríbete", texto: "Aquí en la página o en el evento presencial." },
-        { titulo: "Baila con tu outfit Chased", texto: "Sube tu video o publícalo etiquetando a @chased_med." },
+        { titulo: "Baila con tu outfit Chased", texto: "Publica tu video etiquetando a @chased_med y pega el link al inscribirte." },
         { titulo: "La comunidad vota", texto: "Reparte tus votos entre tus favoritos. Las prendas exclusivas son para quien más mueva a la familia." },
       ],
       pasados: "Eventos pasados",
@@ -534,7 +544,7 @@ export const TEXTOS = {
     intro: "Herramientas para preparar la presentación. Todo pasa solo en este navegador.",
     cargarTitulo: "Cargar datos de ejemplo",
     cargarTexto:
-      "Crea una usuaria de ejemplo con su quiz, dos pedidos (insignia Runner), un descuento disponible, una caja escaneada, un conjunto publicado y un voto en el concurso.",
+      "Crea una usuaria de ejemplo con su quiz, tres pedidos (7 prendas, insignia Runner: con una compra más sube a Chaser), un descuento disponible, una caja escaneada, un conjunto publicado y un voto en el concurso.",
     cargar: "Cargar datos de ejemplo",
     cargado: "¡Listo! Ya hay datos de ejemplo. Date una vuelta por el perfil.",
     reiniciarTitulo: "Reiniciar todo",

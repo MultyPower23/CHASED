@@ -256,7 +256,7 @@ export function htmlTarjetaEstilo(clave, { etiqueta = "", acciones = "", grande 
     <article class="tarjeta-estilo ${grande ? "tarjeta-estilo--grande" : ""}">
       ${visual.fondo ? `<img class="tarjeta-estilo__fondo" src="${visual.fondo}" alt="" onerror="this.remove()">` : ""}
       <div class="tarjeta-estilo__franja">
-        ${visual.icono ? `<img class="tarjeta-estilo__icono" src="${visual.icono}" alt="" onerror="this.remove()">` : ""}
+        <img class="tarjeta-estilo__icono" src="${visual.icono ?? ICONO_RESPALDO}" alt="" onerror="this.remove()">
         ${etiqueta ? `<p class="tarjeta-estilo__etiqueta">${etiqueta}</p>` : ""}
         <p class="tarjeta-estilo__nombre">${estilo.nombre}</p>
         <p class="tarjeta-estilo__descripcion">${estilo.descripcion}</p>
@@ -315,7 +315,33 @@ export function mostrarAviso(texto) {
 // ---------- Modal genérico ----------
 // Usamos <dialog> porque el navegador ya nos regala el fondo oscuro,
 // cerrar con Esc y no poder hacer clic detrás.
-export function abrirModal(contenidoHTML, { chico = false } = {}) {
+// ---------- Fondo congelado mientras hay un modal ----------
+// En el celular el dedo "atravesaba" la tarjeta y movía la página de
+// atrás. Con el body en position: fixed el fondo queda como una foto:
+// no se mueve hasta cerrar. Guardamos dónde iba la persona para
+// devolverla al mismo punto (si no, saltaría al inicio de la página).
+let modalesAbiertos = 0;
+let scrollGuardado = 0;
+
+function congelarFondo() {
+  modalesAbiertos += 1;
+  if (modalesAbiertos > 1) return; // ya estaba congelado por otro modal
+  scrollGuardado = window.scrollY;
+  document.body.style.top = `-${scrollGuardado}px`;
+  document.body.classList.add("fondo-quieto");
+}
+
+function soltarFondo() {
+  modalesAbiertos = Math.max(0, modalesAbiertos - 1);
+  if (modalesAbiertos > 0) return; // todavía queda un modal encima
+  document.body.classList.remove("fondo-quieto");
+  document.body.style.top = "";
+  window.scrollTo(0, scrollGuardado);
+}
+
+// cerrarAfuera: false → tocar el fondo oscuro NO cierra (en el registro
+// se perdía lo escrito con un toque sin querer). Se cierra con la X.
+export function abrirModal(contenidoHTML, { chico = false, cerrarAfuera = true } = {}) {
   const modal = document.createElement("dialog");
   modal.className = "modal" + (chico ? " modal--chico" : "");
   modal.innerHTML = `
@@ -326,11 +352,16 @@ export function abrirModal(contenidoHTML, { chico = false } = {}) {
   modal.querySelector(".modal__cerrar").addEventListener("click", () => modal.close());
   // Clic en el fondo oscuro (fuera de la cajita) también cierra
   modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.close();
+    if (cerrarAfuera && e.target === modal) modal.close();
   });
   // Al cerrarse, lo sacamos del DOM para no acumular modales escondidos
-  modal.addEventListener("close", () => modal.remove());
+  // y le devolvemos el movimiento a la página
+  modal.addEventListener("close", () => {
+    modal.remove();
+    soltarFondo();
+  });
 
+  congelarFondo();
   modal.showModal();
   return modal;
 }
@@ -386,7 +417,7 @@ export function pedirRegistro(subtitulo = T.registro.subtitulo) {
           <p class="texto-suave">${T.registro.nota}</p>
         </form>
       </div>`,
-      { chico: true }
+      { chico: true, cerrarAfuera: false }
     );
 
     let usuarioNuevo = null;
@@ -509,6 +540,16 @@ export function renderHeader() {
 }
 
 // ---------- Footer ----------
+// Ícono de cámara dibujado con SVG (sin librerías ni imágenes extra).
+// Usa currentColor, así toma el blanco del footer sin inventar colores.
+const ICONO_INSTAGRAM = `
+  <svg class="footer__icono" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"
+       fill="none" stroke="currentColor" stroke-width="1.8">
+    <rect x="3" y="3" width="18" height="18" rx="5"/>
+    <circle cx="12" cy="12" r="4.2"/>
+    <circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none"/>
+  </svg>`;
+
 function renderFooter() {
   const lugar = document.getElementById("footer");
   if (!lugar) return;
@@ -516,9 +557,14 @@ function renderFooter() {
     <footer class="footer">
       <div class="contenedor">
         <img class="footer__logo" src="assets/logo/logo-chased-blanco.png" alt="${T.marca.nombre}">
-        <p><a href="${T.marca.instagramUrl}" target="_blank" rel="noopener">${T.footer.instagram} ${T.marca.instagram}</a></p>
+        <!-- Instagram como botón grande: es la puerta a la comunidad y
+             antes se perdía como un link pequeñito -->
+        <a class="footer__red" href="${T.marca.instagramUrl}" target="_blank" rel="noopener">
+          ${ICONO_INSTAGRAM}
+          <span>${T.footer.instagram}<strong>${T.marca.instagram}</strong></span>
+        </a>
         <!-- Link discreto a la página de preparar la demo (no está en el menú) -->
-        <p class="footer__prototipo">${T.footer.prototipo} · <a href="demo.html">${T.footer.demo}</a></p>
+        <p class="footer__prototipo">${T.footer.prototipo} · <a class="enlace-tactil" href="demo.html">${T.footer.demo}</a></p>
       </div>
     </footer>`;
 }

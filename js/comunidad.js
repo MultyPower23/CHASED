@@ -123,10 +123,12 @@ function htmlPortada() {
   return `
     <section class="portada-comunidad">
       <div class="contenedor">
-        <img class="portada-comunidad__logo" src="assets/logo/logo-stencil-blanco.png" alt="${T.marca.nombre}">
+        <img class="portada-comunidad__logo" src="assets/logo/logo-chased-blanco.png" alt="${T.marca.nombre}">
         <h1>${C.titulo}</h1>
         <p class="portada-comunidad__intro">${C.intro}</p>
         <div class="stats" id="stats"></div>
+        <!-- Los votos base son inventados para la demo: lo decimos claro -->
+        <p class="portada-comunidad__nota">${C.statsNota}</p>
         <nav class="atajos" aria-label="${C.titulo}">${atajos}</nav>
       </div>
     </section>`;
@@ -212,8 +214,11 @@ function htmlParticipante(participante, puesto, misVotos, correo) {
   const votePorEste = misVotos.includes(participante.id);
   const sinVotos = misVotos.length >= VOTOS_POR_PERSONA;
 
+  // Nadie vota por su propia inscripción: en vez del botón, nada
+  // (ya aparece la etiqueta "Tú", que dice todo)
   let boton;
-  if (votePorEste) boton = `<button class="boton boton--voto" type="button" disabled>${C.evento.tuVoto} ✓</button>`;
+  if (esMio) boton = "";
+  else if (votePorEste) boton = `<button class="boton boton--voto" type="button" disabled>${C.evento.tuVoto} ✓</button>`;
   else if (sinVotos) boton = `<button class="boton boton--claro boton--voto" type="button" disabled>${C.evento.sinVotosBoton}</button>`;
   else boton = `<button class="boton boton--voto" type="button" data-accion="votar" data-id="${participante.id}">${C.evento.votar}</button>`;
 
@@ -314,6 +319,9 @@ async function votarParticipante(id) {
   }
 
   const participante = todosLosParticipantes().find((p) => p.id === id);
+  // Por si acaso (ej. se registró justo al tocar "Votar"): tu propia
+  // inscripción no recibe tu voto
+  if (participante.correo === usuario.correo) return renderParticipantes();
   const quedan = VOTOS_POR_PERSONA - misVotos.concurso.length;
   // Votar es algo que no se puede deshacer: mejor preguntar primero
   if (!(await confirmarVoto(participante, quedan))) return;

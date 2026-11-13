@@ -43,7 +43,7 @@ const contenido = document.getElementById("contenido");
 const ESTADO_INICIAL = { tipo: "", color: "", talla: "", genero: "", coleccion: "", orden: "relevancia" };
 const estado = { ...ESTADO_INICIAL };
 
-// Si llega desde el inicio con ?genero=hombre o ?coleccion=bailar,
+// Si llega desde el inicio con ?genero=mujer o ?coleccion=bailar,
 // arrancamos con ese filtro ya puesto.
 const parametros = new URLSearchParams(location.search);
 if (GENEROS[parametros.get("genero")]) estado.genero = parametros.get("genero");
@@ -64,6 +64,9 @@ const OPCIONES = {
   talla: CONFIG.tallas,
 };
 
+// Filtros que se ven en el catálogo (en este orden)
+const FILTROS_VISIBLES = ["tipo", "color", "talla"];
+
 // Guardamos los filtros de género y colección en la URL: así, si
 // recargas o compartes el link, ves lo mismo.
 function actualizarURL(productoId = "") {
@@ -72,7 +75,8 @@ function actualizarURL(productoId = "") {
   if (estado.coleccion) params.set("coleccion", estado.coleccion);
   if (productoId) params.set("producto", productoId);
   const query = params.toString();
-  history.replaceState(null, "", "catalogo.html" + (query ? "?" + query : ""));
+  // history.state se conserva: ahí va la marca de "detalle abierto"
+  history.replaceState(history.state, "", "catalogo.html" + (query ? "?" + query : ""));
 }
 
 // ---------- Filtrar y ordenar ----------
@@ -128,7 +132,7 @@ function htmlParaTi() {
     )
     .join("");
   const linkQuiz = paraTi.modo === "destacados"
-    ? ` <a href="quiz.html">${T.inicio.quizBoton}</a>`
+    ? ` <a class="enlace-tactil" href="quiz.html">${T.inicio.quizBoton}</a>`
     : "";
   return `
     <div class="para-ti">
@@ -164,8 +168,9 @@ function htmlSelectOrden() {
     </label>`;
 }
 
-// Pestañas grandes de Todo / Hombre / Mujer: es lo primero que la
-// gente busca, por eso no va escondido en un select.
+// Pestañas grandes de Todo / Hombre / Mujer / Unisex: es lo primero
+// que la gente busca, por eso no va escondido en un select. Salen de
+// GENEROS (productos.js).
 function htmlPestanas() {
   const opciones = ["", ...Object.keys(GENEROS)];
   return `
@@ -195,7 +200,7 @@ function renderEstructura() {
       <div id="chip-coleccion"></div>
       <div id="para-ti"></div>
       <div class="filtros">
-        ${["tipo", "color", "talla"].map(htmlSelectFiltro).join("")}
+        ${FILTROS_VISIBLES.map(htmlSelectFiltro).join("")}
         ${htmlSelectOrden()}
       </div>
       <div class="filtros__pie">
@@ -285,11 +290,22 @@ function abrirDetalle(id) {
     location.href = "maniqui.html";
   });
 
-  // Mientras el detalle está abierto, el producto queda en la URL;
-  // al cerrar lo quitamos pero dejamos los filtros como estaban.
+  // Botón atrás del celular: abrir el detalle agrega una "página" falsa
+  // al historial (como poner un separador en un libro). Al tocar atrás
+  // se quita ese separador y solo se cierra el detalle, sin salir del
+  // catálogo. Si se cierra con la X, quitamos el separador nosotros.
+  history.pushState({ detalle: producto.id }, "");
   actualizarURL(producto.id);
-  modal.addEventListener("close", () => actualizarURL());
+  detalleAbierto = modal;
+  modal.addEventListener("close", () => {
+    detalleAbierto = null;
+    if (history.state?.detalle) history.back();
+    else actualizarURL();
+  });
 }
+
+let detalleAbierto = null;
+window.addEventListener("popstate", () => detalleAbierto?.close());
 
 // ---------- Panel "¡Quedó en tu carrito!" ----------
 // En vez de un avisito que se va solo, le preguntamos qué quiere
