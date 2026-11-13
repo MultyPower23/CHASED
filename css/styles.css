@@ -3002,39 +3002,46 @@ body.noche {
 .panel-conjunto__avatar .avatar-svg { width: min(60vw, 230px); }
 @media (min-width: 900px) { .avatar-svg { width: 320px; } }
 
-/* Casillas de la izquierda (prendas puestas): la TARJETA se queda
-   quieta; lo que crece es la FOTO de la prenda, igual en las tres,
-   como una lupa que sale por encima para verla bien. */
+/* Casillas de la izquierda (prendas puestas): la tarjeta se queda
+   quieta y lo que crece es la FOTO de la prenda, como una lupa.
+   - El zoom se activa solo al pasar por la FOTO (no por toda la
+     tarjeta), así el botón "Quitar" siempre queda libre.
+   - La foto ampliada no recibe clics (pointer-events: none): aunque
+     esté grande, nunca tapa un botón. El cuadrito original de la foto
+     sigue siendo la zona "activa", por eso el zoom no parpadea. */
 .slot { position: relative; }
-.slot--lleno { cursor: zoom-in; }
 
-.slot__foto {
-  position: relative;
+.slot__foto { overflow: visible; cursor: zoom-in; }
+
+/* La imagen NUNCA recibe clics (ni mientras se encoge al quitar el
+   mouse): el zoom lo detecta su cuadrito contenedor, que no crece */
+.slot__foto .foto {
+  pointer-events: none;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
   transform-origin: left center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
-.slot--lleno:hover,
-.slot--lleno:active,
-.slot--lleno:focus-within { z-index: 6; }
+.slot--lleno:has(.slot__foto:hover),
+.slot--lleno:has(.slot__foto:active) { z-index: 6; }
 
-.slot--lleno:hover .slot__foto,
-.slot--lleno:active .slot__foto,
-.slot--lleno:focus-within .slot__foto {
-  transform: scale(2.6);
+.slot--lleno .slot__foto:hover .foto,
+.slot--lleno .slot__foto:active .foto {
+  position: relative;
   z-index: 6;
+  transform: scale(2.6);
   outline: 1px solid var(--blanco); /* se ve más grueso al escalar */
+  pointer-events: none;
 }
 
-/* En el celular las casillas van en fila: la foto crece hacia abajo
-   (sobre el avatar) y desde el centro, para no salirse por los lados */
+/* En el celular la foto crece hacia abajo, sobre el avatar */
 @media (max-width: 899px) {
-  .slot__foto { transform-origin: center top; }
-  .vestidor__slots .slot:first-child .slot__foto { transform-origin: left top; }
-  .vestidor__slots .slot:last-child .slot__foto { transform-origin: right top; }
-  .slot--lleno:hover .slot__foto,
-  .slot--lleno:active .slot__foto,
-  .slot--lleno:focus-within .slot__foto { transform: scale(1.8); }
+  .slot__foto .foto { transform-origin: center top; }
+  .vestidor__slots .slot:first-child .slot__foto .foto { transform-origin: left top; }
+  .vestidor__slots .slot:last-child .slot__foto .foto { transform-origin: right top; }
+  .slot--lleno .slot__foto:hover .foto,
+  .slot--lleno .slot__foto:active .foto { transform: scale(1.8); }
 }
 
 /* ---------- Prendas puestas que aún no son suyas ---------- */
