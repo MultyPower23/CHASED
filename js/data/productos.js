@@ -109,9 +109,14 @@ export const PRODUCTOS = [
 // para Hombre como para Mujer (y además tiene su propia sección).
 // Así no inventamos géneros que Chased no ha definido: solo
 // agrupamos lo que ya está.
+// Qué prendas entran en cada pestaña de género del catálogo.
+// Hoy no hay prendas solo de hombre, así que "Hombre" mostraba lo mismo
+// que "Unisex", y "Mujer" (mujer + unisex) lo mismo que "Todo". Por eso
+// quedan solo Mujer (las prendas pensadas para mujer) y Unisex.
+// Si llegan prendas de hombre, se vuelve a poner:
+//   hombre: ["hombre"],
 export const GENEROS = {
-  hombre: ["hombre", "unisex"],
-  mujer: ["mujer", "unisex"],
+  mujer: ["mujer"],
   unisex: ["unisex"],
 };
 

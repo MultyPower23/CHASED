@@ -43,7 +43,7 @@ const contenido = document.getElementById("contenido");
 const ESTADO_INICIAL = { tipo: "", color: "", talla: "", genero: "", coleccion: "", orden: "relevancia" };
 const estado = { ...ESTADO_INICIAL };
 
-// Si llega desde el inicio con ?genero=hombre o ?coleccion=bailar,
+// Si llega desde el inicio con ?genero=mujer o ?coleccion=bailar,
 // arrancamos con ese filtro ya puesto.
 const parametros = new URLSearchParams(location.search);
 if (GENEROS[parametros.get("genero")]) estado.genero = parametros.get("genero");
@@ -63,6 +63,12 @@ const OPCIONES = {
   color: valoresUnicos("color"),
   talla: CONFIG.tallas,
 };
+
+// Filtros que se ven. La talla está apagada porque hoy todas las
+// prendas tienen las mismas tallas (no filtraba nada). Cuando Chased
+// pase tallas reales por prenda en productos.js, se agrega "talla"
+// aquí y vuelve a salir: la lógica de filtrar ya está lista.
+const FILTROS_VISIBLES = ["tipo", "color"];
 
 // Guardamos los filtros de género y colección en la URL: así, si
 // recargas o compartes el link, ves lo mismo.
@@ -128,7 +134,7 @@ function htmlParaTi() {
     )
     .join("");
   const linkQuiz = paraTi.modo === "destacados"
-    ? ` <a href="quiz.html">${T.inicio.quizBoton}</a>`
+    ? ` <a class="enlace-tactil" href="quiz.html">${T.inicio.quizBoton}</a>`
     : "";
   return `
     <div class="para-ti">
@@ -164,8 +170,9 @@ function htmlSelectOrden() {
     </label>`;
 }
 
-// Pestañas grandes de Todo / Hombre / Mujer: es lo primero que la
-// gente busca, por eso no va escondido en un select.
+// Pestañas grandes de Todo / Mujer / Unisex: es lo primero que la
+// gente busca, por eso no va escondido en un select. Salen de GENEROS
+// (productos.js), así que si vuelve "hombre" allá, aparece solita.
 function htmlPestanas() {
   const opciones = ["", ...Object.keys(GENEROS)];
   return `
@@ -195,7 +202,7 @@ function renderEstructura() {
       <div id="chip-coleccion"></div>
       <div id="para-ti"></div>
       <div class="filtros">
-        ${["tipo", "color", "talla"].map(htmlSelectFiltro).join("")}
+        ${FILTROS_VISIBLES.map(htmlSelectFiltro).join("")}
         ${htmlSelectOrden()}
       </div>
       <div class="filtros__pie">

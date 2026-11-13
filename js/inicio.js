@@ -9,7 +9,7 @@
 
 import { htmlTarjeta, buscarProducto, productosDeColeccion, nocheMientrasSeVea } from "./app.js";
 import { TEXTOS } from "./textos.js";
-import { PRODUCTOS, COLECCIONES } from "./data/productos.js";
+import { PRODUCTOS, COLECCIONES, GENEROS } from "./data/productos.js";
 import { getPreferencia, guardarPreferencia, getQuiz } from "./storage.js";
 
 const T = TEXTOS;
@@ -22,9 +22,9 @@ const FOTOS_FAMILIA = [
   "assets/img/comunidad/familia-05.jpg",
 ];
 
-// Portadas de Hombre, Mujer y Unisex (fotos de sesión de la familia Chased)
+// Portadas de Mujer y Unisex (fotos de sesión de la familia Chased).
+// Salen de GENEROS: si vuelve "hombre", se agrega su foto aquí.
 const PORTADAS_GENERO = {
-  hombre: "assets/img/comunidad/familia-04.jpg",
   mujer: "assets/img/comunidad/familia-02.jpg",
   unisex: "assets/img/comunidad/familia-01.jpg",
 };
@@ -101,9 +101,9 @@ function htmlPortada() {
         <p class="portada__frase">${fraseAleatoria()}</p>
         <div class="portada__botones">
           <a class="boton boton--invertido" href="catalogo.html">${T.inicio.verCatalogo}</a>
-          <a class="boton boton--borde" href="catalogo.html?genero=hombre">${T.generos.hombre}</a>
-          <a class="boton boton--borde" href="catalogo.html?genero=mujer">${T.generos.mujer}</a>
-          <a class="boton boton--borde" href="catalogo.html?genero=unisex">${T.generos.unisex}</a>
+          ${Object.keys(GENEROS)
+            .map((g) => `<a class="boton boton--borde" href="catalogo.html?genero=${g}">${T.generos[g]}</a>`)
+            .join("")}
         </div>
       </div>
       ${htmlBandera()}
@@ -121,7 +121,7 @@ function htmlGeneros() {
   return `
     <section class="seccion contenedor">
       ${htmlTitulo(T.inicio.paraQuienTitulo)}
-      <div class="generos">${tile("hombre")}${tile("mujer")}${tile("unisex")}</div>
+      <div class="generos">${Object.keys(GENEROS).map(tile).join("")}</div>
     </section>`;
 }
 
@@ -129,7 +129,7 @@ function htmlDestacados() {
   const destacados = PRODUCTOS.filter((p) => p.destacado);
   return `
     <section class="seccion contenedor">
-      ${htmlTitulo(T.inicio.destacadosTitulo, `<a href="catalogo.html" class="texto-suave">${T.inicio.verCatalogo}</a>`)}
+      ${htmlTitulo(T.inicio.destacadosTitulo, `<a href="catalogo.html" class="texto-suave enlace-tactil">${T.inicio.verCatalogo}</a>`)}
       <div class="grilla grilla--destacados">${destacados.map(htmlTarjeta).join("")}</div>
     </section>`;
 }

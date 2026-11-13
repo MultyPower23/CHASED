@@ -256,7 +256,7 @@ export function htmlTarjetaEstilo(clave, { etiqueta = "", acciones = "", grande 
     <article class="tarjeta-estilo ${grande ? "tarjeta-estilo--grande" : ""}">
       ${visual.fondo ? `<img class="tarjeta-estilo__fondo" src="${visual.fondo}" alt="" onerror="this.remove()">` : ""}
       <div class="tarjeta-estilo__franja">
-        ${visual.icono ? `<img class="tarjeta-estilo__icono" src="${visual.icono}" alt="" onerror="this.remove()">` : ""}
+        <img class="tarjeta-estilo__icono" src="${visual.icono ?? ICONO_RESPALDO}" alt="" onerror="this.remove()">
         ${etiqueta ? `<p class="tarjeta-estilo__etiqueta">${etiqueta}</p>` : ""}
         <p class="tarjeta-estilo__nombre">${estilo.nombre}</p>
         <p class="tarjeta-estilo__descripcion">${estilo.descripcion}</p>
@@ -339,7 +339,9 @@ function soltarFondo() {
   window.scrollTo(0, scrollGuardado);
 }
 
-export function abrirModal(contenidoHTML, { chico = false } = {}) {
+// cerrarAfuera: false → tocar el fondo oscuro NO cierra (en el registro
+// se perdía lo escrito con un toque sin querer). Se cierra con la X.
+export function abrirModal(contenidoHTML, { chico = false, cerrarAfuera = true } = {}) {
   const modal = document.createElement("dialog");
   modal.className = "modal" + (chico ? " modal--chico" : "");
   modal.innerHTML = `
@@ -350,7 +352,7 @@ export function abrirModal(contenidoHTML, { chico = false } = {}) {
   modal.querySelector(".modal__cerrar").addEventListener("click", () => modal.close());
   // Clic en el fondo oscuro (fuera de la cajita) también cierra
   modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.close();
+    if (cerrarAfuera && e.target === modal) modal.close();
   });
   // Al cerrarse, lo sacamos del DOM para no acumular modales escondidos
   // y le devolvemos el movimiento a la página
@@ -415,7 +417,7 @@ export function pedirRegistro(subtitulo = T.registro.subtitulo) {
           <p class="texto-suave">${T.registro.nota}</p>
         </form>
       </div>`,
-      { chico: true }
+      { chico: true, cerrarAfuera: false }
     );
 
     let usuarioNuevo = null;
@@ -562,7 +564,7 @@ function renderFooter() {
           <span>${T.footer.instagram}<strong>${T.marca.instagram}</strong></span>
         </a>
         <!-- Link discreto a la página de preparar la demo (no está en el menú) -->
-        <p class="footer__prototipo">${T.footer.prototipo} · <a href="demo.html">${T.footer.demo}</a></p>
+        <p class="footer__prototipo">${T.footer.prototipo} · <a class="enlace-tactil" href="demo.html">${T.footer.demo}</a></p>
       </div>
     </footer>`;
 }

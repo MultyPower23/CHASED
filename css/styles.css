@@ -443,6 +443,12 @@ body.noche {
 .noche .contador--vacio { background: var(--gris-oscuro); color: var(--blanco); }
 .noche .texto-suave { color: var(--gris-claro); }
 
+/* En Mi closet el body sigue en "noche" mientras se ve el vestidor,
+   pero las secciones de abajo son blancas: ahí el gris claro se
+   perdía sobre el blanco. Les devolvemos un gris oscuro del manual. */
+.noche #tu-closet .texto-suave,
+.noche #mis-conjuntos .texto-suave { color: var(--gris-oscuro); }
+
 /* ---------- Portada negra ---------- */
 .portada {
   min-height: calc(100svh - var(--alto-header));
@@ -572,8 +578,16 @@ body.noche {
 
 .subtitulo { margin: -12px 0 20px; }
 
-/* Hombre / Mujer: dos fotos grandes con su nombre en una franja negra */
-/* En el celular: Hombre y Mujer lado a lado, Unisex a lo ancho debajo */
+/* Links de texto que se tocan con el dedo: al menos 40 px de alto
+   para no tener que "apuntar" (el texto se ve igual de pequeño) */
+.enlace-tactil {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+/* Mujer / Unisex: dos fotos grandes lado a lado con su nombre en una
+   franja negra. (Si vuelve una tercera, va a lo ancho debajo) */
 .generos {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1097,12 +1111,13 @@ body.fondo-quieto {
 @media (min-width: 700px) {
   h1 { font-size: 2.4rem; }
   .grilla { grid-template-columns: repeat(3, 1fr); gap: 32px 20px; }
-  .filtros { grid-template-columns: repeat(4, 1fr); }
+  .filtros { grid-template-columns: repeat(3, 1fr); }
   .portada__frase { font-size: 1.7rem; }
   .bandera__pista img { width: 160px; height: 210px; }
-  .generos { grid-template-columns: repeat(3, 1fr); }
+  /* Dos portadas: más anchas que altas para que no ocupen media página */
+  .generos { grid-template-columns: repeat(2, 1fr); }
   .genero,
-  .generos .genero:nth-child(3) { grid-column: auto; aspect-ratio: 3 / 4; }
+  .generos .genero:nth-child(3) { grid-column: auto; aspect-ratio: 4 / 3; }
   .colecciones { grid-auto-columns: 38%; }
   .generos { gap: 20px; }
   .invitacion-quiz__acciones { flex-direction: row; justify-content: center; gap: 20px; }
@@ -1865,6 +1880,12 @@ body.fondo-quieto {
 }
 
 .portada-comunidad h1 { font-size: 2.2rem; margin-bottom: 8px; }
+
+.portada-comunidad__nota {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--gris-claro);
+}
 
 .portada-comunidad__intro {
   font-family: var(--fuente-titulos);

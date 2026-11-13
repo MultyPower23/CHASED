@@ -300,7 +300,7 @@ export const TEXTOS = {
     irCatalogo: "Ir al catálogo",
     closetVacio: "Aquí aparecerán las prendas que compres.",
     probarAyuda: "Pruébala en tu vestidor y arma un conjunto con ella.",
-    closetNota: "Pronto podrás armar outfits con ellas en Mi closet.",
+    closetNota: "Toca una prenda para probarla en tu vestidor.",
   },
 
   // Insignias — nombres BORRADOR (TODO confirmar con el equipo)
@@ -319,12 +319,13 @@ export const TEXTOS = {
     intro: "Aquí no solo compras: participas, votas y te ven.",
     // Contadores de la portada
     stats: { participantes: "participantes", votos: "votos", disenos: "diseños" },
+    statsNota: "Incluye datos de ejemplo",
     ir: { concurso: "Concurso", disenos: "Diseños", outfits: "Outfits", familia: "Familia" },
     ejemplo: "Ejemplo",
     tu: "Tú",
     evento: {
       titulo: "Concurso de baile Chased",
-      descripcion: "Baila con tu outfit Chased, sube tu video aquí o publícalo en redes etiquetando a @chased_med. La comunidad vota.",
+      descripcion: "Baila con tu outfit Chased, pega aquí el link de tu video o publícalo en redes etiquetando a @chased_med. La comunidad vota.",
       premio: "Premio: prendas exclusivas Chased",
       inscribirse: "Inscribirme",
       yaInscrito: "Ya estás inscrit@ ✓",
@@ -335,7 +336,7 @@ export const TEXTOS = {
       etiquetar: "Publícalo en Instagram",
       pasos: [
         { titulo: "Inscríbete", texto: "Aquí en la página o en el evento presencial." },
-        { titulo: "Baila con tu outfit Chased", texto: "Sube tu video o publícalo etiquetando a @chased_med." },
+        { titulo: "Baila con tu outfit Chased", texto: "Publica tu video etiquetando a @chased_med y pega el link al inscribirte." },
         { titulo: "La comunidad vota", texto: "Reparte tus votos entre tus favoritos. Las prendas exclusivas son para quien más mueva a la familia." },
       ],
       pasados: "Eventos pasados",
