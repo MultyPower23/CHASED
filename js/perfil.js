@@ -21,9 +21,13 @@ import {
   htmlIconoInsignia,
   htmlBarraInsignia,
   htmlCaminoInsignias,
+  abrirModal,
+  htmlPrecio,
+  capitalizar,
 } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { CONFIG } from "./data/productos.js";
+import { prendasDelCloset, ponerEn, getBorrador, guardarBorrador } from "./conjuntos.js";
 import { getUsuario, getPedidos, getQuiz, getCupones } from "./storage.js";
 
 const T = TEXTOS;
@@ -169,15 +173,15 @@ function htmlPedidos() {
 // Adelanto del closet: las prendas que ya compró (sin repetir).
 // En la Fase 4 esto se conecta con el maniquí.
 function htmlCloset() {
-  const ids = [...new Set(getPedidos().flatMap((p) => p.items.map((i) => i.id)))];
-  const productos = ids.map(buscarProducto).filter(Boolean);
+  // Mismo closet que Mi closet: lo comprado + lo de las cajas escaneadas
+  const productos = prendasDelCloset().map((p) => p.producto);
   const cuerpo = productos.length
     ? `<div class="closet">
          ${productos
            .map(
-             (p) => `<a class="closet__prenda" href="catalogo.html?producto=${p.id}">
+             (p) => `<button class="closet__prenda" type="button" data-prenda="${p.id}">
                        ${htmlFoto(p)}<span>${escaparHTML(p.nombre)}</span>
-                     </a>`
+                     </button>`
            )
            .join("")}
        </div>
@@ -204,7 +208,39 @@ function renderPerfil() {
     ${htmlCloset()}`;
 }
 
+// La prenda del closet se ve AQUÍ, en una ventanita (sin irse al
+// catálogo). "Probar en conjunto" la pone en el vestidor y lleva allá.
+function verPrenda(id) {
+  const producto = buscarProducto(id);
+  const modal = abrirModal(
+    `<div class="agregado">
+      <div class="agregado__producto">
+        ${htmlFoto(producto)}
+        <div>
+          <p class="agregado__titulo">${P.closet}</p>
+          <h2>${escaparHTML(producto.nombre)}</h2>
+          <p class="texto-suave">${escaparHTML(capitalizar(producto.color))}</p>
+          ${htmlPrecio(producto)}
+        </div>
+      </div>
+      <p class="texto-suave">${P.probarAyuda}</p>
+      <div class="agregado__acciones">
+        <button class="boton boton--ancho boton--grande" type="button" data-probar>${T.conjunto.probar}</button>
+      </div>
+    </div>`,
+    { chico: true }
+  );
+  modal.querySelector("[data-probar]").addEventListener("click", () => {
+    const borrador = getBorrador();
+    ponerEn(borrador, id);
+    guardarBorrador(borrador);
+    location.href = "maniqui.html";
+  });
+}
+
 contenido.addEventListener("click", (e) => {
+  const prenda = e.target.closest("[data-prenda]");
+  if (prenda) return verPrenda(prenda.dataset.prenda);
   if (e.target.closest('[data-accion="registro"]')) pedirRegistro();
 });
 

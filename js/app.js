@@ -278,6 +278,21 @@ export function htmlCaminoInsignias(indiceActual) {
   return `<ol class="camino">${pasos}</ol>`;
 }
 
+// ---------- Modo noche mientras se ve una sección ----------
+// Un "vigilante" (IntersectionObserver) mira la sección. Mientras se
+// vea buena parte de ella, la página está en modo noche (header y
+// fondo negros); al bajar se quita la clase y el CSS hace la
+// transición a blanco. Lo usan la portada del inicio y el vestidor.
+export function nocheMientrasSeVea(seccion, umbral = 0.35) {
+  if (!seccion) return;
+  document.body.classList.add("noche");
+  const vigilante = new IntersectionObserver(
+    ([entrada]) => document.body.classList.toggle("noche", entrada.intersectionRatio > umbral),
+    { threshold: [0, umbral, 1] }
+  );
+  vigilante.observe(seccion);
+}
+
 // ---------- Avisos (toast) ----------
 let temporizadorAviso;
 
@@ -322,7 +337,8 @@ export function abrirModal(contenidoHTML, { chico = false } = {}) {
 
 // Reduce la foto de perfil a 160px antes de guardarla. Una foto del
 // celular pesa megas y el localStorage solo aguanta ~5 MB en total.
-function leerFotoReducida(archivo) {
+// "lado" = tamaño máximo en px (160 para avatar, más grande para diseños)
+export function leerFotoReducida(archivo, lado = 160) {
   return new Promise((resolve) => {
     if (!archivo) return resolve(null);
     const lector = new FileReader();
@@ -331,7 +347,7 @@ function leerFotoReducida(archivo) {
       const img = new Image();
       img.onerror = () => resolve(null);
       img.onload = () => {
-        const escala = Math.min(1, 160 / Math.max(img.width, img.height));
+        const escala = Math.min(1, lado / Math.max(img.width, img.height));
         const lienzo = document.createElement("canvas");
         lienzo.width = Math.round(img.width * escala);
         lienzo.height = Math.round(img.height * escala);
@@ -499,7 +515,8 @@ function renderFooter() {
       <div class="contenedor">
         <img class="footer__logo" src="assets/logo/logo-chased-blanco.png" alt="${T.marca.nombre}">
         <p><a href="${T.marca.instagramUrl}" target="_blank" rel="noopener">${T.footer.instagram} ${T.marca.instagram}</a></p>
-        <p class="footer__prototipo">${T.footer.prototipo}</p>
+        <!-- Link discreto a la página de preparar la demo (no está en el menú) -->
+        <p class="footer__prototipo">${T.footer.prototipo} · <a href="demo.html">${T.footer.demo}</a></p>
       </div>
     </footer>`;
 }
@@ -513,6 +530,7 @@ const TITULOS = {
   quiz: T.quiz.titulo,
   comunidad: T.comunidad.titulo,
   maniqui: T.maniqui.titulo,
+  demo: T.demo.titulo,
 };
 
 function ponerTitulo() {

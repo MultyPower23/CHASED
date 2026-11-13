@@ -110,6 +110,56 @@ export function salirDeslizando(elemento) {
   }).finished;
 }
 
+// Un número que sube contando (ej. 0 → 58 votos), como en un marcador
+export function contarHasta(elemento, hasta, formato = (n) => n, desde = 0) {
+  if (sinMovimiento || hasta === desde) {
+    elemento.textContent = formato(hasta);
+    return;
+  }
+  const marcador = { n: desde };
+  anime({
+    targets: marcador,
+    n: hasta,
+    round: 1,
+    duration: Math.min(1400, 300 + Math.abs(hasta - desde) * 40),
+    easing: "easeOutQuad",
+    update: () => (elemento.textContent = formato(marcador.n)),
+  });
+}
+
+// Las secciones se "arman" cuando la persona baja hasta ellas: los
+// hijos entran en cascada la primera vez que se ven en pantalla.
+export function revelarAlBajar(secciones) {
+  if (sinMovimiento) return;
+  const vigilante = new IntersectionObserver(
+    (entradas) =>
+      entradas.forEach((entrada) => {
+        if (!entrada.isIntersecting) return;
+        vigilante.unobserve(entrada.target);
+        anime({
+          targets: entrada.target.children,
+          opacity: [0, 1],
+          translateY: [28, 0],
+          delay: anime.stagger(110),
+          duration: 650,
+          easing: "easeOutCubic",
+        });
+      }),
+    { threshold: 0.12 }
+  );
+  secciones.forEach((seccion) => {
+    // Escondemos los hijos ANTES de que se vean, para que no "parpadeen"
+    [...seccion.children].forEach((hijo) => (hijo.style.opacity = 0));
+    vigilante.observe(seccion);
+  });
+}
+
+// Un "pop" corto para confirmar una acción (ej. al votar)
+export function rebotar(elemento) {
+  if (sinMovimiento) return;
+  anime({ targets: elemento, scale: [1, 1.12, 1], duration: 450, easing: "easeOutQuad" });
+}
+
 // Entrada suave de un elemento (ej. el panel de "agregado al carrito")
 export function aparecer(elemento, desde = 30) {
   if (sinMovimiento) return;

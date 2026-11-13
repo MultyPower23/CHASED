@@ -44,6 +44,18 @@ export function cerrarSesion() {
   localStorage.removeItem(PREFIJO + "usuario");
 }
 
+// Para el modo demo: borra TODO lo de Chased (solo nuestras claves,
+// las que empiezan por "chased_"; no toca nada más del navegador)
+export function reiniciarTodo() {
+  try {
+    Object.keys(localStorage)
+      .filter((clave) => clave.startsWith(PREFIJO))
+      .forEach((clave) => localStorage.removeItem(clave));
+  } catch (error) {
+    console.warn("No se pudo reiniciar el localStorage:", error);
+  }
+}
+
 // ---------- Carrito ----------
 // Cada ítem es { id, talla, cantidad }. Solo guardamos el id del
 // producto, no el producto entero, para no duplicar datos de
@@ -119,6 +131,80 @@ export function getCupones() {
 
 export function guardarCupones(cupones) {
   escribir("cupones", cupones);
+}
+
+// ---------- Comunidad ----------
+// Participantes del concurso, diseños y outfits que publica la gente.
+// (Los de ejemplo viven en js/data/comunidad.js, no aquí.)
+export function getParticipantes() {
+  return leer("participantes", []);
+}
+
+export function guardarParticipante(participante) {
+  escribir("participantes", [...getParticipantes(), participante]);
+}
+
+export function getDisenos() {
+  return leer("disenos", []);
+}
+
+export function guardarDiseno(diseno) {
+  escribir("disenos", [...getDisenos(), diseno]);
+}
+
+export function getOutfits() {
+  return leer("outfits", []);
+}
+
+export function guardarOutfit(outfit) {
+  escribir("outfits", [...getOutfits(), outfit]);
+}
+
+// Para "Quitar de Comunidad": se le pasa una función que dice cuáles quitar
+export function quitarOutfits(debeQuitarse) {
+  escribir("outfits", getOutfits().filter((o) => !debeQuitarse(o)));
+}
+
+// Votos: se guardan POR CORREO, así cada persona tiene su propio voto
+// aunque usen el mismo computador (útil en las pruebas con usuarios).
+// { "correo@x.com": { concurso: "p-ej-1", disenos: ["d-ej-2", ...] } }
+export function getVotos() {
+  return leer("votos", {});
+}
+
+export function guardarVotos(votos) {
+  escribir("votos", votos);
+}
+
+// ---------- Closet ----------
+// Prendas que la persona agregó a mano ("ya la tengo"). Las compradas
+// salen de los pedidos, no se guardan dos veces.
+export function getClosetManual() {
+  return leer("closet", []);
+}
+
+export function agregarAlCloset(id) {
+  const closet = getClosetManual();
+  if (!closet.includes(id)) escribir("closet", [...closet, id]);
+}
+
+// Cajas ya escaneadas (para no agregar dos veces la misma)
+export function getCajasEscaneadas() {
+  return leer("cajas", []);
+}
+
+export function registrarCaja(codigo) {
+  escribir("cajas", [...getCajasEscaneadas(), codigo]);
+}
+
+// ---------- Mis conjuntos ----------
+// { id, nombre, prendas: { arriba, abajo, extra }, publicado, fecha }
+export function getConjuntos() {
+  return leer("conjuntos", []);
+}
+
+export function guardarConjuntos(conjuntos) {
+  escribir("conjuntos", conjuntos);
 }
 
 // ---------- Resultado del quiz ----------
