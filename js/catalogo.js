@@ -75,7 +75,8 @@ function actualizarURL(productoId = "") {
   if (estado.coleccion) params.set("coleccion", estado.coleccion);
   if (productoId) params.set("producto", productoId);
   const query = params.toString();
-  history.replaceState(null, "", "catalogo.html" + (query ? "?" + query : ""));
+  // history.state se conserva: ahí va la marca de "detalle abierto"
+  history.replaceState(history.state, "", "catalogo.html" + (query ? "?" + query : ""));
 }
 
 // ---------- Filtrar y ordenar ----------
@@ -289,11 +290,22 @@ function abrirDetalle(id) {
     location.href = "maniqui.html";
   });
 
-  // Mientras el detalle está abierto, el producto queda en la URL;
-  // al cerrar lo quitamos pero dejamos los filtros como estaban.
+  // Botón atrás del celular: abrir el detalle agrega una "página" falsa
+  // al historial (como poner un separador en un libro). Al tocar atrás
+  // se quita ese separador y solo se cierra el detalle, sin salir del
+  // catálogo. Si se cierra con la X, quitamos el separador nosotros.
+  history.pushState({ detalle: producto.id }, "");
   actualizarURL(producto.id);
-  modal.addEventListener("close", () => actualizarURL());
+  detalleAbierto = modal;
+  modal.addEventListener("close", () => {
+    detalleAbierto = null;
+    if (history.state?.detalle) history.back();
+    else actualizarURL();
+  });
 }
+
+let detalleAbierto = null;
+window.addEventListener("popstate", () => detalleAbierto?.close());
 
 // ---------- Panel "¡Quedó en tu carrito!" ----------
 // En vez de un avisito que se va solo, le preguntamos qué quiere
