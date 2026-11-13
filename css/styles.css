@@ -20,6 +20,9 @@
   --fuente-texto: Corbel, Candara, "Segoe UI", sans-serif;
 
   --ancho-max: 1120px;
+  /* Esquinas redondeadas: todo se siente menos "cuadrado" */
+  --radio: 16px;
+  --radio-chico: 10px;
   --espacio: 16px;
   --alto-header: 88px;
   --transicion-modo: 0.7s ease;
@@ -2438,4 +2441,488 @@ body.noche {
   .maniqui-layout { grid-template-columns: 420px 1fr; align-items: start; }
   .mini-grilla { grid-template-columns: repeat(4, 1fr); }
   .casilla { grid-template-columns: 120px 1fr; min-height: 150px; }
+}
+
+/* ============================================================
+   MENOS CUADRADO — esquinas redondeadas en todo el sitio
+   (un solo bloque para poder ajustarlo fácil). El logo NO se toca.
+   ============================================================ */
+.boton,
+.atajos a,
+.chip,
+.segmento,
+.barra-conjunto { border-radius: 999px; }
+
+.campo input,
+.campo select,
+.campo textarea,
+.talla,
+.opcion,
+.opcion__letra,
+.cantidad,
+.etiqueta,
+.toast,
+.deshacer,
+.deshacer button,
+.insignia__descuento,
+.concurso__premio,
+.cupon,
+.cupon-perfil,
+.cupon-perfil__estado,
+.mis-votos,
+.paso,
+.premios li,
+.aviso-borde,
+.beta { border-radius: var(--radio-chico); }
+
+.modal,
+.tarjeta .foto,
+.coleccion .foto,
+.drop .foto,
+.genero,
+.banner-evento,
+.invitacion-quiz,
+.resumen,
+.item .foto,
+.tarjeta-perfil,
+.tarjeta-estilo,
+.pedido,
+.participante,
+.participante__video,
+.diseno,
+.diseno__imagen,
+.outfit,
+.familia__foto,
+.closet__prenda .foto,
+.agregado__producto .foto,
+.outfit-prenda .foto,
+.confirmacion__gracias img,
+.bandera__pista img,
+.para-ti__item .foto { border-radius: var(--radio); overflow: hidden; }
+
+.cantidad { overflow: hidden; }
+.bloques span { border-radius: 4px; }
+.barra,
+.barra span { border-radius: 99px; }
+.participante__video { border-radius: var(--radio) var(--radio) 0 0; }
+.diseno__imagen { border-radius: var(--radio) var(--radio) 0 0; }
+.tarjeta-estilo__franja { border-radius: var(--radio-chico) var(--radio-chico) 0 0; }
+
+/* ============================================================
+   FASE 4 (v2) — Vestidor tipo videojuego
+   ============================================================ */
+.boton--chico { min-height: 38px; padding: 0 16px; font-size: 0.9rem; }
+.boton--separado { margin-top: 8px; }
+
+.vestidor-seccion {
+  background: var(--negro);
+  color: var(--blanco);
+  padding: 36px 0 44px;
+}
+
+.vestidor-cabecera {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.vestidor-cabecera h1 { margin: 0; }
+.vestidor-seccion .beta { border-color: var(--gris-medio); }
+.vestidor-seccion .beta span { color: var(--gris-claro); }
+
+/* minmax(0, 1fr): sin esto la columna se estira al ancho de la fila
+   de cartas deslizables y todo se sale de la pantalla */
+.vestidor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.vestidor > * { min-width: 0; }
+
+/* Casillas (como los espacios de equipo de un videojuego) */
+.vestidor__slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border: 1.5px dashed var(--gris-oscuro);
+  border-radius: var(--radio);
+  min-width: 0;
+}
+
+.slot--lleno { border: 1.5px solid var(--blanco); }
+
+.slot__foto {
+  aspect-ratio: 1;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+  background: var(--gris-oscuro);
+}
+
+.slot__foto .foto { aspect-ratio: 1; }
+
+.slot__texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.slot__casilla {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gris-medio);
+}
+
+.slot__nombre {
+  font-family: var(--fuente-titulos);
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot__quitar {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gris-claro);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Avatar al centro, sobre un "piso" iluminado */
+.vestidor__centro { display: flex; flex-direction: column; gap: 12px; }
+
+.vestidor__avatar {
+  display: grid;
+  place-items: center;
+  padding: 16px 0 8px;
+  border-radius: var(--radio);
+  background: radial-gradient(ellipse at 50% 92%, var(--gris-oscuro) 0%, var(--negro) 62%);
+}
+
+.avatar-svg {
+  width: min(56vw, 230px);
+  height: auto;
+}
+
+.avatar__base { fill: var(--gris-oscuro); stroke: var(--gris-medio); stroke-width: 1.2; }
+.avatar__borde { fill: none; stroke: var(--blanco); stroke-width: 1.4; }
+
+.campo--oscuro { color: var(--gris-claro); }
+
+.nombre-fila { display: flex; gap: 8px; }
+
+.campo--oscuro input,
+.armar input {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--gris-oscuro);
+  border-radius: 999px;
+  background: var(--negro);
+  color: var(--blanco);
+  font: inherit;
+}
+
+.vestidor__botones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Panel de cartas */
+.segmentos {
+  display: inline-flex;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--gris-oscuro);
+  border-radius: 999px;
+}
+
+.segmento {
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  color: var(--gris-claro);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.segmento[aria-pressed="true"] { background: var(--blanco); color: var(--negro); }
+
+.vestidor__panel .texto-suave { color: var(--gris-medio); margin: 8px 0 12px; }
+
+.armar {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.cartas {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 42%;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
+
+/* Carta de prenda, estilo inventario de videojuego */
+.carta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 8px 10px;
+  border: 1.5px solid var(--gris-oscuro);
+  border-radius: var(--radio);
+  background: #000000;
+  color: var(--blanco);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.carta:hover { border-color: var(--gris-claro); transform: translateY(-2px); }
+.carta--puesta { border-color: var(--blanco); }
+
+.carta .foto { border-radius: var(--radio-chico); overflow: hidden; }
+
+.carta__sello {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gris-oscuro);
+  color: var(--blanco);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.carta__sello--mia { background: var(--blanco); color: var(--negro); }
+.carta--puesta .carta__sello { background: var(--blanco); color: var(--negro); }
+
+.carta__nombre { font-family: var(--fuente-titulos); font-size: 0.9rem; line-height: 1.2; }
+.carta__color { color: var(--gris-medio); font-size: 0.75rem; }
+
+/* Los estilos como "stats" */
+.carta__stats { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.carta__stats i {
+  font-style: normal;
+  font-size: 0.68rem;
+  padding: 1px 7px;
+  border: 1px solid var(--gris-oscuro);
+  border-radius: 999px;
+  color: var(--gris-claro);
+}
+
+.vestidor__vacio {
+  padding: 18px;
+  border: 1.5px dashed var(--gris-oscuro);
+  border-radius: var(--radio);
+  color: var(--gris-claro);
+}
+
+.publicado { border-radius: var(--radio); background: var(--gris-oscuro); }
+
+/* ---------- Tu closet + combinar ---------- */
+.closet-layout { display: grid; gap: 20px; }
+
+.closet-lista { display: grid; gap: 10px; align-content: start; }
+
+.prenda-closet {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--gris-claro);
+  border-radius: var(--radio);
+}
+
+.prenda-closet .foto { border-radius: var(--radio-chico); overflow: hidden; }
+.prenda-closet h3 { margin: 6px 0 0; font-size: 1rem; }
+.prenda-closet p { margin: 0 0 8px; }
+.prenda-closet .carta__sello { position: static; display: inline-block; background: var(--negro); color: var(--blanco); }
+
+.combinar {
+  align-self: start;
+  padding: 20px;
+  border-radius: var(--radio);
+  background: var(--gris-claro);
+}
+
+.combinar h3 { margin-bottom: 4px; }
+
+.consejo {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: var(--radio);
+  background: var(--blanco);
+}
+
+.consejo__texto { font-family: var(--fuente-titulos); font-size: 1.1rem; }
+
+.consejo__ejemplo {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.consejo__ejemplo .foto { border-radius: var(--radio-chico); overflow: hidden; }
+.consejo__ejemplo h3 { margin: 0; font-size: 1rem; }
+.consejo__ejemplo p { margin: 0 0 8px; }
+.consejo__botones { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* Escáner (simulado) */
+.visor {
+  position: relative;
+  width: 180px;
+  aspect-ratio: 1;
+  margin: 8px auto 12px;
+  border-radius: var(--radio);
+  background:
+    linear-gradient(var(--negro), var(--negro)) top left / 28px 3px no-repeat,
+    linear-gradient(var(--negro), var(--negro)) top left / 3px 28px no-repeat,
+    linear-gradient(var(--negro), var(--negro)) top right / 28px 3px no-repeat,
+    linear-gradient(var(--negro), var(--negro)) top right / 3px 28px no-repeat,
+    linear-gradient(var(--negro), var(--negro)) bottom left / 28px 3px no-repeat,
+    linear-gradient(var(--negro), var(--negro)) bottom left / 3px 28px no-repeat,
+    linear-gradient(var(--negro), var(--negro)) bottom right / 28px 3px no-repeat,
+    linear-gradient(var(--negro), var(--negro)) bottom right / 3px 28px no-repeat,
+    var(--gris-claro);
+  overflow: hidden;
+}
+
+/* La línea que "lee" el QR sube y baja */
+.visor__linea {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: var(--negro);
+  animation: escanear 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes escanear { from { top: 14px; } to { top: calc(100% - 16px); } }
+
+/* ---------- Mis conjuntos ---------- */
+.conjuntos { display: grid; gap: 14px; }
+
+.conjunto {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 14px;
+  padding: 10px;
+  border: 1px solid var(--gris-claro);
+  border-radius: var(--radio);
+}
+
+.conjunto__fotos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+  align-self: start;
+}
+
+.conjunto h3 { margin: 8px 0 2px; }
+.conjunto p { margin: 0 0 10px; }
+.conjunto .etiqueta { margin-top: 0 !important; }
+.conjunto__botones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.outfit__nombre { margin: 6px 0 0; font-size: 1.05rem; }
+
+/* ---------- Catálogo: botón flotante y panel del conjunto ---------- */
+.barra-conjunto {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 15;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1.5px solid var(--negro);
+  background: var(--blanco);
+  color: var(--negro);
+  font: inherit;
+  cursor: pointer;
+}
+
+.barra-conjunto--llena { background: var(--negro); color: var(--blanco); }
+
+.panel-conjunto__layout { display: grid; gap: 16px; margin-top: 12px; }
+
+.panel-conjunto__avatar {
+  display: grid;
+  place-items: center;
+  padding: 12px 0;
+  border-radius: var(--radio);
+  background: radial-gradient(ellipse at 50% 92%, var(--gris-oscuro) 0%, var(--negro) 62%);
+}
+
+.panel-conjunto__avatar .avatar-svg { width: min(40vw, 170px); }
+
+.piezas { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 10px; }
+
+.pieza {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.pieza .foto { border-radius: var(--radio-chico); overflow: hidden; }
+.pieza h3 { margin: 2px 0 0; font-size: 0.95rem; }
+.pieza .precio { margin: 0; }
+
+.pieza__fila { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+
+.pieza__fila select {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--gris-claro);
+  border-radius: var(--radio-chico);
+  background: var(--blanco);
+  font: inherit;
+}
+
+.panel-conjunto__botones { display: grid; gap: 8px; justify-items: center; }
+.panel-conjunto__botones .boton { width: 100%; }
+
+@media (min-width: 900px) {
+  .vestidor { grid-template-columns: 200px minmax(0, 1fr) minmax(0, 1.25fr); align-items: start; }
+  .vestidor__slots { grid-template-columns: 1fr; }
+  .slot { flex-direction: row; align-items: center; }
+  .slot__foto { width: 64px; flex: none; }
+  .avatar-svg { width: 240px; }
+  .cartas {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-height: 560px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .closet-layout { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; }
+  .closet-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .conjuntos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .panel-conjunto__layout { grid-template-columns: 220px 1fr; }
 }

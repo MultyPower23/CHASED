@@ -171,6 +171,25 @@ export function agregarAlCloset(id) {
   if (!closet.includes(id)) escribir("closet", [...closet, id]);
 }
 
+// Cajas ya escaneadas (para no agregar dos veces la misma)
+export function getCajasEscaneadas() {
+  return leer("cajas", []);
+}
+
+export function registrarCaja(codigo) {
+  escribir("cajas", [...getCajasEscaneadas(), codigo]);
+}
+
+// ---------- Mis conjuntos ----------
+// { id, nombre, prendas: { arriba, abajo, extra }, publicado, fecha }
+export function getConjuntos() {
+  return leer("conjuntos", []);
+}
+
+export function guardarConjuntos(conjuntos) {
+  escribir("conjuntos", conjuntos);
+}
+
 // ---------- Resultado del quiz ----------
 // Se guarda aunque la persona no esté registrada: el quiz es opcional
 // y no queremos ponerle trabas. { estilo, puntajes, respuestas, fecha }

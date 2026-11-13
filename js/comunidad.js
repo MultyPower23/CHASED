@@ -544,6 +544,7 @@ function htmlOutfit(outfit) {
       <div class="outfit__fotos">${fotos}</div>
       <div class="outfit__info">
         ${outfit.ejemplo ? etiqueta(C.ejemplo) : ""}
+        ${outfit.nombre ? `<h3 class="outfit__nombre">${escaparHTML(outfit.nombre)}</h3>` : ""}
         <p class="outfit__prendas">${nombres}</p>
         <p class="texto-suave">${C.outfits.por(escaparHTML(outfit.autor))}</p>
         <span class="outfit__ver">${C.outfits.verOutfit} →</span>
@@ -579,7 +580,7 @@ function abrirOutfit(id) {
   const modal = abrirModal(`
     <div class="modal__cuerpo outfit-modal">
       <p class="agregado__titulo">${C.outfits.modalEtiqueta}</p>
-      <h2>${prendas.map((p) => escaparHTML(p.nombre)).join(" + ")}</h2>
+      <h2>${outfit.nombre ? escaparHTML(outfit.nombre) : prendas.map((p) => escaparHTML(p.nombre)).join(" + ")}</h2>
       <p class="texto-suave">${C.outfits.por(escaparHTML(outfit.autor))}</p>
       <div class="outfit-modal__prendas">${prendas.map(htmlPrendaOutfit).join("")}</div>
       <div class="resumen__fila resumen__fila--total">

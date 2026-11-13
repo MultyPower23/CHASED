@@ -24,6 +24,7 @@ import {
 } from "./app.js";
 import { TEXTOS } from "./textos.js";
 import { CONFIG } from "./data/productos.js";
+import { prendasDelCloset } from "./conjuntos.js";
 import { getUsuario, getPedidos, getQuiz, getCupones } from "./storage.js";
 
 const T = TEXTOS;
@@ -169,8 +170,8 @@ function htmlPedidos() {
 // Adelanto del closet: las prendas que ya compró (sin repetir).
 // En la Fase 4 esto se conecta con el maniquí.
 function htmlCloset() {
-  const ids = [...new Set(getPedidos().flatMap((p) => p.items.map((i) => i.id)))];
-  const productos = ids.map(buscarProducto).filter(Boolean);
+  // Mismo closet que Mi closet: lo comprado + lo de las cajas escaneadas
+  const productos = prendasDelCloset().map((p) => p.producto);
   const cuerpo = productos.length
     ? `<div class="closet">
          ${productos

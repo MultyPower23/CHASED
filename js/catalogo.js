@@ -13,6 +13,8 @@ import {
   abrirModal,
   buscarProducto,
   capitalizar,
+  formatearPrecio,
+  mostrarAviso,
   escaparHTML,
   coincideGenero,
   buscarColeccion,
@@ -21,7 +23,8 @@ import {
 import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, CONFIG, GENEROS } from "./data/productos.js";
 import { agregarAlCarrito, contarPrendasCarrito } from "./storage.js";
-import { aparecer } from "./animaciones.js";
+import { aparecer, rebotar } from "./animaciones.js";
+import { htmlAvatar, ponerEn, idsDelOutfit, CASILLAS, getBorrador, guardarBorrador, guardarConjunto } from "./conjuntos.js";
 import { recomendarParaTi, puntajeProducto } from "./recomendador.js";
 
 const T = TEXTOS;
@@ -231,6 +234,7 @@ function abrirDetalle(id) {
         </fieldset>
         <p class="error" aria-live="polite"></p>
         <button class="boton boton--ancho" type="button" data-accion="agregar">${T.catalogo.agregar}</button>
+        <button class="boton boton--claro boton--ancho boton--separado" type="button" data-accion="probar">${T.conjunto.probar}</button>
         <details class="guia-tallas">
           <summary>${T.catalogo.guiaTallas}</summary>
           <p>${T.catalogo.guiaTallasNota}</p>
@@ -260,6 +264,17 @@ function abrirDetalle(id) {
     agregarAlCarrito(producto.id, tallaElegida);
     modal.close();
     mostrarAgregado(producto, tallaElegida);
+  });
+
+  // "Probar en conjunto": no compra nada, solo lo pone en el panel
+  modal.querySelector('[data-accion="probar"]').addEventListener("click", () => {
+    const borrador = getBorrador();
+    ponerEn(borrador, producto.id);
+    guardarBorrador(borrador);
+    modal.close();
+    renderBarraConjunto();
+    rebotar(document.querySelector(".barra-conjunto"));
+    mostrarAviso(T.conjunto.agregado(producto.nombre));
   });
 
   // Mientras el detalle está abierto, el producto queda en la URL;
@@ -334,9 +349,109 @@ function conectarEventos() {
   });
 }
 
+// ---------- Panel "Armar conjunto" ----------
+// Un botón flotante abajo abre un panel (como un menú que se
+// despliega) donde se ve el conjunto en el avatar ANTES de comprar.
+// Se puede comprar todo junto o solo lo que guste.
+function renderBarraConjunto() {
+  let barra = document.querySelector(".barra-conjunto");
+  if (!barra) {
+    barra = document.createElement("button");
+    barra.type = "button";
+    barra.className = "barra-conjunto";
+    barra.addEventListener("click", abrirPanelConjunto);
+    document.body.append(barra);
+  }
+  const n = idsDelOutfit(getBorrador()).length;
+  barra.textContent = T.conjunto.abrir(n);
+  barra.classList.toggle("barra-conjunto--llena", n > 0);
+}
+
+function htmlPiezaConjunto(casilla, id) {
+  const p = buscarProducto(id);
+  const tallas = tallasDe(p).map((t) => `<option>${t}</option>`).join("");
+  return `
+    <li class="pieza" data-casilla="${casilla}">
+      ${htmlFoto(p)}
+      <div>
+        <span class="slot__casilla">${T.maniqui.casillas[casilla]}</span>
+        <h3>${escaparHTML(p.nombre)}</h3>
+        ${htmlPrecio(p)}
+        <div class="pieza__fila">
+          <select aria-label="${T.catalogo.elegirTalla}" data-talla-de="${id}">
+            <option value="">${T.catalogo.filtros.talla}</option>${tallas}
+          </select>
+          <button class="boton-texto" type="button" data-sacar="${casilla}">${T.maniqui.quitar}</button>
+        </div>
+      </div>
+    </li>`;
+}
+
+function abrirPanelConjunto() {
+  const panel = abrirModal(`<div class="modal__cuerpo panel-conjunto"></div>`);
+  panel.classList.add("modal--hoja");
+  const cuerpo = panel.querySelector(".panel-conjunto");
+
+  const pintar = () => {
+    const borrador = getBorrador();
+    const piezas = CASILLAS.filter((c) => borrador[c]);
+    const total = piezas.reduce((suma, c) => suma + buscarProducto(borrador[c]).precio, 0);
+    cuerpo.innerHTML = `
+      <h2>${T.conjunto.titulo}</h2>
+      <p class="texto-suave">${T.conjunto.ayuda}</p>
+      <div class="panel-conjunto__layout">
+        <div class="panel-conjunto__avatar">${htmlAvatar(borrador, "catalogo")}</div>
+        <div>
+          ${piezas.length
+            ? `<ul class="piezas">${piezas.map((c) => htmlPiezaConjunto(c, borrador[c])).join("")}</ul>
+               <div class="resumen__fila resumen__fila--total">
+                 <span>${T.conjunto.total}</span>
+                 <strong>${formatearPrecio(total)} <span class="precio__nota">· ${T.general.referencial}</span></strong>
+               </div>
+               <p class="error" aria-live="polite"></p>
+               <div class="panel-conjunto__botones">
+                 <button class="boton boton--grande" type="button" data-panel="todo">${T.conjunto.agregarTodo}</button>
+                 <button class="boton boton--claro" type="button" data-panel="guardar">${T.maniqui.guardar}</button>
+                 <a class="boton-texto" href="maniqui.html">${T.conjunto.abrirCloset}</a>
+               </div>`
+            : `<p class="aviso-borde">${T.conjunto.vacio}</p>`}
+        </div>
+      </div>`;
+  };
+
+  cuerpo.addEventListener("click", (e) => {
+    const borrador = getBorrador();
+    const sacar = e.target.closest("[data-sacar]");
+    if (sacar) {
+      borrador[sacar.dataset.sacar] = null;
+      guardarBorrador(borrador);
+      renderBarraConjunto();
+      return pintar();
+    }
+    const accion = e.target.closest("[data-panel]")?.dataset.panel;
+    if (accion === "todo") {
+      // Cada prenda necesita su talla antes de ir al carrito
+      const selects = [...cuerpo.querySelectorAll("[data-talla-de]")];
+      if (selects.some((s) => !s.value)) return (cuerpo.querySelector(".error").textContent = T.conjunto.faltanTallas);
+      selects.forEach((s) => agregarAlCarrito(s.dataset.tallaDe, s.value));
+      panel.close();
+      mostrarAviso(T.conjunto.agregadoTodo(selects.length));
+    }
+    if (accion === "guardar") {
+      if (!borrador.arriba || !borrador.abajo) return (cuerpo.querySelector(".error").textContent = T.maniqui.errorIncompleto);
+      guardarConjunto("", borrador);
+      mostrarAviso(T.maniqui.guardado);
+    }
+  });
+
+  pintar();
+  aparecer(cuerpo, 40);
+}
+
 renderEstructura();
 renderProductos();
 conectarEventos();
+renderBarraConjunto();
 
 // Si venimos del inicio con un producto en la URL, abrimos su detalle de una
 const idEnUrl = parametros.get("producto");

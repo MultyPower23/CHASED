@@ -1,248 +1,441 @@
 // ============================================================
-// maniqui.js — Mi closet y el maniquí (BOCETO / beta)
+// maniqui.js — Mi closet y el vestidor (BOCETO / beta)
 // ------------------------------------------------------------
-// Es una versión sencilla de lo que haría una IA: hoy el maniquí
-// son 3 casillas (arriba, abajo, extra) y "Armar por mí" funciona
-// con palabras clave y los tags de estilo de cada prenda. Suficiente
-// para mostrar la idea en la demo sin prometer magia.
+// Tres partes:
+// 1) El vestidor: avatar al centro, casillas a un lado y tarjetas de
+//    prendas al otro, como cuando te equipas algo en un videojuego.
+// 2) Tu closet: solo lo comprado o lo que traía tu caja (QR), con el
+//    "¿Con qué combino esto?".
+// 3) Mis conjuntos: los que guardaste y publicaste.
+// Lo de "IA" es simulado con reglas sencillas (estilos y colores).
 // ============================================================
 
-import { htmlFoto, buscarProducto, escaparHTML, capitalizar, mostrarAviso, pedirRegistro } from "./app.js";
+import { htmlFoto, buscarProducto, escaparHTML, capitalizar, mostrarAviso, pedirRegistro, abrirModal, formatoFecha } from "./app.js";
 import { TEXTOS } from "./textos.js";
-import { PRODUCTOS, CASILLA_POR_TIPO } from "./data/productos.js";
-import { getUsuario, getPedidos, getClosetManual, agregarAlCloset, getQuiz, guardarOutfit } from "./storage.js";
+import { PRODUCTOS } from "./data/productos.js";
+import { getUsuario, getQuiz, guardarOutfit, getConjuntos } from "./storage.js";
 import { aparecer, rebotar } from "./animaciones.js";
+import {
+  CASILLAS,
+  prendasDelCloset,
+  idsDelCloset,
+  escanearCaja,
+  codigosDemo,
+  casillaDe,
+  ponerEn,
+  idsDelOutfit,
+  htmlAvatar,
+  sugerenciaPara,
+  sugerirNombre,
+  guardarConjunto,
+  marcarPublicado,
+  eliminarConjunto,
+  getBorrador,
+  guardarBorrador,
+} from "./conjuntos.js";
 
 const T = TEXTOS;
 const M = T.maniqui;
 const contenido = document.getElementById("contenido");
-const CASILLAS = ["arriba", "abajo", "extra"];
 
-// Lo que tiene puesto el maniquí ahora: { arriba: id, abajo: id, extra: id }
-const outfit = { arriba: null, abajo: null, extra: null };
-let pestana = "closet";
+// Si viene del catálogo con un conjunto armado, arrancamos con ese
+const outfit = { ...getBorrador() };
+let modo = "mezcla"; // "mio" | "mezcla" | "nuevo"
+let nombreOutfit = "";
 
-// ---------- El closet ----------
-// Lo comprado (sale de los pedidos) + lo que agregó a mano, sin repetir
-function idsComprados() {
-  return getPedidos().flatMap((p) => p.items.map((i) => i.id));
+// ============================================================
+// Qué prendas se ofrecen según el modo
+// ============================================================
+
+function prendasDisponibles() {
+  const mias = idsDelCloset();
+  if (modo === "mio") return mias.map(buscarProducto);
+  if (modo === "nuevo") return PRODUCTOS.filter((p) => !mias.includes(p.id));
+  // Mezclar: lo tuyo primero y luego el resto del catálogo
+  return [...mias.map(buscarProducto), ...PRODUCTOS.filter((p) => !mias.includes(p.id))];
 }
 
-function prendasDelCloset() {
-  const ids = [...new Set([...idsComprados(), ...getClosetManual()])];
-  return ids.map(buscarProducto).filter(Boolean);
-}
+// ============================================================
+// "Armar por mí": plan → estilo → la mejor prenda para cada casilla
+// ============================================================
 
-// ---------- Poner prendas en el maniquí ----------
-// Cada tipo tiene su casilla. Si "arriba" ya está ocupada y llega otra
-// prenda de arriba, va a "extra" como segunda capa (ej. hoodie encima).
-function ponerPrenda(id) {
-  const producto = buscarProducto(id);
-  let casilla = CASILLA_POR_TIPO[producto.tipo] ?? "extra";
-  if (casilla === "arriba" && outfit.arriba && outfit.arriba !== id) casilla = "extra";
-  outfit[casilla] = id;
-  renderManiqui();
-  rebotar(document.querySelector(`[data-casilla="${casilla}"]`));
-}
-
-// ---------- "Armar por mí" ----------
-// 1) Del plan que escribió sacamos un estilo (bailar → flow...).
-//    Si no dice nada conocido, usamos su estilo del quiz o "minimal".
-// 2) Buscamos la mejor prenda de arriba y de abajo con ese estilo,
-//    PRIMERO en su closet y, si no hay, en el catálogo.
 function estiloDelPlan(texto) {
   const plan = texto.toLowerCase();
-  const encontrado = Object.entries(M.palabrasClave).find(([, palabras]) =>
-    palabras.some((p) => plan.includes(p))
-  );
+  const encontrado = Object.entries(M.palabrasClave).find(([, palabras]) => palabras.some((p) => plan.includes(p)));
   return encontrado?.[0] ?? getQuiz()?.estilo ?? "minimal";
 }
 
-function mejorPrenda(casilla, estilo, excluir = []) {
-  const sirve = (p) => CASILLA_POR_TIPO[p.tipo] === casilla && !excluir.includes(p.id);
-  const conEstilo = (lista) => lista.filter((p) => sirve(p) && p.tags.includes(estilo));
-  const delCloset = conEstilo(prendasDelCloset());
-  const delCatalogo = conEstilo(PRODUCTOS);
-  const opciones = delCloset.length ? delCloset : delCatalogo.length ? delCatalogo : PRODUCTOS.filter(sirve);
-  // Un poquito de azar para que no salga siempre lo mismo
-  return opciones[Math.floor(Math.random() * opciones.length)]?.id ?? null;
+function elegir(casilla, estilo) {
+  const opciones = prendasDisponibles().filter((p) => casillaDe(p) === casilla);
+  const conEstilo = opciones.filter((p) => p.tags.includes(estilo));
+  const lista = conEstilo.length ? conEstilo : opciones;
+  // En "Mezclar", si tiene algo suyo que sirva, lo preferimos
+  const mias = idsDelCloset();
+  const suyas = lista.filter((p) => mias.includes(p.id));
+  const final = modo === "mezcla" && suyas.length ? suyas : lista;
+  return final[Math.floor(Math.random() * final.length)]?.id ?? null;
 }
 
 function armarPorMi(plan) {
   const estilo = estiloDelPlan(plan);
-  outfit.arriba = mejorPrenda("arriba", estilo);
-  outfit.abajo = mejorPrenda("abajo", estilo);
-  outfit.extra = null;
-  renderManiqui();
-  renderPrendas();
+  const arriba = elegir("arriba", estilo);
+  const abajo = elegir("abajo", estilo);
+  if (!arriba || !abajo) return mostrarAviso(M.faltaParaArmar);
+  Object.assign(outfit, { arriba, abajo, extra: null });
+  nombreOutfit = "";
+  cambioDeOutfit();
   mostrarAviso(M.armado);
-  document.querySelectorAll(".casilla").forEach((c, i) => setTimeout(() => rebotar(c), i * 120));
 }
 
-// Recomendaciones: prendas del catálogo que comparten estilo con lo
-// que lleva puesto y que todavía no están en el outfit
-function recomendaciones() {
-  const puestos = CASILLAS.map((c) => outfit[c]).filter(Boolean);
-  if (!puestos.length) return [];
-  const tags = new Set(puestos.flatMap((id) => buscarProducto(id).tags));
-  return PRODUCTOS.filter((p) => !puestos.includes(p.id) && p.tags.some((t) => tags.has(t))).slice(0, 4);
-}
+// ============================================================
+// Vestidor
+// ============================================================
 
-// ---------- Publicar en la comunidad ----------
-async function publicar() {
-  if (!outfit.arriba || !outfit.abajo) return mostrarAviso(M.errorPublicar);
-  const usuario = getUsuario() ?? (await pedirRegistro(M.registroPublicar));
-  if (!usuario) return;
-  guardarOutfit({
-    id: `o-${Date.now()}`,
-    autor: usuario.nombre,
-    correo: usuario.correo,
-    prendas: CASILLAS.map((c) => outfit[c]).filter(Boolean),
-  });
-  document.getElementById("publicado").innerHTML = `
-    <p>${M.publicado}</p>
-    <a class="boton boton--invertido" href="comunidad.html#outfits">${M.verComunidad}</a>`;
-  document.getElementById("publicado").classList.remove("oculto");
-  aparecer(document.getElementById("publicado"));
-}
-
-// ---------- Pintar ----------
-function htmlCasilla(casilla) {
-  const producto = outfit[casilla] ? buscarProducto(outfit[casilla]) : null;
+function htmlSlot(casilla) {
+  const producto = outfit[casilla] && buscarProducto(outfit[casilla]);
   return `
-    <div class="casilla ${producto ? "casilla--llena" : ""} casilla--${casilla}" data-casilla="${casilla}">
-      <span class="casilla__nombre">${M.casillas[casilla]}</span>
-      ${producto
-        ? `${htmlFoto(producto)}
-           <div class="casilla__info">
-             <span>${escaparHTML(producto.nombre)}</span>
-             <button class="boton-texto" type="button" data-quitar="${casilla}">${M.quitar}</button>
-           </div>`
-        : `<p class="casilla__vacia">${M.casillaVacia}</p>`}
+    <div class="slot ${producto ? "slot--lleno" : ""}" data-slot="${casilla}">
+      <div class="slot__foto">${producto ? htmlFoto(producto) : ""}</div>
+      <div class="slot__texto">
+        <span class="slot__casilla">${M.casillas[casilla]}</span>
+        <span class="slot__nombre">${producto ? escaparHTML(producto.nombre) : M.casillaVacia}</span>
+        ${producto ? `<button class="slot__quitar" type="button" data-quitar="${casilla}">${M.quitar}</button>` : ""}
+      </div>
     </div>`;
 }
 
-function renderManiqui() {
-  document.getElementById("maniqui").innerHTML = CASILLAS.map(htmlCasilla).join("");
-  const recos = recomendaciones();
-  document.getElementById("recos").innerHTML = recos.length
-    ? `<h3>${M.recomendacion}</h3>
-       <div class="recos">${recos.map((p) => htmlMiniPrenda(p)).join("")}</div>`
-    : "";
-}
-
-function htmlMiniPrenda(producto, comprada = false) {
-  const puesto = CASILLAS.some((c) => outfit[c] === producto.id);
+// Tarjeta "de videojuego": foto, nombre, color y los estilos como "stats"
+function htmlCarta(producto, mias) {
+  const puesta = idsDelOutfit(outfit).includes(producto.id);
+  const esMia = mias.includes(producto.id);
   return `
-    <button class="mini-prenda ${puesto ? "mini-prenda--puesta" : ""}" type="button" data-poner="${producto.id}">
+    <button class="carta ${puesta ? "carta--puesta" : ""}" type="button" data-poner="${producto.id}">
+      <span class="carta__sello ${esMia ? "carta__sello--mia" : ""}">${puesta ? M.equipada : esMia ? M.tuya : M.nueva}</span>
       ${htmlFoto(producto)}
-      <span class="mini-prenda__nombre">${escaparHTML(producto.nombre)}</span>
-      <span class="texto-suave">${escaparHTML(capitalizar(producto.color))}${comprada ? ` · ${M.deCompra}` : ""}</span>
+      <span class="carta__nombre">${escaparHTML(producto.nombre)}</span>
+      <span class="carta__color">${escaparHTML(capitalizar(producto.color))} · ${M.casillas[casillaDe(producto)]}</span>
+      <span class="carta__stats">${producto.tags.map((t) => `<i>${T.quiz.estilos[t]?.nombre ?? t}</i>`).join("")}</span>
     </button>`;
 }
 
-function renderPrendas() {
-  document.querySelectorAll("[data-pestana]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.pestana === pestana));
-  const lugar = document.getElementById("prendas");
-  if (pestana === "catalogo") {
-    lugar.innerHTML = `<div class="mini-grilla">${PRODUCTOS.map((p) => htmlMiniPrenda(p)).join("")}</div>`;
-    return;
-  }
-  const comprados = idsComprados();
-  const closet = prendasDelCloset();
-  const opciones = PRODUCTOS.map((p) => `<option value="${p.id}">${escaparHTML(p.nombre)} · ${escaparHTML(p.color)}</option>`).join("");
-  lugar.innerHTML = `
-    ${closet.length
-      ? `<div class="mini-grilla">${closet.map((p) => htmlMiniPrenda(p, comprados.includes(p.id))).join("")}</div>`
-      : `<p class="aviso-borde">${M.closetVacio}</p>`}
-    <form class="agregar-closet" id="form-closet">
-      <label class="campo">${M.agregarPrenda}
-        <select name="prenda"><option value="">${M.elegirPrenda}</option>${opciones}</select>
-      </label>
-      <button class="boton boton--claro" type="submit">${M.agregar}</button>
-    </form>`;
+function renderVestidor() {
+  document.getElementById("slots").innerHTML = CASILLAS.map(htmlSlot).join("");
+  document.getElementById("avatar").innerHTML = htmlAvatar(outfit, "vestidor");
+  const mias = idsDelCloset();
+  const prendas = prendasDisponibles();
+  document.getElementById("cartas").innerHTML = prendas.length
+    ? prendas.map((p) => htmlCarta(p, mias)).join("")
+    : `<p class="vestidor__vacio">${M.sinPrendas}</p>`;
+  document.querySelectorAll("[data-modo]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.modo === modo));
+  document.getElementById("modo-ayuda").textContent = M.modosAyuda[modo];
+  const campoNombre = document.getElementById("nombre-outfit");
+  if (campoNombre.value !== nombreOutfit) campoNombre.value = nombreOutfit;
 }
+
+// Cada vez que cambia el outfit: repintar y recordar el borrador
+function cambioDeOutfit() {
+  guardarBorrador(outfit);
+  renderVestidor();
+  aparecer(document.querySelector(".avatar-svg"), 8);
+}
+
+// ============================================================
+// Guardar y publicar
+// ============================================================
+
+const outfitCompleto = () => outfit.arriba && outfit.abajo;
+
+function guardar() {
+  if (!outfitCompleto()) return mostrarAviso(M.errorIncompleto);
+  guardarConjunto(nombreOutfit.trim(), outfit);
+  mostrarAviso(M.guardado);
+  renderConjuntos();
+}
+
+async function publicarConjunto(conjunto) {
+  const usuario = getUsuario() ?? (await pedirRegistro(M.registroPublicar));
+  if (!usuario) return false;
+  guardarOutfit({
+    id: `o-${Date.now()}`,
+    nombre: conjunto.nombre,
+    autor: usuario.nombre,
+    correo: usuario.correo,
+    prendas: idsDelOutfit(conjunto.prendas),
+  });
+  marcarPublicado(conjunto.id);
+  renderConjuntos();
+  return true;
+}
+
+async function publicarActual() {
+  if (!outfitCompleto()) return mostrarAviso(M.errorIncompleto);
+  // Publicar también lo guarda en "Mis conjuntos"
+  const conjunto = guardarConjunto(nombreOutfit.trim(), outfit);
+  if (!(await publicarConjunto(conjunto))) return;
+  const aviso = document.getElementById("publicado");
+  aviso.innerHTML = `<p>${M.publicado}</p><a class="boton boton--invertido" href="comunidad.html#outfits">${M.verComunidad}</a>`;
+  aviso.classList.remove("oculto");
+  aparecer(aviso);
+}
+
+// ============================================================
+// Tu closet + "¿Con qué combino esto?"
+// ============================================================
+
+function renderCloset() {
+  const prendas = prendasDelCloset();
+  document.getElementById("closet").innerHTML = prendas.length
+    ? prendas
+        .map(
+          ({ producto, origen }) => `
+          <article class="prenda-closet">
+            ${htmlFoto(producto)}
+            <div class="prenda-closet__info">
+              <span class="carta__sello carta__sello--mia">${origen === "compra" ? M.deCompra : M.deCaja}</span>
+              <h3>${escaparHTML(producto.nombre)}</h3>
+              <p class="texto-suave">${escaparHTML(capitalizar(producto.color))}</p>
+              <button class="boton boton--claro boton--chico" type="button" data-combinar="${producto.id}">${M.combinarBoton}</button>
+            </div>
+          </article>`
+        )
+        .join("")
+    : `<p class="aviso-borde">${M.sinPrendas}</p>`;
+}
+
+function mostrarCombinacion(id) {
+  const { texto, ejemplo } = sugerenciaPara(id);
+  const lugar = document.getElementById("combinacion");
+  lugar.innerHTML = `
+    <div class="consejo">
+      <p class="consejo__texto">${escaparHTML(texto)}</p>
+      ${ejemplo
+        ? `<p class="texto-suave">${M.ejemploStock}</p>
+           <div class="consejo__ejemplo">
+             ${htmlFoto(ejemplo)}
+             <div>
+               <h3>${escaparHTML(ejemplo.nombre)}</h3>
+               <p class="texto-suave">${escaparHTML(capitalizar(ejemplo.color))}</p>
+               <div class="consejo__botones">
+                 <button class="boton boton--chico" type="button" data-probar="${id}|${ejemplo.id}">${M.probarAvatar}</button>
+                 <a class="boton-texto" href="catalogo.html?producto=${ejemplo.id}">${T.catalogo.titulo}</a>
+               </div>
+             </div>
+           </div>`
+        : ""}
+    </div>`;
+  aparecer(lugar.firstElementChild, 14);
+  lugar.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// QR de la caja (simulado): visor de cámara + campo para el código
+function abrirEscaner() {
+  const modal = abrirModal(
+    `<div class="modal__cuerpo escaner">
+      <h2>${M.qrTitulo}</h2>
+      <p>${M.qrTexto}</p>
+      <div class="visor" aria-hidden="true"><span class="visor__linea"></span></div>
+      <p class="texto-suave">${M.qrSimulado}</p>
+      <form class="formulario" novalidate>
+        <label class="campo">${M.qrCodigo}
+          <input name="codigo" type="text" autocomplete="off" placeholder="CH-CAJA-01">
+        </label>
+        <p class="error" aria-live="polite"></p>
+        <button class="boton boton--ancho" type="submit">${M.qrAgregar}</button>
+        <p class="texto-suave">${M.qrDemo(codigosDemo())}</p>
+      </form>
+    </div>`,
+    { chico: true }
+  );
+  const form = modal.querySelector("form");
+  form.codigo.focus();
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const resultado = escanearCaja(form.codigo.value);
+    if (!resultado.ok) return (modal.querySelector(".error").textContent = resultado.mensaje);
+    modal.close();
+    mostrarAviso(resultado.mensaje);
+    renderCloset();
+    renderVestidor();
+  });
+}
+
+// ============================================================
+// Mis conjuntos
+// ============================================================
+
+function renderConjuntos() {
+  const conjuntos = [...getConjuntos()].reverse();
+  document.getElementById("conjuntos").innerHTML = conjuntos.length
+    ? conjuntos
+        .map((c) => {
+          const prendas = idsDelOutfit(c.prendas).map(buscarProducto).filter(Boolean);
+          return `
+          <article class="conjunto">
+            <div class="conjunto__fotos">${prendas.map(htmlFoto).join("")}</div>
+            <div class="conjunto__info">
+              <span class="etiqueta ${c.publicado ? "etiqueta--negra" : ""}">${c.publicado ? M.estadoPublicado : M.estadoGuardado}</span>
+              <h3>${escaparHTML(c.nombre || M.sinNombre)}</h3>
+              <p class="texto-suave">${prendas.map((p) => escaparHTML(p.nombre)).join(" + ")} · ${formatoFecha(c.fecha)}</p>
+              <div class="conjunto__botones">
+                <button class="boton boton--chico" type="button" data-cargar="${c.id}">${M.cargar}</button>
+                ${c.publicado ? "" : `<button class="boton boton--claro boton--chico" type="button" data-publicar="${c.id}">${M.publicar}</button>`}
+                <button class="boton-texto" type="button" data-eliminar="${c.id}">${M.eliminar}</button>
+              </div>
+            </div>
+          </article>`;
+        })
+        .join("")
+    : `<p class="aviso-borde">${M.misConjuntosVacio}</p>`;
+}
+
+// ============================================================
+// Página
+// ============================================================
 
 function render() {
+  const modos = Object.entries(M.modos)
+    .map(([clave, texto]) => `<button type="button" class="segmento" data-modo="${clave}">${texto}</button>`)
+    .join("");
+
   contenido.innerHTML = `
-    <section class="seccion contenedor">
-      <div class="maniqui-cabecera">
-        <h1>${M.titulo}</h1>
-        <p class="beta"><strong>${M.beta}</strong><span>${M.betaTexto}</span></p>
-      </div>
+    <section class="vestidor-seccion">
+      <div class="contenedor">
+        <div class="vestidor-cabecera">
+          <h1>${M.titulo}</h1>
+          <p class="beta"><strong>${M.beta}</strong><span>${M.betaTexto}</span></p>
+        </div>
 
-      <div class="maniqui-layout">
-        <div>
-          <h2>${M.maniqui}</h2>
-          <div class="maniqui" id="maniqui"></div>
-          <form class="armar" id="form-armar">
-            <label class="campo">${M.peticion}
-              <input name="plan" type="text" maxlength="60">
+        <div class="vestidor">
+          <aside class="vestidor__slots" id="slots"></aside>
+          <div class="vestidor__centro">
+            <div class="vestidor__avatar" id="avatar"></div>
+            <label class="campo campo--oscuro">${M.nombreOutfit}
+              <span class="nombre-fila">
+                <input id="nombre-outfit" type="text" maxlength="40">
+                <button class="boton boton--borde boton--chico" type="button" data-accion="sugerir">${M.sugerirNombre}</button>
+              </span>
             </label>
-            <button class="boton" type="submit">${M.armarPorMi}</button>
-          </form>
-          <div class="maniqui-acciones">
-            <button class="boton boton--grande boton--ancho" type="button" data-accion="publicar">${M.publicar}</button>
-            <button class="boton-texto" type="button" data-accion="limpiar">${M.limpiar}</button>
+            <p class="texto-suave oculto" id="nombre-ayuda">${M.nombreSugerido}</p>
+            <div class="vestidor__botones">
+              <button class="boton boton--invertido" type="button" data-accion="guardar">${M.guardar}</button>
+              <button class="boton boton--borde" type="button" data-accion="publicar">${M.publicar}</button>
+              <button class="boton-texto boton-texto--claro" type="button" data-accion="limpiar">${M.limpiar}</button>
+            </div>
+            <div class="publicado oculto" id="publicado"></div>
           </div>
-          <div class="publicado oculto" id="publicado"></div>
-        </div>
-
-        <div>
-          <div class="pestanas">
-            <button class="pestana" type="button" data-pestana="closet">${M.pestanas.closet}</button>
-            <button class="pestana" type="button" data-pestana="catalogo">${M.pestanas.catalogo}</button>
+          <div class="vestidor__panel">
+            <div class="segmentos" role="group">${modos}</div>
+            <p class="texto-suave" id="modo-ayuda"></p>
+            <form class="armar" id="form-armar">
+              <input name="plan" type="text" maxlength="60" placeholder="${M.peticion}" aria-label="${M.peticion}">
+              <button class="boton boton--invertido boton--chico" type="submit">${M.armarPorMi}</button>
+            </form>
+            <div class="cartas" id="cartas"></div>
           </div>
-          <div id="prendas"></div>
-          <div class="recos-bloque" id="recos"></div>
         </div>
       </div>
+    </section>
+
+    <section class="seccion contenedor" id="tu-closet">
+      <div class="titulo-seccion">
+        <h2 class="titulo-ch"><img src="assets/logo/simbolo-ch-negro.png" alt="">${M.closet}</h2>
+        <button class="boton boton--chico" type="button" data-accion="escanear">${M.escanear}</button>
+      </div>
+      <p class="texto-suave">${M.closetNota}</p>
+      <div class="closet-layout">
+        <div class="closet-lista" id="closet"></div>
+        <aside class="combinar">
+          <h3>${M.combinarTitulo}</h3>
+          <p class="texto-suave">${M.combinarAyuda}</p>
+          <div id="combinacion"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="seccion contenedor" id="mis-conjuntos">
+      <h2 class="titulo-ch"><img src="assets/logo/simbolo-ch-negro.png" alt="">${M.misConjuntos}</h2>
+      <div class="conjuntos" id="conjuntos"></div>
     </section>`;
-  renderManiqui();
-  renderPrendas();
+
+  renderVestidor();
+  renderCloset();
+  renderConjuntos();
 }
 
-// ---------- Eventos ----------
-contenido.addEventListener("click", (e) => {
-  const poner = e.target.closest("[data-poner]");
-  if (poner) {
-    ponerPrenda(poner.dataset.poner);
-    renderPrendas(); // para marcar cuál está puesta
+// ============================================================
+// Eventos (un solo oyente para todo)
+// ============================================================
+
+contenido.addEventListener("click", async (e) => {
+  const el = (selector) => e.target.closest(selector);
+
+  if (el("[data-poner]")) {
+    const casilla = ponerEn(outfit, el("[data-poner]").dataset.poner);
+    cambioDeOutfit();
+    rebotar(document.querySelector(`[data-slot="${casilla}"]`));
     return;
   }
-  const quitar = e.target.closest("[data-quitar]");
-  if (quitar) {
-    outfit[quitar.dataset.quitar] = null;
-    renderManiqui();
-    renderPrendas();
+  if (el("[data-quitar]")) {
+    outfit[el("[data-quitar]").dataset.quitar] = null;
+    return cambioDeOutfit();
+  }
+  if (el("[data-modo]")) {
+    modo = el("[data-modo]").dataset.modo;
+    return renderVestidor();
+  }
+  if (el("[data-combinar]")) return mostrarCombinacion(el("[data-combinar]").dataset.combinar);
+  if (el("[data-probar]")) {
+    // Pone la prenda suya + el ejemplo en el avatar y sube a verlo
+    const [suya, ejemplo] = el("[data-probar]").dataset.probar.split("|");
+    Object.assign(outfit, { arriba: null, abajo: null, extra: null });
+    ponerEn(outfit, suya);
+    ponerEn(outfit, ejemplo);
+    modo = "mezcla";
+    cambioDeOutfit();
+    return document.querySelector(".vestidor-seccion").scrollIntoView({ behavior: "smooth" });
+  }
+  if (el("[data-cargar]")) {
+    const conjunto = getConjuntos().find((c) => c.id === el("[data-cargar]").dataset.cargar);
+    Object.assign(outfit, conjunto.prendas);
+    nombreOutfit = conjunto.nombre;
+    cambioDeOutfit();
+    return document.querySelector(".vestidor-seccion").scrollIntoView({ behavior: "smooth" });
+  }
+  if (el("[data-publicar]")) {
+    const conjunto = getConjuntos().find((c) => c.id === el("[data-publicar]").dataset.publicar);
+    if (await publicarConjunto(conjunto)) mostrarAviso(M.publicado);
     return;
   }
-  const tab = e.target.closest("[data-pestana]");
-  if (tab) {
-    pestana = tab.dataset.pestana;
-    renderPrendas();
-    return;
+  if (el("[data-eliminar]")) {
+    eliminarConjunto(el("[data-eliminar]").dataset.eliminar);
+    renderConjuntos();
+    return mostrarAviso(M.eliminado);
   }
-  const accion = e.target.closest("[data-accion]")?.dataset.accion;
-  if (accion === "publicar") publicar();
+
+  const accion = el("[data-accion]")?.dataset.accion;
+  if (accion === "sugerir") {
+    nombreOutfit = sugerirNombre(outfit);
+    document.getElementById("nombre-ayuda").classList.toggle("oculto", !nombreOutfit);
+    renderVestidor();
+  }
+  if (accion === "guardar") guardar();
+  if (accion === "publicar") publicarActual();
+  if (accion === "escanear") abrirEscaner();
   if (accion === "limpiar") {
-    CASILLAS.forEach((c) => (outfit[c] = null));
+    Object.assign(outfit, { arriba: null, abajo: null, extra: null });
+    nombreOutfit = "";
     document.getElementById("publicado").classList.add("oculto");
-    renderManiqui();
-    renderPrendas();
+    cambioDeOutfit();
   }
+});
+
+contenido.addEventListener("input", (e) => {
+  if (e.target.id === "nombre-outfit") nombreOutfit = e.target.value;
 });
 
 contenido.addEventListener("submit", (e) => {
   e.preventDefault();
   if (e.target.id === "form-armar") armarPorMi(e.target.plan.value);
-  if (e.target.id === "form-closet") {
-    const id = e.target.prenda.value;
-    if (!id) return;
-    agregarAlCloset(id);
-    mostrarAviso(M.agregadaCloset(buscarProducto(id).nombre));
-    renderPrendas();
-  }
 });
 
 render();
