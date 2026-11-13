@@ -8,13 +8,10 @@
    ============================================================ */
 
 /* ---------- Libre Baskerville sin internet ----------
-   Hoy la fuente llega de Google Fonts: si en la expo no hay wifi, los
-   títulos caen en Georgia. Con los .woff2 dentro de assets/fonts/ la
-   fuente viaja con la página (como llevar la comida de la casa en vez
-   de depender del restaurante).
-   ⚠️ APAGADO hasta que estén los 3 archivos en assets/fonts/. Para
-   activarlo: quitar el comentario de abajo y borrar los <link> de
-   Google Fonts de los 8 .html.
+   Antes la fuente llegaba de Google Fonts: si en la expo no había
+   wifi, los títulos caían en Georgia. Ahora los .woff2 viven en
+   assets/fonts/ y la fuente viaja con la página (como llevar la
+   comida de la casa en vez de depender del restaurante). */
 
 @font-face {
   font-family: "Libre Baskerville";
@@ -39,7 +36,6 @@
   font-style: italic;
   font-display: swap;
 }
-*/
 
 /* Los colores viven aquí y en ningún otro lado. Si Chased cambia
    un gris, se cambia una línea y listo. */
@@ -315,6 +311,39 @@ select {
 }
 
 .footer a { color: var(--blanco); }
+
+/* Instagram como botón de borde: se nota sin romper lo minimalista */
+.footer__red {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  margin: 8px 0 4px;
+  padding: 10px 22px;
+  border: 1px solid var(--blanco);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.footer__red span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 0.8rem;
+  color: var(--gris-claro);
+  line-height: 1.2;
+}
+
+.footer__red strong {
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+  color: var(--blanco);
+}
+
+.footer__red:hover { background: var(--blanco); color: var(--negro); }
+.footer__red:hover span,
+.footer__red:hover strong { color: var(--negro); }
 
 .footer__prototipo {
   color: var(--gris-claro);
@@ -782,7 +811,26 @@ body.noche {
   background: var(--blanco);
 }
 
-.modal { overflow: auto; }
+/* overscroll-behavior: contain → cuando el scroll de la tarjeta llega
+   al final, el gesto se queda ahí y no se "pasa" a la página de atrás.
+   90dvh = 90% de lo que de verdad se ve en el celular (sin la barra
+   del navegador); con 90vh el botón de agregar podía quedar escondido. */
+.modal {
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  max-height: 90dvh;
+}
+
+/* Mientras hay un modal abierto, la página de atrás queda congelada.
+   El "top" negativo lo pone app.js para que no salte al inicio. */
+body.fondo-quieto {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+}
 
 .modal::backdrop { background: rgba(0, 0, 0, 0.55); }
 
