@@ -515,7 +515,8 @@ function renderFooter() {
       <div class="contenedor">
         <img class="footer__logo" src="assets/logo/logo-chased-blanco.png" alt="${T.marca.nombre}">
         <p><a href="${T.marca.instagramUrl}" target="_blank" rel="noopener">${T.footer.instagram} ${T.marca.instagram}</a></p>
-        <p class="footer__prototipo">${T.footer.prototipo}</p>
+        <!-- Link discreto a la página de preparar la demo (no está en el menú) -->
+        <p class="footer__prototipo">${T.footer.prototipo} · <a href="demo.html">${T.footer.demo}</a></p>
       </div>
     </footer>`;
 }
@@ -529,6 +530,7 @@ const TITULOS = {
   quiz: T.quiz.titulo,
   comunidad: T.comunidad.titulo,
   maniqui: T.maniqui.titulo,
+  demo: T.demo.titulo,
 };
 
 function ponerTitulo() {

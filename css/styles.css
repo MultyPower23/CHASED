@@ -3160,3 +3160,61 @@ body.noche {
 .faltante .precio__nota { display: none; } /* el "referencial" ya va en el resumen */
 .faltantes summary span:first-child { min-width: 0; }
 .faltantes__botones { flex-direction: column; }
+
+/* ============================================================
+   FASE 5 — Página de demo (oculta)
+   ============================================================ */
+.demo { max-width: 860px; }
+
+.demo__tarjetas {
+  display: grid;
+  gap: 14px;
+  margin: 24px 0 36px;
+}
+
+.demo__tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border-radius: var(--radio);
+  background: var(--negro);
+  color: var(--blanco);
+}
+
+.demo__tarjeta p { color: var(--gris-claro); flex: 1; }
+.demo__tarjeta .boton { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+
+.demo__tarjeta--clara {
+  background: var(--gris-claro);
+  color: var(--negro);
+}
+
+.demo__tarjeta--clara p { color: var(--gris-oscuro); }
+.demo__tarjeta--clara .boton { background: var(--blanco); color: var(--negro); border-color: var(--negro); }
+
+.demo__pasos {
+  margin: 0 0 28px;
+  padding-left: 22px;
+  display: grid;
+  gap: 8px;
+  color: var(--gris-oscuro);
+}
+
+.footer__prototipo a { color: var(--gris-claro); }
+
+@media (min-width: 700px) {
+  .demo__tarjetas { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---------- Pulido responsive (Fase 5) ---------- */
+/* Espacio abajo para que el botón flotante del conjunto no tape nada */
+.con-barra-conjunto main { padding-bottom: 72px; }
+
+/* Outfits y conjuntos de 3 prendas: las fotos se reparten en columnas */
+.outfit__fotos,
+.conjunto__fotos {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}

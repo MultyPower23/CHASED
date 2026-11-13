@@ -17,6 +17,11 @@ Es un proyecto del reto **"Chasing Your Style"** para la **Expo InnvEm 2026** (C
 
 No hay que instalar nada más: es HTML, CSS y JS puro. Los datos se guardan en el `localStorage` del navegador, así que son simulados.
 
+### Modo demo (para la presentación)
+Abre `demo.html` (también hay un link discreto "Modo demo" en el footer):
+- **Cargar datos de ejemplo:** crea una usuaria con quiz, pedidos (insignia Runner), un descuento disponible, una caja escaneada, un conjunto publicado y un voto.
+- **Reiniciar todo:** borra lo guardado para que alguien pruebe desde cero.
+
 ## Qué tiene
 | Página | Qué hace |
 |---|---|

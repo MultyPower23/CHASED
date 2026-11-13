@@ -528,6 +528,32 @@ export const TEXTOS = {
     },
   },
 
+  // Página oculta para preparar la demo (no está en el menú)
+  demo: {
+    titulo: "Modo demo",
+    intro: "Herramientas para preparar la presentación. Todo pasa solo en este navegador.",
+    cargarTitulo: "Cargar datos de ejemplo",
+    cargarTexto:
+      "Crea una usuaria de ejemplo con su quiz, dos pedidos (insignia Runner), un descuento disponible, una caja escaneada, un conjunto publicado y un voto en el concurso.",
+    cargar: "Cargar datos de ejemplo",
+    cargado: "¡Listo! Ya hay datos de ejemplo. Date una vuelta por el perfil.",
+    reiniciarTitulo: "Reiniciar todo",
+    reiniciarTexto: "Borra todo lo guardado (usuario, carrito, pedidos, votos, closet…) para empezar de cero.",
+    reiniciar: "Reiniciar todo",
+    confirmar: "¿Seguro? Se borra todo lo guardado en este navegador.",
+    reiniciado: "Listo, todo quedó como recién abierto.",
+    recorrido: "Recorrido sugerido",
+    pasos: [
+      "Inicio: la portada negra, la frase y las colecciones.",
+      "Catálogo: filtros, \"Para ti\" y \"Armar conjunto\".",
+      "Quiz: la animación de carga y el resultado.",
+      "Carrito: comprar, subir de insignia y usar el descuento.",
+      "Comunidad: votar, postular un diseño y ver outfits.",
+      "Mi closet: el vestidor, combinar y publicar.",
+    ],
+    ir: "Ir al inicio",
+  },
+
   // Armar conjunto en el catálogo (panel que se despliega)
   conjunto: {
     abrir: (n) => `Armar conjunto (${n})`,
@@ -547,5 +573,6 @@ export const TEXTOS = {
   footer: {
     instagram: "Síguenos en Instagram",
     prototipo: "Prototipo académico — Expo InnvEm 2026 · Colegio UPB Marinilla",
+    demo: "Modo demo",
   },
 };

@@ -374,6 +374,9 @@ function renderBarraConjunto() {
   const n = idsDelOutfit(getBorrador()).length;
   barra.textContent = T.conjunto.abrir(n);
   barra.classList.toggle("barra-conjunto--llena", n > 0);
+  // Solo se muestra cuando ya hay algo en el conjunto (menos ruido)
+  barra.classList.toggle("oculto", n === 0);
+  document.body.classList.toggle("con-barra-conjunto", n > 0);
 }
 
 function htmlPiezaConjunto(casilla, id) {

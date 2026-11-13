@@ -44,6 +44,18 @@ export function cerrarSesion() {
   localStorage.removeItem(PREFIJO + "usuario");
 }
 
+// Para el modo demo: borra TODO lo de Chased (solo nuestras claves,
+// las que empiezan por "chased_"; no toca nada más del navegador)
+export function reiniciarTodo() {
+  try {
+    Object.keys(localStorage)
+      .filter((clave) => clave.startsWith(PREFIJO))
+      .forEach((clave) => localStorage.removeItem(clave));
+  } catch (error) {
+    console.warn("No se pudo reiniciar el localStorage:", error);
+  }
+}
+
 // ---------- Carrito ----------
 // Cada ítem es { id, talla, cantidad }. Solo guardamos el id del
 // producto, no el producto entero, para no duplicar datos de
