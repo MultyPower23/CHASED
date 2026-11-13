@@ -32,6 +32,7 @@ import {
   escanearCaja,
   codigosDemo,
   casillaDe,
+  outfitCompleto as estaCompleto,
   ponerEn,
   idsDelOutfit,
   htmlAvatar,
@@ -43,6 +44,7 @@ import {
   actualizarConjunto,
   getBorrador,
   guardarBorrador,
+  normalizarOutfit,
 } from "./conjuntos.js";
 
 const T = TEXTOS;
@@ -87,12 +89,17 @@ function elegir(casilla, estilo) {
   return final[Math.floor(Math.random() * final.length)]?.id ?? null;
 }
 
+// Estilos que suelen llevar una capa encima (hoodie o buzo)
+const ESTILOS_CON_CAPA = ["comfy", "urbano"];
+
 function armarPorMi(plan) {
   const estilo = estiloDelPlan(plan);
   const arriba = elegir("arriba", estilo);
   const abajo = elegir("abajo", estilo);
-  if (!arriba || !abajo) return mostrarAviso(M.faltaParaArmar);
-  Object.assign(outfit, { arriba, abajo, extra: null });
+  const extra = ESTILOS_CON_CAPA.includes(estilo) ? elegir("extra", estilo) : null;
+  // Necesita parte de arriba (camiseta o hoodie) y parte de abajo
+  if (!(arriba || extra) || !abajo) return mostrarAviso(M.faltaParaArmar);
+  Object.assign(outfit, { arriba, abajo, extra });
   nombreOutfit = "";
   cambioDeOutfit();
   mostrarAviso(M.armado);
@@ -154,7 +161,7 @@ function cambioDeOutfit() {
 // Guardar y publicar
 // ============================================================
 
-const outfitCompleto = () => outfit.arriba && outfit.abajo;
+const outfitCompleto = () => estaCompleto(outfit);
 
 function guardar() {
   if (!outfitCompleto()) return mostrarAviso(M.errorIncompleto);
@@ -445,7 +452,7 @@ contenido.addEventListener("click", async (e) => {
 
   if (el("[data-cargar]")) {
     const conjunto = conjuntoDe("data-cargar");
-    Object.assign(outfit, conjunto.prendas);
+    Object.assign(outfit, normalizarOutfit(conjunto.prendas));
     nombreOutfit = conjunto.nombre;
     cambioDeOutfit();
     return document.querySelector(".vestidor-seccion").scrollIntoView({ behavior: "smooth" });

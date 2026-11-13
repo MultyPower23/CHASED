@@ -2996,3 +2996,8 @@ body.noche {
 
 .closet__prenda:hover,
 .closet__prenda:active { transform: scale(1.05); }
+
+/* Avatar en pose T: el lienzo es más ancho que alto en los brazos */
+.avatar-svg { width: min(78vw, 300px); }
+.panel-conjunto__avatar .avatar-svg { width: min(60vw, 230px); }
+@media (min-width: 900px) { .avatar-svg { width: 320px; } }

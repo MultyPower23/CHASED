@@ -425,7 +425,7 @@ export const TEXTOS = {
     beta: "Versión beta: así funcionará con IA",
     betaTexto: "Hoy armamos por estilos, colores y palabras clave. La idea es que una IA aprenda de tu closet y tus gustos para proponerte conjuntos.",
     vestidor: "Tu vestidor",
-    casillas: { arriba: "Arriba", abajo: "Abajo", extra: "Extra" },
+    casillas: { arriba: "Camiseta", abajo: "Abajo", extra: "Hoodie / buzo" },
     casillaVacia: "Vacío",
     quitar: "Quitar",
     // Con qué ropa se arma el outfit
@@ -480,7 +480,7 @@ export const TEXTOS = {
     publicado: "¡Outfit publicado en Comunidad!",
     verComunidad: "Ver en Comunidad",
     limpiar: "Empezar de nuevo",
-    errorIncompleto: "Pon al menos una prenda arriba y una abajo.",
+    errorIncompleto: "Pon una camiseta o un hoodie, y una prenda abajo.",
     registroPublicar: "Para publicar tu outfit en la comunidad necesitamos saber quién eres.",
     sinNombre: "Outfit sin nombre",
     // Mis conjuntos

@@ -63,19 +63,31 @@ export const codigosDemo = () => Object.keys(CAJAS_DEMO).join(", ");
 // Casillas: dónde va cada prenda
 // ============================================================
 
-export const casillaDe = (producto) => CASILLA_POR_TIPO[producto.tipo] ?? "extra";
+// Un producto puede decir su casilla directamente (ej. el Crop Hoodie,
+// que es tipo "crop" pero es un hoodie); si no, se usa la de su tipo
+export const casillaDe = (producto) => producto.casilla ?? CASILLA_POR_TIPO[producto.tipo] ?? "extra";
 
-// Pone una prenda en el outfit. Si arriba ya tiene otra cosa y llega
-// otra de arriba, va a "extra" como segunda capa (ej. hoodie encima).
+// Completo = algo arriba (camiseta o hoodie) + algo abajo.
+// Hoodie + jogger sin camiseta también es un outfit válido.
+export const outfitCompleto = (outfit) => Boolean((outfit.arriba || outfit.extra) && outfit.abajo);
+
+// Pone una prenda en SU casilla. Si ya había otra ahí, la reemplaza
+// (no tiene sentido ponerse dos camisetas a la vez).
 export function ponerEn(outfit, id) {
-  const producto = buscarProducto(id);
-  let casilla = casillaDe(producto);
-  if (casilla === "arriba" && outfit.arriba && outfit.arriba !== id) casilla = "extra";
+  const casilla = casillaDe(buscarProducto(id));
   outfit[casilla] = id;
   return casilla;
 }
 
 export const idsDelOutfit = (outfit) => CASILLAS.map((c) => outfit[c]).filter(Boolean);
+
+// Reacomoda cada prenda en su casilla correcta (sirve para outfits
+// guardados antes de que el hoodie tuviera su propia casilla)
+export function normalizarOutfit(outfit) {
+  const nuevo = { arriba: null, abajo: null, extra: null };
+  idsDelOutfit(outfit).forEach((id) => buscarProducto(id) && ponerEn(nuevo, id));
+  return nuevo;
+}
 
 // ============================================================
 // Avatar (silueta en SVG). Las prendas "puestas" rellenan su zona
@@ -83,15 +95,19 @@ export const idsDelOutfit = (outfit) => CASILLAS.map((c) => outfit[c]).filter(Bo
 // videojuego. Nada de librerías: es un dibujo hecho con trazos.
 // ============================================================
 
+// Avatar en pose T (brazos abiertos, separados del cuerpo), en un
+// lienzo de 300 de ancho para que quepan los brazos
 const ZONAS = {
-  // torso (arriba)
-  torso: "M60 92 Q100 78 140 92 L148 206 Q100 216 52 206 Z",
-  // brazos (van con "arriba" o con la capa "extra")
-  brazos: "M60 92 L38 196 L52 200 L70 118 Z M140 92 L162 196 L148 200 L130 118 Z",
-  // capa extra: hombros + brazos (como una chaqueta abierta)
-  capa: "M56 90 Q100 76 144 90 L166 198 L148 204 L134 124 L130 206 L112 208 L112 100 L88 100 L88 208 L70 206 L66 124 L52 204 L34 198 Z",
+  // torso (camiseta)
+  torso: "M112 92 Q150 80 188 92 L194 206 Q150 216 106 206 Z",
+  // brazos horizontales: salen de los hombros hacia los lados
+  brazos: "M114 94 L34 104 L34 126 L114 122 Z M186 94 L266 104 L266 126 L186 122 Z",
+  // capa (hoodie / buzo): chaqueta abierta, deja ver la camiseta en el centro
+  capa:
+    "M108 88 Q128 79 142 81 L142 214 Q122 216 100 211 L104 130 L28 132 L28 98 Z " +
+    "M192 88 Q172 79 158 81 L158 214 Q178 216 200 211 L196 130 L272 132 L272 98 Z",
   // piernas (abajo)
-  piernas: "M54 204 L146 204 L141 404 L107 404 L100 262 L93 404 L59 404 Z",
+  piernas: "M106 204 L194 204 L189 404 L157 404 L150 262 L143 404 L111 404 Z",
 };
 
 // Por ahora el avatar NO muestra fotos: cada zona es gris claro si
@@ -103,9 +119,12 @@ function zona(nombre, d, puesta) {
 
 export function htmlAvatar(outfit) {
   return `
-    <svg class="avatar-svg" viewBox="0 0 200 420" role="img" aria-label="${M.vestidor}">
-      <circle cx="100" cy="46" r="26" class="avatar__cabeza"/>
-      <rect x="90" y="68" width="20" height="18" rx="6" class="avatar__cabeza"/>
+    <svg class="avatar-svg" viewBox="0 0 300 420" role="img" aria-label="${M.vestidor}">
+      <circle cx="150" cy="46" r="26" class="avatar__cabeza"/>
+      <rect x="140" y="68" width="20" height="18" rx="6" class="avatar__cabeza"/>
+      <!-- Manos al final de los brazos abiertos -->
+      <circle cx="24" cy="115" r="10" class="avatar__cabeza"/>
+      <circle cx="276" cy="115" r="10" class="avatar__cabeza"/>
       ${zona("abajo", ZONAS.piernas, outfit.abajo)}
       ${zona("arriba", ZONAS.torso + " " + ZONAS.brazos, outfit.arriba)}
       ${outfit.extra ? zona("extra", ZONAS.capa, true) : `<path d="${ZONAS.capa}" class="avatar__capa-vacia" data-zona="extra"/>`}
@@ -230,5 +249,5 @@ export function actualizarConjunto(id, cambios) {
 // (se guarda para que, al ir a Mi closet, siga ahí)
 // ============================================================
 
-export const getBorrador = () => getPreferencia("borradorConjunto", { arriba: null, abajo: null, extra: null });
+export const getBorrador = () => normalizarOutfit(getPreferencia("borradorConjunto", {}));
 export const guardarBorrador = (outfit) => guardarPreferencia("borradorConjunto", outfit);

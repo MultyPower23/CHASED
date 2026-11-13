@@ -88,7 +88,7 @@ export const PRODUCTOS = [
     descripcion: "Jogger gris.", imagen: "assets/img/productos/jogger-gris.jpg" },
 
   // --- Crop, bodies y shorts (precio referencial) ---
-  { id: "crop-hoodie-azul", nombre: "Crop Hoodie", tipo: "crop", color: "azul celeste", genero: "mujer",
+  { id: "crop-hoodie-azul", nombre: "Crop Hoodie", tipo: "crop", casilla: "extra", color: "azul celeste", genero: "mujer",
     precio: 90000, precioConfirmado: false, tags: ["flow", "urbano"], destacado: false,
     descripcion: "Crop hoodie azul celeste.", imagen: "assets/img/productos/crop-hoodie-azul.jpg" },
   { id: "crop-top-negro", nombre: "Crop Top Chased", tipo: "crop", color: "negro", genero: "mujer",
@@ -128,8 +128,12 @@ export const COLECCIONES = [
   { clave: "nov2024", filtro: { id: ["hoodie-nov-azul", "buzo-nov-beige"] }, portada: "buzo-nov-beige", edicion: true },
 ];
 
-// Para el maniquí: qué casilla ocupa cada tipo de prenda
+// Para el maniquí: qué casilla ocupa cada tipo de prenda.
+// arriba = camisetas y tops · extra = hoodies y buzos (la capa de
+// encima) · abajo = joggers y shorts. Así no se pueden poner dos
+// camisetas a la vez: una nueva reemplaza a la anterior.
 export const CASILLA_POR_TIPO = {
-  camiseta: "arriba", hoodie: "arriba", buzo: "arriba", crop: "arriba", body: "arriba",
+  camiseta: "arriba", crop: "arriba", body: "arriba",
+  hoodie: "extra", buzo: "extra",
   jogger: "abajo", short: "abajo",
 };

@@ -24,7 +24,16 @@ import { TEXTOS } from "./textos.js";
 import { PRODUCTOS, CONFIG, GENEROS } from "./data/productos.js";
 import { agregarAlCarrito, contarPrendasCarrito } from "./storage.js";
 import { aparecer, rebotar } from "./animaciones.js";
-import { htmlAvatar, ponerEn, idsDelOutfit, CASILLAS, getBorrador, guardarBorrador, guardarConjunto } from "./conjuntos.js";
+import {
+  htmlAvatar,
+  ponerEn,
+  idsDelOutfit,
+  CASILLAS,
+  getBorrador,
+  guardarBorrador,
+  guardarConjunto,
+  outfitCompleto,
+} from "./conjuntos.js";
 import { recomendarParaTi, puntajeProducto } from "./recomendador.js";
 
 const T = TEXTOS;
@@ -438,7 +447,7 @@ function abrirPanelConjunto() {
       mostrarAviso(T.conjunto.agregadoTodo(selects.length));
     }
     if (accion === "guardar") {
-      if (!borrador.arriba || !borrador.abajo) return (cuerpo.querySelector(".error").textContent = T.maniqui.errorIncompleto);
+      if (!outfitCompleto(borrador)) return (cuerpo.querySelector(".error").textContent = T.maniqui.errorIncompleto);
       guardarConjunto("", borrador);
       mostrarAviso(T.maniqui.guardado);
     }
