@@ -3002,40 +3002,40 @@ body.noche {
 .panel-conjunto__avatar .avatar-svg { width: min(60vw, 230px); }
 @media (min-width: 900px) { .avatar-svg { width: 320px; } }
 
-/* Casillas de la izquierda (prendas puestas): al pasar el mouse o
-   tocarlas crecen MÁS que las cartas, para ver bien qué tienes puesto.
-   Crecen hacia la derecha (hacia el avatar) para no salirse de la pantalla. */
-.slot {
+/* Casillas de la izquierda (prendas puestas): la TARJETA se queda
+   quieta; lo que crece es la FOTO de la prenda, igual en las tres,
+   como una lupa que sale por encima para verla bien. */
+.slot { position: relative; }
+.slot--lleno { cursor: zoom-in; }
+
+.slot__foto {
   position: relative;
   transform-origin: left center;
-  transition: transform 0.25s ease, background 0.2s, border-color 0.2s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
-.slot--lleno { cursor: zoom-in; }
 
 .slot--lleno:hover,
 .slot--lleno:active,
-.slot--lleno:focus-within {
-  transform: scale(1.35);
-  z-index: 5;
-  background: var(--gris-medio);
-  border-color: var(--blanco);
+.slot--lleno:focus-within { z-index: 6; }
+
+.slot--lleno:hover .slot__foto,
+.slot--lleno:active .slot__foto,
+.slot--lleno:focus-within .slot__foto {
+  transform: scale(2.6);
+  z-index: 6;
+  outline: 1px solid var(--blanco); /* se ve más grueso al escalar */
 }
 
-/* En el celular las casillas van en fila: crecen desde el centro */
+/* En el celular las casillas van en fila: la foto crece hacia abajo
+   (sobre el avatar) y desde el centro, para no salirse por los lados */
 @media (max-width: 899px) {
-  .slot { transform-origin: center top; }
-  .slot--lleno:hover,
-  .slot--lleno:active,
-  .slot--lleno:focus-within { transform: scale(1.25); }
-  .vestidor__slots .slot:first-child { transform-origin: left top; }
-  .vestidor__slots .slot:last-child { transform-origin: right top; }
+  .slot__foto { transform-origin: center top; }
+  .vestidor__slots .slot:first-child .slot__foto { transform-origin: left top; }
+  .vestidor__slots .slot:last-child .slot__foto { transform-origin: right top; }
+  .slot--lleno:hover .slot__foto,
+  .slot--lleno:active .slot__foto,
+  .slot--lleno:focus-within .slot__foto { transform: scale(1.8); }
 }
-
-/* Al crecer, que se lea el nombre completo (sin los "…") */
-.slot--lleno:hover .slot__nombre,
-.slot--lleno:active .slot__nombre,
-.slot--lleno:focus-within .slot__nombre { white-space: normal; overflow: visible; }
 
 /* ---------- Prendas puestas que aún no son suyas ---------- */
 .slot__falta {
