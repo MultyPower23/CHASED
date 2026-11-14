@@ -17,7 +17,7 @@ Prototipo web para **Chased_med**, marca de ropa oversize de Medellín, creado p
 | **Mi rol** | Desarrollo de la página web (diseño de la experiencia, front-end y lógica del prototipo) |
 | **Equipo** | Juan Esteban Ciro Gallego (web) · Sebastián Hernández Muñoz · Simón Andrés Páez Villalobos (marketing y demás responsabilidades) |
 | **Tecnologías** | HTML5, CSS3, JavaScript (módulos ES), `localStorage`, Anime.js, Git/GitHub, VS Code |
-| **Resultado** | Prototipo funcional de 8 páginas, con catálogo de 23 productos y modo demo para la presentación |
+| **Resultado** | Segundo lugar entre los dos equipos del reto. Prototipo funcional de 8 páginas, con catálogo de 23 productos y modo demo. Lo más destacado: el avatar del closet virtual |
 
 ### Frases listas para copiar
 
@@ -25,7 +25,7 @@ Prototipo web para **Chased_med**, marca de ropa oversize de Medellín, creado p
 - Diseñé la solución a partir del problema real de la marca: vendía por Instagram y WhatsApp, y propuse pasar de "solo vender" a **crear comunidad**.
 - Construí un sitio multipágina de ~9.000 líneas en HTML, CSS y JavaScript puro, sin frameworks ni backend, respetando al 100 % el manual de marca (paleta, tipografías y logo).
 - Implementé un recomendador "Para ti" basado en el quiz y en las compras, con un porcentaje de variedad inspirado en los algoritmos de recomendación de redes sociales.
-- Presenté la solución ante jurado en una exposición con demo en vivo.
+- Presenté la solución en la Expo InnvEm 2026 con demo en vivo y obtuve el segundo lugar entre los equipos del reto, con retroalimentación directa de la marca sobre cómo pulir la propuesta.
 
 ---
 
@@ -113,12 +113,17 @@ Para ser claros con los datos de la marca:
 
 ## Resultado en la Expo
 
-<!-- Completar con lo que pasó el 13/nov: -->
 - **Presentación:** viernes 13 de noviembre de 2026, con diapositivas y demo en vivo de la página.
-- **Puesto o reconocimiento:** _por completar_
-- **Retroalimentación del jurado:** _por completar_
-- **Pruebas con usuarios (cuántas personas, promedio de facilidad, mejoras):** _por completar_ (la guía está en `docs/PRUEBAS.md`)
-- **Opinión de Chased_med:** _por completar_
+- **Puesto:** segundo lugar entre los dos equipos que trabajaron con Chased_med. No hubo premio.
+- **Lo que más gustó:** el **avatar** del closet virtual.
+- **Retroalimentación recibida:** llevar las ideas más pulidas y completas; el prototipo se sintió todavía "verde".
+- **Pruebas con usuarios:** informales, con unos 3 amigos, que dijeron que la página les pareció muy chévere y bonita. No alcanzaron para un análisis formal (la guía completa quedó en `docs/PRUEBAS.md`).
+
+### Qué aprendí / qué mejoraría
+- Probar con más personas y registrar los resultados antes de presentar, para tener evidencia real de validación.
+- Pulir menos funciones y dejarlas más completas, en vez de abarcar mucho en poco tiempo.
+- Apostar por lo que mejor funcionó (el avatar y el closet virtual) como parte central de la propuesta.
+- Cerrar con la marca los datos pendientes (precios, tallas, fechas y premios del concurso) antes de la demo.
 
 ## Documentación
 - `docs/CONTEXTO.md`: contexto del reto, la empresa y las decisiones
